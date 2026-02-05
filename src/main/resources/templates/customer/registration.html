@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Registration</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>Customer Registration</h1>
+                <p>Create your account to get started</p>
+            </div>
+            
+            <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+            <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+            
+            <div class="form-container">
+                <form th:action="@{/api/customers/register}" th:object="${customerRegistrationDTO}" method="POST">
+                    <div class="form-group">
+                        <label for="company">Select Company *</label>
+                        <select id="company" th:field="*{id}" required>
+                            <option value="">-- Select Company --</option>
+                            <option th:each="company : ${companies}" 
+                                    th:value="${company.id}" 
+                                    th:text="${company.name}">Company Name</option>
+                        </select>
+                        <span class="error" th:if="${#fields.hasErrors('id')}" th:errors="*{id}"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="firstName">First Name *</label>
+                        <input type="text" id="firstName" th:field="*{firstName}" required>
+                        <span class="error" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="lastName">Last Name *</label>
+                        <input type="text" id="lastName" th:field="*{lastName}" required>
+                        <span class="error" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" th:field="*{email}" required>
+                        <span class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password *</label>
+                        <input type="password" id="password" th:field="*{password}" required>
+                        <span class="error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" th:field="*{phone}">
+                        <span class="error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="customerType">Customer Type</label>
+                        <select id="customerType" th:field="*{customerType}">
+                            <option value="INDIVIDUAL">Individual</option>
+                            <option value="BUSINESS">Business</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <textarea id="address" th:field="*{address}" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="preferredContactMethod">Preferred Contact Method</label>
+                        <select id="preferredContactMethod" th:field="*{preferredContactMethod}">
+                            <option value="EMAIL">Email</option>
+                            <option value="PHONE">Phone</option>
+                            <option value="SMS">SMS</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="timezone">Timezone</label>
+                        <select id="timezone" th:field="*{timezone}">
+                            <option value="UTC">UTC</option>
+                            <option value="America/New_York">Eastern Time (ET)</option>
+                            <option value="America/Chicago">Central Time (CT)</option>
+                            <option value="America/Denver">Mountain Time (MT)</option>
+                            <option value="America/Los_Angeles">Pacific Time (PT)</option>
+                            <option value="Asia/Colombo">Sri Lanka Time (SLT)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="languagePreference">Language Preference</label>
+                        <select id="languagePreference" th:field="*{languagePreference}">
+                            <option value="en">English</option>
+                            <option value="si">Sinhala</option>
+                            <option value="ta">Tamil</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn primary-btn">Register</button>
+                        <a href="/auth/login" class="btn text-btn">Already have an account? Sign in</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="common/footer :: footer"></div>
+    <script src="/js/customer-registration.js"></script>
+</body>
+</html>

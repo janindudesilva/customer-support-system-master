@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Review</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div th:replace="common/header :: header"></div>
+    
+    <div class="dashboard-container">
+        <div th:replace="common/sidebar :: sidebar"></div>
+        
+        <div class="main-content">
+            <h1>Review Your Support Experience</h1>
+            <div class="ticket-info">
+                <h3 th:text="${'Ticket #' + ticket.ticketNumber}">Ticket #TKT-20230101-000001</h3>
+                <p th:text="${'Title: ' + ticket.title}">Title: Issue with login</p>
+                <p th:text="${'Status: ' + ticket.status}">Status: RESOLVED</p>
+                <p th:if="${ticket.agentName != null}" th:text="${'Handled by: ' + ticket.agentName}">Handled by: John Smith</p>
+                <p th:text="${'Created: ' + #temporals.format(ticket.createdAt, 'yyyy-MM-dd')}">Created: 2023-01-01</p>
+                <p th:text="${'Resolved: ' + #temporals.format(ticket.actualResolutionTime, 'yyyy-MM-dd')}">Resolved: 2023-01-05</p>
+            </div>
+            
+            <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+            <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+            
+            <div class="form-container">
+                <form th:action="@{/api/reviews}" th:object="${reviewDTO}" method="POST">
+                    <input type="hidden" th:field="*{ticketId}" th:value="${ticket.id}">
+                    <input type="hidden" th:field="*{customerId}" th:value="${customerId}">
+                    <input type="hidden" th:field="*{agentId}" th:value="${ticket.agentId}">
+                    <input type="hidden" th:field="*{companyId}" th:value="${ticket.companyId}">
+                    
+                    <h2>Overall Rating</h2>
+                    <div class="star-rating">
+                        <div class="rating-group">
+                            <input type="radio" id="rating-5" name="rating" value="5" th:field="*{rating}" class="rating-input">
+                            <label for="rating-5" class="rating-label">
+                                <i class="fas fa-star"></i>
+                            </label>
+                            <input type="radio" id="rating-4" name="rating" value="4" th:field="*{rating}" class="rating-input">
+                            <label for="rating-4" class="rating-label">
+                                <i class="fas fa-star"></i>
+                            </label>
+                            <input type="radio" id="rating-3" name="rating" value="3" th:field="*{rating}" class="rating-input">
+                            <label for="rating-3" class="rating-label">
+                                <i class="fas fa-star"></i>
+                            </label>
+                            <input type="radio" id="rating-2" name="rating" value="2" th:field="*{rating}" class="rating-input">
+                            <label for="rating-2" class="rating-label">
+                                <i class="fas fa-star"></i>
+                            </label>
+                            <input type="radio" id="rating-1" name="rating" value="1" th:field="*{rating}" class="rating-input">
+                            <label for="rating-1" class="rating-label">
+                                <i class="fas fa-star"></i>
+                            </label>
+                        </div>
+                    </div>
+                    <span class="error" th:if="${#fields.hasErrors('rating')}" th:errors="*{rating}"></span>
+                    
+                    <h2>Detailed Ratings</h2>
+                    
+                    <div class="form-group">
+                        <label>Service Quality</label>
+                        <div class="rating-group small">
+                            <input type="radio" id="sq-5" name="serviceQualityRating" value="5" th:field="*{serviceQualityRating}" class="rating-input">
+                            <label for="sq-5" class="rating-label"><i class="fas fa-star"></i></label>
+                            <input type="radio" id="sq-4" name="serviceQualityRating" value="4" th:field="*{serviceQualityRating}" class="rating-input">
+                            <label for="sq-4" class="rating-label"><i class="fas fa-star"></i></label>
+                            <input type="radio" id="sq-3" name="serviceQualityRating" value="3" th:field="*{serviceQualityRating}" class="rating-input">
+                            <label for="sq-3" class="rating-label"><i class="fas fa-star"></i></label>
+                            <input type="radio" id="sq-2" name="serviceQualityRating" value="2" th:field="*{serviceQualityRating}" class="rating-input">
+                            <label for="sq-2" class="rating-label"><i class="fas fa-star"></i></label>
+                            <input type="radio" id="sq-1" name="serviceQualityRating" value="1" th:field="*{serviceQualityRating}" class="rating-input">
+                            <label for="sq-1" class="rating-label"><i class="fas fa-star"></i></label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Response Time</label>
+                        <div class="rating-group small">
+                            <input type="radio" id="rt-5" name="responseTimeRating" value="5" th:field="*{responseTimeRating}" class="rating-input">
+                            <label for="rt-5" class="rating-label"><i class="fas fa-star"></i></label>
+                            <input type="radio" id="rt-4" name="responseTimeRating" value="4" th:field="*{responseTimeRating}" class="rating-input">
+                            <label for="rt-4" class="rating-label"><i class="fas fa-star"></i></label>
+                            <input type="radio" id="rt-3" name="responseTimeRating" value="3" th:field="*{responseTimeRating}" class="rating-input">
+                            <label for="rt-3" class="rating-label"><i class="fas fa-star"></i></label>
+                            <input type="radio" id="rt-2" name="responseTimeRating" value="2" th:field="*{responseTimeRating}" class="rating-input">
+                            <label for="rt-2" class="rating-label"><i class="fas fa-star"></i></label>
+                            <input type="radio" id="rt-1" name="responseTimeRating" value="1" th:field="*{responseTimeRating}" class="rating-input">
+                            <label for="rt-1" class="rating-label"><i class="fas fa-star"></i></label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Professionalism</label>
+                        <div class="rating-group small">
+                            <input type="radio" id="pr-5" name="professionalismRating" value="5" th:field="*{professionalismRating}" class="rating-input">
+                            <label for="pr-5" class="rating-label"><i class="fas fa-star"></i></label>
+                            <input type="radio" id="pr-4" name="professionalismRating" value="4" th:field="*{professionalismRating}" class="rating-input">
+                            <label for="pr-4" class="rating-label"><i class="fas fa-star"></i></label>
+                            <input type="radio" id="pr-3" name="professionalismRating" value="3" th:field="*{professionalismRating}" class="rating-input">
+                            <label for="pr-3" class="rating-label"><i class="fas fa-star"></i></label>
+                            <input type="radio" id="pr-2" name="professionalismRating" value="2" th:field="*{professionalismRating}" class="rating-input">
+                            <label for="pr-2" class="rating-label"><i class="fas fa-star"></i></label>
+                            <input type="radio" id="pr-1" name="professionalismRating" value="1" th:field="*{professionalismRating}" class="rating-input">
+                            <label for="pr-1" class="rating-label"><i class="fas fa-star"></i></label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="feedback">Your Feedback</label>
+                        <textarea id="feedback" th:field="*{feedback}" rows="4" placeholder="Share your experience with our support service"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="additionalComments">Additional Comments</label>
+                        <textarea id="additionalComments" th:field="*{additionalComments}" rows="3" placeholder="Any other comments or suggestions?"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="wouldRecommend" th:field="*{wouldRecommend}" checked>
+                            <span>I would recommend this service to others</span>
+                        </label>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn primary-btn">Submit Review</button>
+                        <a href="/customer/tickets" class="btn secondary-btn">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="common/footer :: footer"></div>
+    <script src="/js/review-form.js"></script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div th:replace="common/header :: header"></div>
+    
+    <div class="dashboard-container">
+        <div th:replace="common/sidebar :: sidebar"></div>
+        
+        <div class="main-content">
+            <h1>User Management</h1>
+            
+            <div class="search-container">
+                <form action="/company-admin/users/search" method="GET">
+                    <input type="text" name="keyword" placeholder="Search users..." th:value="${keyword}">
+                    <button type="submit" class="btn search-btn">Search</button>
+                </form>
+                <div class="filter-options">
+                    <select id="roleFilter" onchange="filterByRole()">
+                        <option value="">All Roles</option>
+                        <option value="COMPANY_ADMIN">Company Admins</option>
+                        <option value="SUPPORT_AGENT">Support Agents</option>
+                        <option value="CUSTOMER">Customers</option>
+                    </select>
+                    <select id="statusFilter" onchange="filterByStatus()">
+                        <option value="">All Statuses</option>
+                        <option value="ACTIVE">Active</option>
+                        <option value="INACTIVE">Inactive</option>
+                        <option value="SUSPENDED">Suspended</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="/company-admin/agents/register" class="btn primary-btn">Register Agent</a>
+                <a href="/company-admin/customers" class="btn secondary-btn">View Customers</a>
+            </div>
+            
+            <div class="users-list">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Last Login</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="user : ${users}">
+                            <td th:text="${user.id}">1</td>
+                            <td th:text="${user.fullName}">John Doe</td>
+                            <td th:text="${user.email}">john@example.com</td>
+                            <td th:text="${user.roleName}">SUPPORT_AGENT</td>
+                            <td th:text="${user.status}">ACTIVE</td>
+                            <td th:text="${user.lastLogin != null ? #temporals.format(user.lastLogin, 'yyyy-MM-dd HH:mm') : 'Never'}">2023-01-01</td>
+                            <td th:text="${#temporals.format(user.created, 'yyyy-MM-dd')}">2023-01-01</td>
+                            <td class="actions">
+                                <a th:href="@{/company-admin/users/{id}(id=${user.id})}" class="btn view-btn">View</a>
+                                <a th:href="@{/company-admin/users/{id}/edit(id=${user.id})}" class="btn edit-btn">Edit</a>
+                                <button th:if="${user.status.name() == 'ACTIVE'}" 
+                                       th:onclick="'deactivateUser(' + ${user.id} + ')'" 
+                                       class="btn warning-btn">Deactivate</button>
+                                <button th:if="${user.status.name() == 'INACTIVE'}" 
+                                       th:onclick="'activateUser(' + ${user.id} + ')'" 
+                                       class="btn success-btn">Activate</button>
+                                <button th:onclick="'resetPassword(' + ${user.id} + ')'" class="btn info-btn">Reset Password</button>
+                                <button th:onclick="'deleteUser(' + ${user.id} + ')'" class="btn danger-btn">Delete</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="common/footer :: footer"></div>
+    <script src="/js/user-management.js"></script>
+</body>
+</html>

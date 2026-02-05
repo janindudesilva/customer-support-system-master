@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Admin - Ticket Management</title>
+    <style>
+        :root {
+            --bg-gradient: radial-gradient(circle at 20% 18%, rgba(91, 33, 182, 0.18), transparent 55%),
+                radial-gradient(circle at 80% 5%, rgba(14, 165, 233, 0.2), transparent 55%),
+                radial-gradient(circle at 50% 90%, rgba(236, 72, 153, 0.18), transparent 65%),
+                #020617;
+            --panel: rgba(15, 23, 42, 0.78);
+            --panel-alt: rgba(17, 24, 39, 0.72);
+            --border: rgba(148, 163, 184, 0.2);
+            --border-strong: rgba(148, 163, 184, 0.35);
+            --fg: #e2e8f0;
+            --fg-muted: #94a3b8;
+            --accent: linear-gradient(135deg, #a855f7 0%, #38bdf8 50%, #22d3ee 100%);
+            --accent-soft: rgba(56, 189, 248, 0.18);
+            --danger: #f87171;
+            --warning: #fbbf24;
+            --success: #34d399;
+            --info: #60a5fa;
+            --shadow: 0 30px 90px -32px rgba(15, 23, 42, 0.85);
+            --glass-blur: blur(18px);
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--fg);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .background-aurora {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 12% 10%, rgba(56, 189, 248, 0.22), transparent 55%),
+                radial-gradient(circle at 88% 18%, rgba(244, 114, 182, 0.18), transparent 60%),
+                radial-gradient(circle at 48% 92%, rgba(45, 212, 191, 0.16), transparent 60%);
+            filter: blur(120px);
+            opacity: 0.48;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            background: rgba(10, 12, 23, 0.85);
+            border-bottom: 1px solid var(--border);
+            padding: 1.6rem 2.4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(18px);
+            box-shadow: 0 28px 60px rgba(2, 6, 23, 0.55);
+        }
+
+        .header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .header-brand {
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: #94a3ff;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: clamp(1.6rem, 2vw, 2.1rem);
+            letter-spacing: -0.02em;
+        }
+
+        .header-subtitle {
+            margin: 0;
+            color: var(--fg-muted);
+            font-size: 0.95rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.85rem;
+            align-items: center;
+        }
+
+        .btn {
+            border: 1px solid transparent;
+            border-radius: 999px;
+            padding: 0.7rem 1.4rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.25s ease, filter 0.2s ease;
+            background: var(--accent);
+            color: #f8fafc;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.25), transparent 60%);
+            mix-blend-mode: screen;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 35px rgba(56, 189, 248, 0.32);
+        }
+
+        .btn:hover::after { opacity: 1; }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--fg);
+            border-color: rgba(148, 163, 184, 0.28);
+        }
+
+        .btn-secondary:hover {
+            border-color: rgba(148, 163, 184, 0.6);
+            background: rgba(148, 163, 184, 0.12);
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.5);
+        }
+
+        .layout {
+            position: relative;
+            z-index: 1;
+            max-width: 1280px;
+            margin: 2.5rem auto 4rem;
+            padding: 0 2.1rem 4rem;
+        }
+
+        .filters {
+            background: var(--panel);
+            border-radius: 18px;
+            padding: 1.6rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.1rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            backdrop-filter: var(--glass-blur);
+        }
+
+        .filters label {
+            font-weight: 700;
+            color: var(--fg-muted);
+            display: block;
+            margin-bottom: 0.35rem;
+            font-size: 0.78rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .filters input,
+        .filters select {
+            padding: 0.6rem 0.85rem;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            background: rgba(10, 12, 23, 0.6);
+            color: var(--fg);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .filters input:focus,
+        .filters select:focus {
+            border-color: rgba(56, 189, 248, 0.8);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+            outline: none;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .summary-card {
+            background: var(--panel);
+            border-radius: 18px;
+            padding: 1.35rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            backdrop-filter: var(--glass-blur);
+        }
+
+        .summary-label {
+            color: var(--fg-muted);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .summary-value {
+            font-size: 1.95rem;
+            font-weight: 700;
+            margin-top: 0.4rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--panel-alt);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        th, td {
+            padding: 0.9rem 1rem;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+            text-align: left;
+            color: var(--fg);
+        }
+
+        th {
+            background: rgba(15, 23, 42, 0.9);
+            font-weight: 600;
+            color: var(--fg-muted);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            font-size: 0.78rem;
+        }
+
+        tr:hover { background: rgba(56, 189, 248, 0.08); }
+
+        .ticket-number { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: 0.92rem; }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.65rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border: 1px solid var(--border-strong);
+            color: var(--fg-muted);
+            background: rgba(148, 163, 184, 0.12);
+        }
+
+        .chip-open { background: rgba(251, 191, 36, 0.18); color: #fcd34d; border-color: rgba(251, 191, 36, 0.35); }
+        .chip-progress { background: rgba(59, 130, 246, 0.18); color: #bae6fd; border-color: rgba(59, 130, 246, 0.35); }
+        .chip-resolved { background: rgba(52, 211, 153, 0.18); color: #bbf7d0; border-color: rgba(52, 211, 153, 0.35); }
+        .chip-closed { background: rgba(148, 163, 184, 0.18); color: #e2e8f0; border-color: rgba(148, 163, 184, 0.35); }
+        .chip-cancelled { background: rgba(248, 113, 113, 0.18); color: #fecaca; border-color: rgba(248, 113, 113, 0.35); }
+
+        .priority-high { color: var(--danger); font-weight: 600; }
+        .priority-medium { color: var(--warning); font-weight: 600; }
+        .priority-low { color: var(--success); font-weight: 600; }
+
+        .empty-state {
+            padding: 2.4rem;
+            text-align: center;
+            color: var(--fg-muted);
+        }
+
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: -520px;
+            width: 460px;
+            height: 100vh;
+            background: var(--panel);
+            border-left: 1px solid var(--border);
+            box-shadow: -24px 0 60px rgba(2, 6, 23, 0.45);
+            transition: right 0.3s ease;
+            z-index: 25;
+            padding: 2rem 1.8rem;
+            overflow-y: auto;
+            backdrop-filter: blur(14px);
+        }
+
+        .drawer.open { right: 0; }
+
+        .drawer h2 { margin-top: 0; }
+
+        .drawer .meta {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.9rem;
+            margin: 1.4rem 0;
+        }
+
+        .meta-item {
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 12px;
+            padding: 0.85rem;
+            border: 1px solid var(--border);
+        }
+
+        .meta-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--fg-muted);
+            letter-spacing: 0.04em;
+        }
+
+        .meta-value { font-size: 0.98rem; margin-top: 0.2rem; color: var(--fg); }
+
+        .responses { margin-top: 1.6rem; }
+
+        .response-card {
+            border-left: 3px solid rgba(56, 189, 248, 0.65);
+            padding: 0.85rem 1.1rem;
+            background: rgba(15, 23, 42, 0.82);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(56, 189, 248, 0.25);
+        }
+
+        .response-meta {
+            font-size: 0.8rem;
+            color: var(--fg-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .response-text { margin-top: 0.45rem; white-space: pre-wrap; }
+        .timeline-badge { font-weight: 600; color: #bae6fd; }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(15, 23, 42, 0.92);
+            color: var(--fg);
+            padding: 0.95rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            box-shadow: 0 30px 60px rgba(2, 6, 23, 0.65);
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 30;
+        }
+
+        .toast.show { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 900px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.1rem;
+                padding: 1.4rem 1.8rem;
+            }
+
+            .layout {
+                padding: 0 1.5rem 3.5rem;
+            }
+
+            .drawer {
+                width: min(100%, 90vw);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .header-actions {
+                width: 100%;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+
+            .filters { grid-template-columns: 1fr; }
+
+            table { font-size: 0.92rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="background-aurora"></div>
+<header class="header">
+    <div class="header-left">
+        <span class="header-brand">Oryzo</span>
+        <h1>Ticket Queue &amp; Monitoring</h1>
+        <p class="header-subtitle">Oversee escalations, speed, and service quality across your teams.</p>
+    </div>
+    <div class="header-actions">
+        <button class="btn btn-secondary" onclick="window.location.href='/company-admin/dashboard.html'">⬅ Dashboard</button>
+        <button class="btn" onclick="logout()">Logout</button>
+    </div>
+</header>
+
+<main class="layout">
+    <section class="filters">
+        <div>
+            <label for="statusFilter">Status</label>
+            <select id="statusFilter" onchange="loadTickets()">
+                <option value="">All statuses</option>
+                <option value="OPEN">Open</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="PENDING_CUSTOMER">Pending Customer</option>
+                <option value="RESOLVED">Resolved</option>
+                <option value="CLOSED">Closed</option>
+                <option value="CANCELLED">Cancelled</option>
+            </select>
+        </div>
+        <div>
+            <label for="searchInput">Search</label>
+            <input type="search" id="searchInput" placeholder="Search by ticket number, title, description" oninput="debounceLoadTickets()">
+        </div>
+    </section>
+
+    <section class="summary-grid" id="summaryGrid">
+        <!-- dynamically populated -->
+    </section>
+
+    <section>
+        <table>
+            <thead>
+            <tr>
+                <th>Ticket</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Agent</th>
+                <th>Customer</th>
+                <th>Last Activity</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody id="ticketsTableBody">
+            <tr><td colspan="8" class="empty-state">Loading tickets…</td></tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+
+<aside class="drawer" id="ticketDrawer">
+    <button class="btn-secondary btn" style="margin-bottom:1rem" onclick="closeDrawer()">Close</button>
+    <h2 id="drawerTitle">Ticket Details</h2>
+    <p id="drawerDescription"></p>
+
+    <div class="meta">
+        <div class="meta-item">
+            <div class="meta-label">Ticket Number</div>
+            <div class="meta-value ticket-number" id="drawerNumber">-</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">Status</div>
+            <div class="meta-value" id="drawerStatus">-</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">Priority</div>
+            <div class="meta-value" id="drawerPriority">-</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">Assigned Agent</div>
+            <div class="meta-value" id="drawerAgent">-</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">Customer</div>
+            <div class="meta-value" id="drawerCustomer">-</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">Category</div>
+            <div class="meta-value" id="drawerCategory">-</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">Created</div>
+            <div class="meta-value" id="drawerCreated">-</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">Last Updated</div>
+            <div class="meta-value" id="drawerUpdated">-</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">Resolution</div>
+            <div class="meta-value" id="drawerResolution">-</div>
+        </div>
+    </div>
+
+    <div class="responses">
+        <h3>Conversation Timeline</h3>
+        <div id="responsesContainer">
+            <p class="empty-state" style="padding:1rem; background:#f8f9ff; border-radius:12px;">Loading timeline…</p>
+        </div>
+    </div>
+</aside>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    let currentUser = null;
+    let userToken = null;
+    let ticketCache = [];
+    let debounceTimer = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        userToken = localStorage.getItem('token');
+        currentUser = JSON.parse(localStorage.getItem('user'));
+
+        if (!userToken || !currentUser || currentUser.role !== 'COMPANY_ADMIN') {
+            window.location.href = '/';
+            return;
+        }
+
+        loadSummary();
+        loadTickets();
+    });
+
+    function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/';
+    }
+
+    async function loadSummary() {
+        try {
+            const response = await fetch(`/api/company-admin/tickets/status-summary?companyId=${currentUser.companyId}`, {
+                headers: { 'Authorization': `Bearer ${userToken}` }
+            });
+            if (!response.ok) throw new Error('Unable to load summary');
+            const data = await response.json();
+            renderSummary(data);
+        } catch (error) {
+            showToast(error.message, true);
+        }
+    }
+
+    function renderSummary(data) {
+        const summaryGrid = document.getElementById('summaryGrid');
+        const totals = data.totals || {};
+        summaryGrid.innerHTML = '';
+
+        const cards = [
+            { label: 'Total Tickets', value: data.totalTickets || 0 },
+            { label: 'Open', value: (totals.OPEN || 0) + (totals.IN_PROGRESS || 0) },
+            { label: 'Pending Customer', value: totals.PENDING_CUSTOMER || 0 },
+            { label: 'Resolved', value: (totals.RESOLVED || 0) + (totals.CLOSED || 0) },
+            { label: 'Cancelled', value: totals.CANCELLED || 0 }
+        ];
+
+        cards.forEach(card => {
+            const div = document.createElement('div');
+            div.className = 'summary-card';
+            div.innerHTML = `<div class="summary-label">${card.label}</div><div class="summary-value">${card.value}</div>`;
+            summaryGrid.appendChild(div);
+        });
+    }
+
+    async function loadTickets() {
+        try {
+            const status = document.getElementById('statusFilter').value;
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            const params = new URLSearchParams({ companyId: currentUser.companyId });
+            if (status) params.append('status', status);
+            if (searchTerm) params.append('search', searchTerm);
+
+            const response = await fetch(`/api/company-admin/tickets?${params.toString()}`, {
+                headers: { 'Authorization': `Bearer ${userToken}` }
+            });
+            if (!response.ok) throw new Error('Unable to load tickets');
+            ticketCache = await response.json();
+            renderTickets();
+        } catch (error) {
+            showToast(error.message, true);
+            document.getElementById('ticketsTableBody').innerHTML = `<tr><td colspan="8" class="empty-state">${error.message}</td></tr>`;
+        }
+    }
+
+    function debounceLoadTickets() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(loadTickets, 400);
+    }
+
+    function renderTickets() {
+        const tbody = document.getElementById('ticketsTableBody');
+        if (!ticketCache.length) {
+            tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No tickets match your filters.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = ticketCache.map(ticket => `
+            <tr>
+                <td class="ticket-number">${escapeHtml(ticket.ticketNumber || '-')}</td>
+                <td>${escapeHtml(ticket.title || '-')}</td>
+                <td>${renderStatusChip(ticket.status)}</td>
+                <td>${renderPriority(ticket.priority)}</td>
+                <td>${ticket.agentName ? escapeHtml(ticket.agentName) : '<span style="color:#9ca3af">Unassigned</span>'}</td>
+                <td>${escapeHtml(ticket.customerName || '-')}</td>
+                <td>${formatDate(ticket.lastActivity || ticket.updatedAt || ticket.createdAt)}</td>
+                <td style="text-align:right;"><button class="btn-secondary btn" onclick="openDrawer(${ticket.id})">View</button></td>
+            </tr>
+        `).join('');
+    }
+
+    function renderStatusChip(status) {
+        if (!status) return '-';
+        const map = {
+            OPEN: 'chip chip-open',
+            IN_PROGRESS: 'chip chip-progress',
+            PENDING_CUSTOMER: 'chip chip-progress',
+            RESOLVED: 'chip chip-resolved',
+            CLOSED: 'chip chip-closed',
+            CANCELLED: 'chip chip-cancelled'
+        };
+        const label = status.replace('_', ' ');
+        return `<span class="${map[status] || 'chip'}">${label}</span>`;
+    }
+
+    function renderPriority(priority) {
+        if (!priority) return '-';
+        const map = {
+            URGENT: 'priority-high',
+            HIGH: 'priority-high',
+            MEDIUM: 'priority-medium',
+            LOW: 'priority-low'
+        };
+        return `<span class="${map[priority] || ''}">${priority}</span>`;
+    }
+
+    function formatDate(value) {
+        if (!value) return '-';
+        try {
+            const date = new Date(value);
+            return date.toLocaleString();
+        } catch (e) {
+            return value;
+        }
+    }
+
+    async function openDrawer(ticketId) {
+        const ticket = ticketCache.find(t => t.id === ticketId);
+        if (!ticket) {
+            showToast('Ticket not found', true);
+            return;
+        }
+
+        document.getElementById('drawerTitle').textContent = ticket.title || 'Ticket Details';
+    document.getElementById('drawerDescription').textContent = ticket.description || '—';
+    document.getElementById('drawerNumber').textContent = ticket.ticketNumber || '-';
+        document.getElementById('drawerStatus').innerHTML = renderStatusChip(ticket.status);
+        document.getElementById('drawerPriority').innerHTML = renderPriority(ticket.priority);
+        document.getElementById('drawerAgent').textContent = ticket.agentName || 'Unassigned';
+        document.getElementById('drawerCustomer').textContent = ticket.customerName || '-';
+        document.getElementById('drawerCategory').textContent = ticket.categoryName || '-';
+        document.getElementById('drawerCreated').textContent = formatDate(ticket.createdAt);
+        document.getElementById('drawerUpdated').textContent = formatDate(ticket.updatedAt || ticket.lastActivity);
+        document.getElementById('drawerResolution').textContent = ticket.resolution || 'Not resolved yet';
+
+        await loadResponses(ticketId);
+
+        document.getElementById('ticketDrawer').classList.add('open');
+    }
+
+    function closeDrawer() {
+        document.getElementById('ticketDrawer').classList.remove('open');
+    }
+
+    async function loadResponses(ticketId) {
+        const container = document.getElementById('responsesContainer');
+        container.innerHTML = '<p class="empty-state" style="padding:1rem; background:#f8f9ff; border-radius:12px;">Loading timeline…</p>';
+        try {
+            const response = await fetch(`/api/company-admin/tickets/${ticketId}/responses?companyId=${currentUser.companyId}`, {
+                headers: { 'Authorization': `Bearer ${userToken}` }
+            });
+            if (!response.ok) throw new Error('No responses available');
+            const data = await response.json();
+            if (!Array.isArray(data) || !data.length) {
+                container.innerHTML = '<p class="empty-state" style="padding:1rem; background:#f8f9ff; border-radius:12px;">No interactions recorded yet.</p>';
+                return;
+            }
+            container.innerHTML = data.map(item => `
+                <div class="response-card">
+                    <div class="response-meta">
+                        <span class="timeline-badge">${item.responseType || 'Update'}</span>
+                        <span>${formatDate(item.createdAt)}</span>
+                    </div>
+                    <div class="response-text">${escapeHtml(item.message || '')}</div>
+                    ${item.attachments ? `<small>Attachments: ${escapeHtml(item.attachments)}</small>` : ''}
+                </div>
+            `).join('');
+        } catch (error) {
+            container.innerHTML = `<p class="empty-state" style="padding:1rem; background:#f8f9ff; border-radius:12px;">${error.message}</p>`;
+        }
+    }
+
+    let toastTimeout;
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.style.background = isError ? '#e11d48' : '#262a3d';
+        toast.classList.add('show');
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => toast.classList.remove('show'), 3200);
+    }
+
+    function escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        if (typeof str !== 'string') str = String(str);
+        return str.replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    }
+</script>
+</body>
+</html>

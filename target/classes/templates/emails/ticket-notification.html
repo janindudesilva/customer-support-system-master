@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>New Support Ticket Alert</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+        }
+        .header {
+            background-color: #3498db;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+            border-radius: 0 0 5px 5px;
+            margin-top: 20px;
+        }
+        .content {
+            padding: 20px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .ticket-details {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #3498db;
+        }
+        .priority-high {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .priority-medium {
+            color: #f39c12;
+            font-weight: bold;
+        }
+        .priority-low {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+        .description {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            white-space: pre-line;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>New Support Ticket</h1>
+        </div>
+        
+        <div class="content">
+            <p>Hello <span th:text="${agentName}">Agent</span>,</p>
+            
+            <p>A new support ticket has been created and requires your attention:</p>
+            
+            <div class="ticket-details">
+                <h3>Ticket Information:</h3>
+                <p><strong>Ticket Number:</strong> <span th:text="${ticketNumber}">TKT-12345</span></p>
+                <p><strong>Title:</strong> <span th:text="${ticketTitle}">Issue with login</span></p>
+                <p><strong>Priority:</strong> 
+                    <span th:class="${ticketPriority == 'HIGH' ? 'priority-high' : (ticketPriority == 'MEDIUM' ? 'priority-medium' : 'priority-low')}"
+                          th:text="${ticketPriority}">MEDIUM</span>
+                </p>
+                <p><strong>Category:</strong> <span th:text="${ticketCategory}">General</span></p>
+                <p><strong>Submitted By:</strong> <span th:text="${customerName}">John Doe</span></p>
+                <p><strong>Created On:</strong> <span th:text="${ticketCreatedAt}">2025-10-12 10:30:45</span></p>
+            </div>
+            
+            <h3>Ticket Description:</h3>
+            <div class="description">
+                <p th:text="${ticketDescription}">Detailed description of the issue...</p>
+            </div>
+            
+            <p>Please review and respond to this ticket as soon as possible.</p>
+            
+            <a class="button" th:href="${ticketUrl}" target="_blank">View Ticket</a>
+            
+            <p>Thank you for your prompt attention to this matter.</p>
+            
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 Customer Support System. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

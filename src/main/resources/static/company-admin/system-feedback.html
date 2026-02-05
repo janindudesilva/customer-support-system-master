@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Admin - System Feedback</title>
+    <style>
+        :root {
+            --bg-gradient: radial-gradient(circle at 20% 18%, rgba(91, 33, 182, 0.18), transparent 55%),
+                radial-gradient(circle at 80% 5%, rgba(14, 165, 233, 0.2), transparent 55%),
+                radial-gradient(circle at 45% 95%, rgba(236, 72, 153, 0.18), transparent 65%),
+                #020617;
+            --panel: rgba(15, 23, 42, 0.78);
+            --panel-alt: rgba(17, 24, 39, 0.7);
+            --border: rgba(148, 163, 184, 0.2);
+            --border-strong: rgba(148, 163, 184, 0.35);
+            --fg: #e2e8f0;
+            --fg-muted: #94a3b8;
+            --accent: linear-gradient(135deg, #a855f7 0%, #38bdf8 50%, #22d3ee 100%);
+            --accent-soft: rgba(56, 189, 248, 0.18);
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #f87171;
+            --info: #60a5fa;
+            --shadow: 0 30px 90px -32px rgba(15, 23, 42, 0.85);
+            --glass-blur: blur(18px);
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--fg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .background-aurora {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 12% 10%, rgba(56, 189, 248, 0.22), transparent 55%),
+                radial-gradient(circle at 88% 18%, rgba(244, 114, 182, 0.18), transparent 60%),
+                radial-gradient(circle at 48% 92%, rgba(45, 212, 191, 0.16), transparent 60%);
+            filter: blur(120px);
+            opacity: 0.48;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .header {
+            background: rgba(10, 12, 23, 0.85);
+            color: var(--fg);
+            padding: 1.6rem 2.4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 28px 60px rgba(2, 6, 23, 0.55);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(18px);
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        .logo {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .logo span {
+            display: block;
+        }
+
+        .brand {
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: #94a3ff;
+        }
+
+        .page-title {
+            font-size: clamp(1.6rem, 2vw, 2.1rem);
+            letter-spacing: -0.02em;
+        }
+
+        .page-subtitle {
+            color: var(--fg-muted);
+            margin-top: 0.3rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            flex-wrap: wrap;
+        }
+
+        .logout-btn,
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: var(--accent);
+            border: 1px solid transparent;
+            color: #f8fafc;
+            padding: 0.7rem 1.4rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.25s ease, filter 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logout-btn::after,
+        .btn::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.25), transparent 60%);
+            mix-blend-mode: screen;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .logout-btn:hover,
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 35px rgba(56, 189, 248, 0.32);
+        }
+
+        .logout-btn:hover::after,
+        .btn:hover::after { opacity: 1; }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--fg);
+            border-color: rgba(148, 163, 184, 0.28);
+        }
+
+        .btn-secondary:hover {
+            border-color: rgba(148, 163, 184, 0.6);
+            background: rgba(148, 163, 184, 0.12);
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.5);
+        }
+
+        .btn-ghost {
+            background: rgba(148, 163, 184, 0.12);
+            border-color: rgba(148, 163, 184, 0.28);
+            color: var(--fg);
+        }
+
+        .btn-ghost:hover {
+            filter: brightness(1.1);
+        }
+
+        .container {
+            flex: 1;
+            width: 100%;
+            max-width: 1280px;
+            margin: 2.5rem auto 4rem;
+            padding: 0 2.1rem 4rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .feedback-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--panel);
+            border-radius: 20px;
+            padding: 1.9rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            backdrop-filter: var(--glass-blur);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::after {
+            content: "";
+            position: absolute;
+            inset: 1px;
+            border-radius: 19px;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.35s ease;
+            pointer-events: none;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 32px 70px rgba(2, 6, 23, 0.55);
+        }
+
+        .card:hover::after { opacity: 1; }
+
+        .card h2 {
+            margin-bottom: 1rem;
+            color: #c4d4ff;
+            font-size: 1.35rem;
+        }
+
+        .page-subtitle,
+        .card p {
+            color: var(--fg-muted);
+        }
+
+        .form-group {
+            margin-bottom: 1.1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+
+        .form-group label {
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--fg-muted);
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem 0.95rem;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 12px;
+            font-size: 1rem;
+            background: rgba(10, 12, 23, 0.6);
+            color: var(--fg);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: rgba(56, 189, 248, 0.8);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .status-select {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--fg-muted);
+        }
+
+        .status-select label {
+            font-weight: 600;
+        }
+
+        .message {
+            padding: 0.9rem 1.1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            border: 1px solid transparent;
+        }
+
+        .message.success {
+            background: rgba(52, 211, 153, 0.18);
+            color: #bbf7d0;
+            border-color: rgba(52, 211, 153, 0.35);
+        }
+
+        .message.error {
+            background: rgba(248, 113, 113, 0.18);
+            color: #fecaca;
+            border-color: rgba(248, 113, 113, 0.35);
+        }
+
+        .feedback-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .feedback-card {
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.35rem;
+            background: var(--panel-alt);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .feedback-card.editing {
+            border-color: rgba(56, 189, 248, 0.45);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+        }
+
+        .feedback-card h3 {
+            color: #f8fafc;
+            font-size: 1.15rem;
+        }
+
+        .feedback-card p {
+            color: var(--fg-muted);
+            line-height: 1.6;
+        }
+
+        .rating-stars {
+            color: #fbbf24;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+        }
+
+        .feedback-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .feedback-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .feedback-actions .status-hint {
+            color: var(--fg-muted);
+            font-size: 0.85rem;
+            font-style: italic;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.3rem 0.85rem;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            border: 1px solid var(--border-strong);
+            background: rgba(148, 163, 184, 0.12);
+            color: var(--fg-muted);
+        }
+
+        .status-badge.pending {
+            background: rgba(251, 191, 36, 0.18);
+            color: #fcd34d;
+            border-color: rgba(251, 191, 36, 0.35);
+        }
+
+        .status-badge.approved {
+            background: rgba(52, 211, 153, 0.18);
+            color: #bbf7d0;
+            border-color: rgba(52, 211, 153, 0.35);
+        }
+
+        .status-badge.rejected {
+            background: rgba(248, 113, 113, 0.18);
+            color: #fecaca;
+            border-color: rgba(248, 113, 113, 0.35);
+        }
+
+        .timestamp {
+            color: var(--fg-muted);
+            font-size: 0.85rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 1.6rem;
+            color: var(--fg-muted);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--fg-muted);
+            padding: 1.6rem;
+            border: 1px dashed rgba(148, 163, 184, 0.35);
+            border-radius: 14px;
+            background: rgba(15, 23, 42, 0.75);
+        }
+
+        .edit-banner {
+            display: none;
+            margin-bottom: 1rem;
+            padding: 0.85rem 1.1rem;
+            border-radius: 12px;
+            background: rgba(56, 189, 248, 0.16);
+            color: #bae6fd;
+            border: 1px solid rgba(56, 189, 248, 0.32);
+            font-size: 0.95rem;
+            line-height: 1.45;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1.25rem 2.5rem;
+            }
+
+            .feedback-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .feedback-meta {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-aurora"></div>
+    <div class="header">
+        <div class="logo">
+            <span class="brand">Oryzo</span>
+            <span class="page-title">System Sentiment Studio</span>
+            <span class="page-subtitle">Share platform wins and friction directly with the core team.</span>
+        </div>
+        <div class="user-info">
+            <span id="userName">Loading...</span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1 class="page-title">Share Your Platform Feedback</h1>
+        <p class="page-subtitle">Tell the Oryzo support squad how the system is working for your company. Super admins will review and approve submissions before they appear on the public landing page.</p>
+
+        <div class="feedback-grid">
+            <div class="card">
+                <h2>Submit new feedback</h2>
+                <div id="editBanner" class="edit-banner"></div>
+                <div id="feedbackSuccess" class="message success" style="display: none;"></div>
+                <div id="feedbackError" class="message error" style="display: none;"></div>
+                <form id="feedbackForm">
+                    <div class="form-group">
+                        <label for="feedbackTitle">Headline</label>
+                        <input type="text" id="feedbackTitle" name="title" placeholder="What impressed you most?" required maxlength="150">
+                    </div>
+                    <div class="form-group">
+                        <label for="feedbackRating">Rating</label>
+                        <select id="feedbackRating" name="rating" required>
+                            <option value="">Select a rating</option>
+                            <option value="5">5 - Exceptional</option>
+                            <option value="4">4 - Great</option>
+                            <option value="3">3 - Good</option>
+                            <option value="2">2 - Needs work</option>
+                            <option value="1">1 - Needs urgent attention</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="feedbackMessage">Feedback</label>
+                        <textarea id="feedbackMessage" name="feedback" placeholder="Share your experience with SupportHub" required minlength="20"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn" id="submitBtn">Submit Feedback</button>
+                        <button type="button" class="btn btn-secondary" id="cancelEditBtn" style="display: none;">Cancel edit</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Recent submissions</h2>
+                <div class="status-select">
+                    <label for="statusFilter">Filter by status</label>
+                    <select id="statusFilter">
+                        <option value="ALL">All</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="APPROVED">Approved</option>
+                        <option value="REJECTED">Rejected</option>
+                    </select>
+                </div>
+                <div id="feedbackList" class="feedback-list">
+                    <div class="loading">Loading feedback...</div>
+                </div>
+                <div id="feedbackEmpty" class="empty-state" style="display: none;">
+                    You haven&#39;t shared any system feedback yet. Submit your first update to engage with the SupportHub team.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let userToken = null;
+        let adminId = null;
+        let companyId = null;
+        let editingFeedbackId = null;
+        let editingOriginalStatus = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            userToken = localStorage.getItem('token');
+            currentUser = JSON.parse(localStorage.getItem('user'));
+
+            if (!userToken || !currentUser || currentUser.role !== 'COMPANY_ADMIN') {
+                window.location.href = '/';
+                return;
+            }
+
+            adminId = currentUser.userId ?? currentUser.id ?? null;
+            companyId = currentUser.companyId ?? currentUser.company?.id ?? null;
+
+            const feedbackErrorBox = document.getElementById('feedbackError');
+            const submitButton = document.getElementById('submitBtn');
+
+            if (!adminId || !companyId) {
+                if (feedbackErrorBox) {
+                    feedbackErrorBox.textContent = 'We could not resolve your company admin profile. Please sign out and sign in again.';
+                    feedbackErrorBox.style.display = 'block';
+                }
+                if (submitButton) {
+                    submitButton.disabled = true;
+                }
+                return;
+            }
+
+            document.getElementById('userName').textContent = `${currentUser.firstName} ${currentUser.lastName}`;
+
+            document.getElementById('feedbackForm').addEventListener('submit', submitFeedback);
+            document.getElementById('statusFilter').addEventListener('change', loadFeedback);
+            document.getElementById('cancelEditBtn').addEventListener('click', () => cancelEditingFeedback());
+
+            loadFeedback();
+        });
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        }
+
+        async function submitFeedback(event) {
+            event.preventDefault();
+
+            const successBox = document.getElementById('feedbackSuccess');
+            const errorBox = document.getElementById('feedbackError');
+            const submitBtn = document.getElementById('submitBtn');
+            const isEditing = Boolean(editingFeedbackId);
+
+            successBox.style.display = 'none';
+            errorBox.style.display = 'none';
+
+            const title = document.getElementById('feedbackTitle').value.trim();
+            const ratingValue = parseInt(document.getElementById('feedbackRating').value, 10);
+            const feedback = document.getElementById('feedbackMessage').value.trim();
+
+            if (!title || !ratingValue || !feedback) {
+                errorBox.textContent = 'Please complete all fields before submitting.';
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            const payload = {
+                companyId,
+                adminId,
+                title,
+                rating: ratingValue,
+                feedback
+            };
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = isEditing ? 'Saving...' : 'Submitting...';
+
+            const endpoint = isEditing ? `/api/system-feedback/${editingFeedbackId}` : '/api/system-feedback';
+            const method = isEditing ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(endpoint, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: 'Failed to submit feedback' }));
+                    throw new Error(errorData.error || 'Failed to submit feedback');
+                }
+
+                successBox.textContent = isEditing
+                    ? 'Your updates were sent for super admin review. The status has been reset to Pending.'
+                    : 'Thanks for sharing! Your feedback is pending super admin approval.';
+                successBox.style.display = 'block';
+
+                if (isEditing) {
+                    cancelEditingFeedback(false);
+                }
+
+                document.getElementById('feedbackForm').reset();
+                loadFeedback();
+            } catch (error) {
+                console.error('Error submitting feedback:', error);
+                errorBox.textContent = error.message || 'We could not submit your feedback right now. Please try again.';
+                errorBox.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = editingFeedbackId ? 'Save & Resubmit' : 'Submit Feedback';
+            }
+        }
+
+        async function loadFeedback() {
+            const list = document.getElementById('feedbackList');
+            const emptyState = document.getElementById('feedbackEmpty');
+            const filterValue = document.getElementById('statusFilter').value;
+
+            list.innerHTML = '<div class="loading">Loading feedback...</div>';
+            emptyState.style.display = 'none';
+
+            let url = `/api/system-feedback/company/${companyId}`;
+            if (filterValue && filterValue !== 'ALL') {
+                url += `?status=${filterValue}`;
+            }
+
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load feedback');
+                }
+
+                const items = await response.json();
+                list.innerHTML = '';
+
+                if (!Array.isArray(items) || items.length === 0) {
+                    emptyState.style.display = 'block';
+                    return;
+                }
+
+                items.forEach(item => list.appendChild(renderFeedbackItem(item)));
+            } catch (error) {
+                console.error('Error loading feedback:', error);
+                list.innerHTML = '<div class="message error">Unable to load feedback right now. Please try again shortly.</div>';
+            }
+        }
+
+        function beginEditingFeedback(item) {
+            if (!item || !item.id) {
+                return;
+            }
+
+            editingFeedbackId = item.id;
+            editingOriginalStatus = item.status || null;
+
+            document.getElementById('feedbackTitle').value = item.title || '';
+            document.getElementById('feedbackRating').value = item.rating != null ? String(item.rating) : '';
+            document.getElementById('feedbackMessage').value = item.feedback || '';
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.textContent = 'Save & Resubmit';
+
+            const cancelBtn = document.getElementById('cancelEditBtn');
+            cancelBtn.style.display = 'inline-flex';
+
+            const banner = document.getElementById('editBanner');
+            const statusDescriptor = formatStatus(item.status);
+            banner.textContent = `Editing "${item.title || 'your feedback'}" (${statusDescriptor}). Saving will resubmit it for super admin approval.`;
+            banner.style.display = 'block';
+
+            document.querySelectorAll('.feedback-card.editing').forEach(card => card.classList.remove('editing'));
+            const highlightedCard = document.querySelector(`.feedback-card[data-feedback-id="${item.id}"]`);
+            if (highlightedCard) {
+                highlightedCard.classList.add('editing');
+                highlightedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cancelEditingFeedback(resetFields = true) {
+            editingFeedbackId = null;
+            editingOriginalStatus = null;
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.textContent = 'Submit Feedback';
+
+            const cancelBtn = document.getElementById('cancelEditBtn');
+            cancelBtn.style.display = 'none';
+
+            const banner = document.getElementById('editBanner');
+            banner.style.display = 'none';
+            banner.textContent = '';
+
+            if (resetFields) {
+                document.getElementById('feedbackForm').reset();
+            }
+
+            document.querySelectorAll('.feedback-card.editing').forEach(card => card.classList.remove('editing'));
+        }
+
+        function renderFeedbackItem(item) {
+            const card = document.createElement('div');
+            card.className = 'feedback-card';
+            card.dataset.feedbackId = item.id;
+
+            if (editingFeedbackId === item.id) {
+                card.classList.add('editing');
+            }
+
+            const title = document.createElement('h3');
+            title.textContent = item.title || 'System Feedback';
+
+            const body = document.createElement('p');
+            body.textContent = item.feedback || 'No written feedback provided.';
+
+            const rating = document.createElement('div');
+            rating.className = 'rating-stars';
+            const ratingValue = Math.max(0, Math.min(5, item.rating || 0));
+            rating.textContent = '★'.repeat(ratingValue) + '☆'.repeat(5 - ratingValue);
+
+            const meta = document.createElement('div');
+            meta.className = 'feedback-meta';
+
+            const badge = document.createElement('span');
+            badge.className = `status-badge ${String(item.status || 'PENDING').toLowerCase()}`;
+            const statusLabel = formatStatus(item.status);
+            badge.textContent = statusLabel;
+
+            const timestamp = document.createElement('span');
+            timestamp.className = 'timestamp';
+            timestamp.textContent = formatTimestamp(item.updatedAt || item.createdAt);
+
+            meta.appendChild(badge);
+            meta.appendChild(timestamp);
+
+            card.appendChild(title);
+            card.appendChild(body);
+            card.appendChild(rating);
+            card.appendChild(meta);
+
+            const actions = document.createElement('div');
+            actions.className = 'feedback-actions';
+
+            const editBtn = document.createElement('button');
+            editBtn.type = 'button';
+            editBtn.className = 'btn btn-ghost';
+            editBtn.textContent = item.status === 'APPROVED' ? 'Request update' : 'Edit submission';
+            editBtn.addEventListener('click', () => beginEditingFeedback(item));
+
+            actions.appendChild(editBtn);
+
+            const note = document.createElement('span');
+            note.className = 'status-hint';
+            note.textContent = 'Edits reset the status to Pending for super admin review.';
+            actions.appendChild(note);
+
+            card.appendChild(actions);
+
+            return card;
+        }
+
+        function formatStatus(status) {
+            if (!status) return 'Pending Review';
+            switch (status) {
+                case 'APPROVED':
+                    return 'Approved';
+                case 'REJECTED':
+                    return 'Rejected';
+                default:
+                    return 'Pending Review';
+            }
+        }
+
+        function formatTimestamp(isoString) {
+            if (!isoString) {
+                return 'Updated just now';
+            }
+            const date = new Date(isoString);
+            return `Updated ${date.toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`;
+        }
+    </script>
+</body>
+</html>

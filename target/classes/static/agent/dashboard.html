@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oryzo Agent Workspace</title>
+    <style>
+        :root {
+            --color-bg: #05060b;
+            --color-surface: rgba(13, 17, 23, 0.85);
+            --color-surface-alt: rgba(22, 27, 34, 0.85);
+            --color-border: #232a35;
+            --color-fg: #e6edf3;
+            --color-fg-muted: #9da6b7;
+            --color-accent: #58a6ff;
+            --color-purple: #a371f7;
+            --color-success: #3fb950;
+            --color-warning: #f2cc60;
+            --color-danger: #f85149;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+            --modal-bg: rgba(5, 6, 11, 0.85);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--color-bg);
+            color: var(--color-fg);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: -40% -60% -30% -60%;
+            background: radial-gradient(circle at 20% 20%, rgba(121, 192, 255, 0.35), transparent 55%),
+                        radial-gradient(circle at 80% 10%, rgba(167, 119, 255, 0.25), transparent 50%),
+                        radial-gradient(circle at 50% 90%, rgba(247, 120, 186, 0.2), transparent 55%);
+            z-index: 0;
+            filter: blur(120px);
+            opacity: 0.65;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: rgba(13, 17, 23, 0.85);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--color-border);
+            color: var(--color-fg);
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: var(--color-fg);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--color-fg-muted);
+        }
+
+        .logout-btn {
+            background: linear-gradient(120deg, rgba(121, 192, 255, 0.1), rgba(167, 119, 255, 0.15));
+            border: 1px solid rgba(88, 166, 255, 0.35);
+            color: var(--color-fg);
+            padding: 0.55rem 1.25rem;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px rgba(88, 166, 255, 0.25);
+            border-color: rgba(121, 192, 255, 0.6);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2.5rem 2rem 3.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.75rem;
+        }
+
+        .section-subtitle {
+            color: var(--color-fg-muted);
+            margin-bottom: 2.5rem;
+            max-width: 720px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.75rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .card {
+            background: var(--color-surface);
+            border: 1px solid rgba(88, 166, 255, 0.12);
+            border-radius: 18px;
+            padding: 1.75rem;
+            box-shadow: 0 18px 40px rgba(5, 6, 11, 0.45);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::after {
+            content: "";
+            position: absolute;
+            inset: 1px;
+            border-radius: 17px;
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.08), transparent 65%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 24px 50px rgba(5, 6, 11, 0.55);
+            border-color: rgba(167, 119, 255, 0.32);
+        }
+
+        .card:hover::after {
+            opacity: 1;
+        }
+
+        .card h3 {
+            color: var(--color-fg);
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .card p {
+            color: var(--color-fg-muted);
+            line-height: 1.6;
+            margin-bottom: 1.25rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--color-purple), var(--color-accent));
+            color: var(--color-fg);
+            border: none;
+            padding: 0.75rem 1.6rem;
+            border-radius: 999px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 10px 24px rgba(79, 110, 255, 0.25);
+            position: relative;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 36px rgba(89, 125, 255, 0.35);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, rgba(121, 192, 255, 0.2), rgba(167, 119, 255, 0.35));
+            border: 1px solid rgba(121, 192, 255, 0.4);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: var(--color-surface-alt);
+            border: 1px solid rgba(35, 42, 53, 0.9);
+            border-radius: 16px;
+            padding: 1.6rem;
+            text-align: center;
+            box-shadow: inset 0 0 0 1px rgba(88, 166, 255, 0.08);
+        }
+
+        .stat-number {
+            font-size: 2.15rem;
+            font-weight: 700;
+            color: var(--color-accent);
+        }
+
+        .stat-label {
+            margin-top: 0.45rem;
+            color: var(--color-fg-muted);
+            letter-spacing: 0.3px;
+        }
+
+        .ticket-queue {
+            background: var(--color-surface);
+            border-radius: 20px;
+            padding: 1.75rem;
+            border: 1px solid rgba(35, 42, 53, 0.85);
+            box-shadow: 0 22px 55px rgba(5, 6, 11, 0.55);
+        }
+
+        .ticket-item {
+            border: 1px solid rgba(88, 166, 255, 0.12);
+            border-radius: 14px;
+            padding: 1.1rem 1.25rem;
+            background: rgba(12, 18, 26, 0.85);
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+            position: relative;
+        }
+
+        .ticket-item:hover {
+            transform: translateY(-2px);
+            border-color: rgba(167, 119, 255, 0.35);
+            box-shadow: 0 16px 32px rgba(5, 6, 11, 0.45);
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.65rem;
+        }
+
+        .ticket-title {
+            font-weight: 600;
+            color: var(--color-fg);
+            font-size: 1.05rem;
+        }
+
+        .ticket-status {
+            padding: 0.35rem 0.9rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: capitalize;
+            letter-spacing: 0.3px;
+        }
+
+        .status-open { background: rgba(88, 166, 255, 0.18); color: var(--color-accent); }
+        .status-in-progress { background: rgba(242, 204, 96, 0.18); color: var(--color-warning); }
+        .status-resolved { background: rgba(63, 185, 80, 0.18); color: var(--color-success); }
+        .status-pending-customer { background: rgba(242, 163, 101, 0.18); color: #f2a365; }
+        .status-closed { background: rgba(157, 166, 183, 0.18); color: #a0aabf; }
+        .status-cancelled { background: rgba(248, 81, 73, 0.18); color: var(--color-danger); }
+
+        .ticket-meta {
+            color: var(--color-fg-muted);
+            font-size: 0.9rem;
+            line-height: 1.55;
+        }
+
+        .ticket-section {
+            margin-top: 1.75rem;
+        }
+
+        .ticket-section h4 {
+            margin-bottom: 0.85rem;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--color-fg);
+        }
+
+        .ticket-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .ticket-actions {
+            margin-top: 0.85rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .btn-ghost {
+            background: rgba(88, 166, 255, 0.12);
+            border: 1px solid rgba(88, 166, 255, 0.35);
+            color: var(--color-accent);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(88, 166, 255, 0.16);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, rgba(248, 81, 73, 0.85), rgba(241, 105, 122, 0.85));
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 1.25rem;
+            border: 1px dashed rgba(88, 166, 255, 0.25);
+            border-radius: 14px;
+            color: var(--color-fg-muted);
+            font-size: 0.95rem;
+            background: rgba(12, 18, 26, 0.65);
+        }
+
+        .ticket-tags {
+            margin-top: 0.65rem;
+            font-size: 0.8rem;
+            color: var(--color-fg-muted);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: rgba(167, 119, 255, 0.18);
+            color: rgba(167, 119, 255, 0.95);
+            border-radius: 999px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.8rem;
+            margin-right: 0.5rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--color-fg-muted);
+        }
+
+        .error {
+            background: rgba(248, 81, 73, 0.12);
+            color: var(--color-danger);
+            border: 1px solid rgba(248, 81, 73, 0.35);
+            padding: 1rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+        }
+
+        .ticket-queue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .last-updated {
+            font-size: 0.85rem;
+            color: var(--color-fg-muted);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .container {
+                padding: 2rem 1.5rem 3rem;
+            }
+
+            .ticket-item {
+                padding: 1rem;
+            }
+        }
+        
+        /* Modal Styles */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .modal {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 2rem;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--color-border);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-title {
+            font-size: 1.6rem;
+            color: var(--color-accent);
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            background: rgba(248, 81, 73, 0.2);
+            border: 1px solid rgba(248, 81, 73, 0.3);
+            color: var(--color-danger);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-close:hover {
+            background: rgba(248, 81, 73, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .performance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .performance-metric {
+            background: var(--color-surface-alt);
+            border: 1px solid var(--color-border);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+        }
+        
+        .metric-label {
+            color: var(--color-fg-muted);
+            font-size: 0.9rem;
+        }
+        
+        .performance-section {
+            margin-bottom: 2.5rem;
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+            color: var(--color-fg);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .ticket-list-performance {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .ticket-review {
+            display: flex;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .review-stars {
+            color: var(--color-warning);
+            margin-top: 0.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .no-data-message {
+            text-align: center;
+            color: var(--color-fg-muted);
+            padding: 2rem 0;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🎫 Oryzo Agent Workspace</div>
+        <div class="user-info">
+            <span id="userName">Loading...</span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="stats" id="statsContainer">
+            <div class="stat-card">
+                <div class="stat-number" id="assignedTickets">-</div>
+                <div class="stat-label">Assigned Tickets</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="resolvedToday">-</div>
+                <div class="stat-label">Resolved Today</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="avgResolutionTime">-</div>
+                <div class="stat-label">Avg Resolution Time</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="satisfactionRating">-</div>
+                <div class="stat-label">Satisfaction Rating</div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3>🎫 My Ticket Queue</h3>
+                <p>View and manage your assigned tickets</p>
+                <button class="btn" onclick="viewTicketQueue()">View Queue</button>
+            </div>
+            <!-- <div class="card">
+                <h3>📚 Knowledge Base</h3>
+                <p>Access FAQ and knowledge base</p>
+                <button class="btn btn-secondary" onclick="viewKnowledgeBase()">Browse FAQs</button>
+            </div> -->
+            <div class="card">
+                <h3>📊 My Performance</h3>
+                <p>View your performance metrics</p>
+                <button class="btn" onclick="viewPerformance()">View Metrics</button>
+            </div>
+        </div>
+
+        <div class="ticket-queue">
+            <div class="ticket-queue-header">
+                <h3>🛰️ Ticket Overview</h3>
+                <span id="ticketsLastUpdated" class="last-updated">Loading...</span>
+            </div>
+            <div id="ticketError" class="error hidden"></div>
+            <div class="ticket-section">
+                <h4>My Active Tickets</h4>
+                <div id="myTicketsContainer" class="ticket-list"></div>
+            </div>
+            <div class="ticket-section">
+                <h4>Available to Claim</h4>
+                <div id="availableTicketsContainer" class="ticket-list"></div>
+            </div>
+            <div class="ticket-section">
+                <h4>Recently Closed</h4>
+                <div id="closedTicketsContainer" class="ticket-list"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Performance Metrics Modal -->
+    <div id="performanceModal" class="modal-backdrop">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">📊 My Performance Metrics</div>
+                <div class="modal-close" onclick="closePerformanceModal()">✕</div>
+            </div>
+            
+            <div class="performance-grid" id="performanceMetrics">
+                <div class="performance-metric">
+                    <div class="metric-value" id="totalAssignedTickets">-</div>
+                    <div class="metric-label">Total Assigned Tickets</div>
+                </div>
+                <div class="performance-metric">
+                    <div class="metric-value" id="ongoingTickets">-</div>
+                    <div class="metric-label">Ongoing Tickets</div>
+                </div>
+                <div class="performance-metric">
+                    <div class="metric-value" id="closedTickets">-</div>
+                    <div class="metric-label">Closed Tickets</div>
+                </div>
+                <div class="performance-metric">
+                    <div class="metric-value" id="avgResponseTime">-</div>
+                    <div class="metric-label">Avg. Response Time</div>
+                </div>
+                <div class="performance-metric">
+                    <div class="metric-value" id="avgResolutionTimeDetailed">-</div>
+                    <div class="metric-label">Avg. Resolution Time</div>
+                </div>
+                <div class="performance-metric">
+                    <div class="metric-value" id="overallRating">-</div>
+                    <div class="metric-label">Overall Rating</div>
+                </div>
+            </div>
+            
+            <div class="performance-section">
+                <h3 class="section-title">Assigned Tickets</h3>
+                <div id="assignedTicketsContainer" class="ticket-list-performance">
+                    <!-- Ticket items will be inserted here -->
+                </div>
+            </div>
+            
+            <div class="performance-section">
+                <h3 class="section-title">Ongoing Tickets</h3>
+                <div id="ongoingTicketsContainer" class="ticket-list-performance">
+                    <!-- Ticket items will be inserted here -->
+                </div>
+            </div>
+            
+            <div class="performance-section">
+                <h3 class="section-title">Recently Closed Tickets with Reviews</h3>
+                <div id="reviewedTicketsContainer" class="ticket-list-performance">
+                    <!-- Ticket items with reviews will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let userToken = null;
+        let ticketBoard = null;
+        let claimingTickets = new Set();
+
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            userToken = localStorage.getItem('token');
+            currentUser = JSON.parse(localStorage.getItem('user'));
+            
+            if (!userToken || !currentUser || currentUser.role !== 'SUPPORT_AGENT') {
+                window.location.href = '/';
+                return;
+            }
+            
+            document.getElementById('userName').textContent = `${currentUser.firstName} ${currentUser.lastName}`;
+            loadDashboardData();
+            
+            // Add event listener for Escape key to close modal
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    closePerformanceModal();
+                }
+            });
+            
+            // Close modal if clicked outside
+            document.getElementById('performanceModal').addEventListener('click', function(event) {
+                if (event.target === this) {
+                    closePerformanceModal();
+                }
+            });
+        });
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        }
+
+        async function loadDashboardData() {
+            try {
+                // Load assigned tickets
+                const ticketsResponse = await fetch('/api/agents/tickets', {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+                
+                if (ticketsResponse.ok) {
+                    const board = await ticketsResponse.json();
+                    ticketBoard = board;
+                    displayTicketSections(board);
+                    updateStats(board.stats);
+                    updateLastUpdated();
+                    clearTicketError();
+                } else {
+                    const errorMessage = await ticketsResponse.text();
+                    showTicketError(errorMessage || 'Error loading tickets');
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                showTicketError('Error loading data');
+            }
+        }
+
+        function displayTicketSections(board) {
+            renderTicketList(board.assignedTickets, 'myTicketsContainer', {
+                emptyMessage: 'No active tickets assigned to you yet.',
+                actions: ['view', 'respond']
+            });
+
+            renderTicketList(board.availableTickets, 'availableTicketsContainer', {
+                emptyMessage: 'No open tickets are waiting for pickup right now.',
+                actions: ['view', 'claim']
+            });
+
+            renderTicketList(board.closedCompanyTickets.slice(0, 5), 'closedTicketsContainer', {
+                emptyMessage: 'No tickets have been closed recently.',
+                actions: ['view']
+            });
+        }
+
+        function renderTicketList(tickets, containerId, options = {}) {
+            const {
+                emptyMessage = 'No tickets found.',
+                actions = []
+            } = options;
+
+            const container = document.getElementById(containerId);
+            if (!Array.isArray(tickets) || tickets.length === 0) {
+                container.innerHTML = `<div class="empty-state">${emptyMessage}</div>`;
+                return;
+            }
+
+            container.innerHTML = tickets.map(ticket => `
+                <div class="ticket-item">
+                    <div class="ticket-header">
+                        <div>
+                            <div class="ticket-title">${ticket.title}</div>
+                            <div class="ticket-tags">
+                                <span class="badge">#${ticket.ticketNumber}</span>
+                                <span class="badge">${ticket.priority || 'UNSET'}</span>
+                            </div>
+                        </div>
+                        ${renderStatusBadge(ticket.status)}
+                    </div>
+                    <div class="ticket-meta">
+                        <strong>Customer:</strong> ${ticket.customerName || 'Unknown customer'}<br>
+                        <strong>Created:</strong> ${formatDate(ticket.createdAt)}
+                    </div>
+                    ${buildTicketActions(ticket, actions)}
+                </div>
+            `).join('');
+        }
+
+        function buildTicketActions(ticket, actions) {
+            if (!actions || actions.length === 0) {
+                return '';
+            }
+
+            const buttons = actions.map(action => {
+                switch (action) {
+                    case 'view':
+                        return `<button class="btn" onclick="viewTicket(${ticket.id})">View</button>`;
+                    case 'respond':
+                        return `<button class="btn btn-secondary" onclick="respondToTicket(${ticket.id})">Respond</button>`;
+                    case 'claim':
+                        const disabled = claimingTickets.has(ticket.id) ? 'disabled' : '';
+                        const label = claimingTickets.has(ticket.id) ? 'Claiming...' : 'Claim Ticket';
+                        return `<button class="btn btn-ghost" ${disabled} onclick="claimTicket(${ticket.id})">${label}</button>`;
+                    default:
+                        return '';
+                }
+            }).filter(Boolean).join('');
+
+            if (!buttons) {
+                return '';
+            }
+
+            return `<div class="ticket-actions">${buttons}</div>`;
+        }
+
+        function renderStatusBadge(status) {
+            if (!status) {
+                return '';
+            }
+            const normalized = status.toLowerCase().replace('_', '-');
+            const label = status.replace('_', ' ');
+            return `<div class="ticket-status status-${normalized}">${label}</div>`;
+        }
+
+        function updateStats(stats = {}) {
+            document.getElementById('assignedTickets').textContent = stats.assignedCount ?? '-';
+            document.getElementById('resolvedToday').textContent = stats.resolvedToday ?? '-';
+
+            const avg = stats.averageResolutionHours;
+            document.getElementById('avgResolutionTime').textContent = typeof avg === 'number'
+                ? `${avg.toFixed(2)} hrs`
+                : '-';
+
+            const satisfaction = stats.satisfactionRating;
+            document.getElementById('satisfactionRating').textContent = typeof satisfaction === 'number'
+                ? `${satisfaction.toFixed(2)} / 5`
+                : '-';
+        }
+
+        function updateLastUpdated() {
+            const element = document.getElementById('ticketsLastUpdated');
+            element.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+        }
+
+        function showTicketError(message) {
+            const errorContainer = document.getElementById('ticketError');
+            errorContainer.textContent = message;
+            errorContainer.classList.remove('hidden');
+            document.getElementById('myTicketsContainer').innerHTML = '';
+            document.getElementById('availableTicketsContainer').innerHTML = '';
+            document.getElementById('closedTicketsContainer').innerHTML = '';
+        }
+
+        function clearTicketError() {
+            const errorContainer = document.getElementById('ticketError');
+            errorContainer.textContent = '';
+            errorContainer.classList.add('hidden');
+        }
+
+        function formatDate(value) {
+            if (!value) {
+                return 'Unknown';
+            }
+            return new Date(value).toLocaleString();
+        }
+
+        function viewTicketQueue() {
+            window.location.href = 'ticket-queue.html';
+        }
+
+        function viewKnowledgeBase() {
+            alert('Knowledge base coming soon!');
+        }
+
+        async function viewPerformance() {
+            const performanceModal = document.getElementById('performanceModal');
+            performanceModal.style.display = 'flex';
+            
+            try {
+                // Fetch agent performance metrics
+                const response = await fetch('/api/agents/performance', {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const performanceData = await response.json();
+                    displayPerformanceMetrics(performanceData);
+                } else {
+                    const errorText = await response.text();
+                    console.error('Error fetching performance data:', errorText);
+                    showPerformanceError('Failed to load performance data');
+                }
+            } catch (error) {
+                console.error('Error in viewPerformance:', error);
+                showPerformanceError('An error occurred while loading performance metrics');
+            }
+        }
+        
+        function closePerformanceModal() {
+            const performanceModal = document.getElementById('performanceModal');
+            performanceModal.style.display = 'none';
+        }
+        
+        function displayPerformanceMetrics(data) {
+            // Update metrics counters
+            document.getElementById('totalAssignedTickets').textContent = data.totalAssignedTickets || 0;
+            document.getElementById('ongoingTickets').textContent = data.ongoingTicketsCount || 0;
+            document.getElementById('closedTickets').textContent = data.closedTicketsCount || 0;
+            
+            // Format time metrics
+            const avgResponse = data.averageResponseTime;
+            document.getElementById('avgResponseTime').textContent = 
+                typeof avgResponse === 'number' ? formatTime(avgResponse) : '-';
+                
+            const avgResolution = data.averageResolutionTime;
+            document.getElementById('avgResolutionTimeDetailed').textContent = 
+                typeof avgResolution === 'number' ? formatTime(avgResolution) : '-';
+                
+            // Rating with stars
+            const rating = data.averageRating;
+            document.getElementById('overallRating').innerHTML = 
+                typeof rating === 'number' ? 
+                `${rating.toFixed(1)} <div class="review-stars">${renderStars(rating)}</div>` : 
+                '-';
+                
+            // Display tickets
+            renderPerformanceTickets(data.assignedTickets || [], 'assignedTicketsContainer');
+            renderPerformanceTickets(data.ongoingTickets || [], 'ongoingTicketsContainer');
+            renderTicketsWithReviews(data.reviewedTickets || [], 'reviewedTicketsContainer');
+        }
+        
+        function renderPerformanceTickets(tickets, containerId) {
+            const container = document.getElementById(containerId);
+            
+            if (!tickets.length) {
+                container.innerHTML = '<div class="no-data-message">No tickets to display</div>';
+                return;
+            }
+            
+            container.innerHTML = tickets.map(ticket => `
+                <div class="ticket-item">
+                    <div class="ticket-header">
+                        <div>
+                            <div class="ticket-title">${ticket.title}</div>
+                            <div class="ticket-tags">
+                                <span class="badge">#${ticket.ticketNumber}</span>
+                                <span class="badge">${ticket.priority || 'UNSET'}</span>
+                            </div>
+                        </div>
+                        ${renderStatusBadge(ticket.status)}
+                    </div>
+                    <div class="ticket-meta">
+                        <strong>Customer:</strong> ${ticket.customerName || 'Unknown customer'}<br>
+                        <strong>Created:</strong> ${formatDate(ticket.createdAt)}<br>
+                        ${ticket.responseCount ? `<strong>Responses:</strong> ${ticket.responseCount}<br>` : ''}
+                        ${ticket.lastUpdated ? `<strong>Last Updated:</strong> ${formatDate(ticket.lastUpdated)}<br>` : ''}
+                    </div>
+                    <div class="ticket-actions">
+                        <button class="btn" onclick="viewTicket(${ticket.id})">View Details</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function renderTicketsWithReviews(reviewedTickets, containerId) {
+            const container = document.getElementById(containerId);
+            
+            if (!reviewedTickets.length) {
+                container.innerHTML = '<div class="no-data-message">No reviewed tickets to display</div>';
+                return;
+            }
+            
+            container.innerHTML = reviewedTickets.map(item => `
+                <div class="ticket-item">
+                    <div class="ticket-header">
+                        <div>
+                            <div class="ticket-title">${item.ticket.title}</div>
+                            <div class="ticket-tags">
+                                <span class="badge">#${item.ticket.ticketNumber}</span>
+                            </div>
+                        </div>
+                        <div class="review-stars">${renderStars(item.review.rating)}</div>
+                    </div>
+                    <div class="ticket-meta">
+                        <strong>Customer:</strong> ${item.ticket.customerName || 'Unknown customer'}<br>
+                        <strong>Closed on:</strong> ${formatDate(item.ticket.closedAt)}<br>
+                        <strong>Feedback:</strong> ${item.review.feedback || 'No detailed feedback provided'}<br>
+                        <strong>Response Time:</strong> ${item.review.responseTimeRating}/5 • 
+                        <strong>Professionalism:</strong> ${item.review.professionalismRating}/5 • 
+                        <strong>Service Quality:</strong> ${item.review.serviceQualityRating}/5
+                    </div>
+                    <div class="ticket-actions">
+                        <button class="btn" onclick="viewTicket(${item.ticket.id})">View Ticket</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function renderStars(rating) {
+            if (typeof rating !== 'number') return '';
+            
+            const fullStars = Math.floor(rating);
+            const halfStar = rating % 1 >= 0.5;
+            const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+            
+            let stars = '';
+            // Full stars
+            for (let i = 0; i < fullStars; i++) {
+                stars += '★';
+            }
+            // Half star
+            if (halfStar) {
+                stars += '★';
+            }
+            // Empty stars
+            for (let i = 0; i < emptyStars; i++) {
+                stars += '☆';
+            }
+            
+            return stars;
+        }
+        
+        function formatTime(minutes) {
+            if (minutes < 60) {
+                return `${minutes} min`;
+            }
+            
+            const hours = Math.floor(minutes / 60);
+            const remainingMinutes = minutes % 60;
+            
+            if (remainingMinutes === 0) {
+                return `${hours} hr${hours > 1 ? 's' : ''}`;
+            }
+            
+            return `${hours} hr${hours > 1 ? 's' : ''} ${remainingMinutes} min`;
+        }
+        
+        function showPerformanceError(message) {
+            const containers = [
+                'assignedTicketsContainer',
+                'ongoingTicketsContainer',
+                'reviewedTicketsContainer'
+            ];
+            
+            containers.forEach(id => {
+                document.getElementById(id).innerHTML = 
+                    `<div class="no-data-message" style="color: var(--color-danger);">${message}</div>`;
+            });
+            
+            const metrics = [
+                'totalAssignedTickets',
+                'ongoingTickets',
+                'closedTickets',
+                'avgResponseTime',
+                'avgResolutionTimeDetailed',
+                'overallRating'
+            ];
+            
+            metrics.forEach(id => {
+                document.getElementById(id).textContent = '-';
+            });
+        }
+
+        function viewTicket(ticketId) {
+            window.location.href = `ticket-response.html?ticketId=${ticketId}`;
+        }
+
+        function respondToTicket(ticketId) {
+            window.location.href = `/agent/ticket-response.html?ticketId=${ticketId}`;
+        }
+
+        async function claimTicket(ticketId) {
+            if (claimingTickets.has(ticketId)) {
+                return;
+            }
+
+            claimingTickets.add(ticketId);
+            if (ticketBoard) {
+                displayTicketSections(ticketBoard);
+            }
+            try {
+                const response = await fetch(`/api/agents/tickets/${ticketId}/claim`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorBody = await response.json().catch(() => ({ error: 'Unable to claim ticket' }));
+                    alert(errorBody.error || 'Unable to claim ticket');
+                }
+
+                await loadDashboardData();
+            } catch (error) {
+                console.error('Error claiming ticket:', error);
+                alert('Something went wrong while claiming the ticket.');
+            } finally {
+                claimingTickets.delete(ticketId);
+                if (ticketBoard) {
+                    displayTicketSections(ticketBoard);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

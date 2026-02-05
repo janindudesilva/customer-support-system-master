@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Dashboard</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div th:replace="common/header :: header"></div>
+    
+    <div class="dashboard-container">
+        <div th:replace="common/sidebar :: sidebar"></div>
+        
+        <div class="main-content">
+            <h1>Agent Dashboard</h1>
+            <h3 th:text="${'Welcome, ' + agent.firstName + ' ' + agent.lastName}">Welcome, Agent</h3>
+            
+            <div class="agent-status-toggle">
+                <label class="switch">
+                    <input type="checkbox" id="agentAvailability" th:checked="${agent.isAvailable}" onchange="updateAvailability()">
+                    <span class="slider round"></span>
+                </label>
+                <span id="availabilityStatus" th:text="${agent.isAvailable ? 'Available' : 'Unavailable'}">Available</span>
+            </div>
+            
+            <div class="dashboard-summary">
+                <div class="summary-card">
+                    <h3>Assigned Tickets</h3>
+                    <p class="count" th:text="${ticketCounts.assigned}">0</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Open Tickets</h3>
+                    <p class="count" th:text="${ticketCounts.open}">0</p>
+                </div>
+                <div class="summary-card">
+                    <h3>In Progress</h3>
+                    <p class="count" th:text="${ticketCounts.inProgress}">0</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Resolved Today</h3>
+                    <p class="count" th:text="${ticketCounts.resolvedToday}">0</p>
+                </div>
+            </div>
+            
+            <div class="performance-stats">
+                <div class="stat-card">
+                    <h3>Average Response Time</h3>
+                    <p th:text="${#numbers.formatDecimal(agent.averageResolutionTime, 1, 2) + ' hours'}">2.5 hours</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Customer Satisfaction</h3>
+                    <p th:text="${#numbers.formatDecimal(agent.customerSatisfactionRating * 100, 1, 1) + '%'}">85.5%</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Tickets Handled</h3>
+                    <p th:text="${agent.totalTicketsHandled}">150</p>
+                </div>
+            </div>
+            
+            <h2>Assigned Tickets</h2>
+            <div class="tickets-list">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Ticket #</th>
+                            <th>Customer</th>
+                            <th>Title</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th>Created</th>
+                            <th>Last Activity</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="ticket : ${assignedTickets}">
+                            <td th:text="${ticket.ticketNumber}">TKT-20230101-000001</td>
+                            <td th:text="${ticket.customerName}">John Doe</td>
+                            <td th:text="${ticket.title}">Issue with login</td>
+                            <td th:text="${ticket.status}">OPEN</td>
+                            <td th:text="${ticket.priority}">MEDIUM</td>
+                            <td th:text="${#temporals.format(ticket.createdAt, 'yyyy-MM-dd')}">2023-01-01</td>
+                            <td th:text="${#temporals.format(ticket.lastActivity, 'yyyy-MM-dd HH:mm')}">2023-01-01 12:00</td>
+                            <td class="actions">
+                                <a th:href="@{/agent/tickets/{id}(id=${ticket.id})}" class="btn view-btn">View</a>
+                                <a th:href="@{/agent/tickets/{id}/respond(id=${ticket.id})}" class="btn respond-btn">Respond</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="no-data-message" th:if="${assignedTickets.empty}">
+                    <p>No tickets assigned to you at the moment.</p>
+                </div>
+            </div>
+            
+            <h2>Unassigned Tickets</h2>
+            <div class="tickets-list">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Ticket #</th>
+                            <th>Customer</th>
+                            <th>Title</th>
+                            <th>Priority</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="ticket : ${unassignedTickets}">
+                            <td th:text="${ticket.ticketNumber}">TKT-20230101-000002</td>
+                            <td th:text="${ticket.customerName}">Jane Smith</td>
+                            <td th:text="${ticket.title}">Can't access account</td>
+                            <td th:text="${ticket.priority}">HIGH</td>
+                            <td th:text="${#temporals.format(ticket.createdAt, 'yyyy-MM-dd')}">2023-01-01</td>
+                            <td class="actions">
+                                <a th:href="@{/agent/tickets/{id}(id=${ticket.id})}" class="btn view-btn">View</a>
+                                <button th:onclick="'assignTicket(' + ${ticket.id} + ')'" class="btn assign-btn">Assign to Me</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="no-data-message" th:if="${unassignedTickets.empty}">
+                    <p>No unassigned tickets available.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="common/footer :: footer"></div>
+    <script src="/js/agent-dashboard.js"></script>
+</body>
+</html>

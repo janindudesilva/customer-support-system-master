@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Customer Support System</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>Customer Support System</h1>
+                <p>Sign in to your account</p>
+            </div>
+            
+            <div id="alert-container"></div>
+            
+            <div class="auth-form">
+                <form id="loginForm" method="POST">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required autocomplete="email">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    
+                    <div id="company-selection" class="form-group" style="display:none;">
+                        <label for="companyId">Select Company</label>
+                        <select id="companyId" name="companyId">
+                            <option value="">-- Select a Company --</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn primary-btn">Sign In</button>
+                    </div>
+                    
+                    <div class="auth-links">
+                        <a href="/auth/password-reset-request">Forgot Password?</a>
+                        <span class="separator">|</span>
+                        <a href="/customer/registration">Create Account</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const email = document.getElementById('email');
+            const companySelection = document.getElementById('company-selection');
+            const companyIdSelect = document.getElementById('companyId');
+            const alertContainer = document.getElementById('alert-container');
+            
+            // Check email format to detect role
+            email.addEventListener('blur', async function() {
+                if (email.value && email.value.includes('@')) {
+                    try {
+                        // Get active companies from backend
+                        const response = await fetch('/api/auth/companies');
+                        if (response.ok) {
+                            const companies = await response.json();
+                            
+                            // Clear previous options
+                            companyIdSelect.innerHTML = '<option value="">-- Select a Company --</option>';
+                            
+                            // Add companies to dropdown
+                            companies.forEach(company => {
+                                const option = document.createElement('option');
+                                option.value = company.id;
+                                option.textContent = company.name;
+                                companyIdSelect.appendChild(option);
+                            });
+                            
+                            // If email doesn't match superadmin pattern, show company selection
+                            if (!email.value.endsWith('@system.com')) {
+                                companySelection.style.display = 'block';
+                            } else {
+                                companySelection.style.display = 'none';
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error fetching companies:', error);
+                    }
+                }
+            });
+            
+            // Handle form submission
+            loginForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                
+                // Clear previous alerts
+                alertContainer.innerHTML = '';
+                
+                // Prepare form data
+                const formData = {
+                    email: email.value,
+                    password: document.getElementById('password').value
+                };
+                
+                // Add company ID if selected
+                if (companyIdSelect.value) {
+                    formData.companyId = parseInt(companyIdSelect.value);
+                }
+                
+                try {
+                    const response = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        // Store token and user data in session storage
+                        sessionStorage.setItem('token', data.token);
+                        sessionStorage.setItem('userId', data.userId);
+                        sessionStorage.setItem('userRole', data.role);
+                        sessionStorage.setItem('userName', data.firstName + ' ' + data.lastName);
+                        
+                        if (data.companyId) {
+                            sessionStorage.setItem('companyId', data.companyId);
+                            sessionStorage.setItem('companyName', data.companyName);
+                        }
+                        
+                        // Redirect based on role
+                        switch (data.role) {
+                            case 'SUPER_ADMIN':
+                                window.location.href = '/super-admin/dashboard';
+                                break;
+                            case 'COMPANY_ADMIN':
+                                window.location.href = '/company-admin/dashboard';
+                                break;
+                            case 'SUPPORT_AGENT':
+                                window.location.href = '/agent/dashboard';
+                                break;
+                            case 'CUSTOMER':
+                                window.location.href = '/customer/dashboard';
+                                break;
+                            default:
+                                window.location.href = '/';
+                        }
+                    } else {
+                        // Show error message
+                        const alert = document.createElement('div');
+                        alert.className = 'alert alert-danger';
+                        alert.textContent = data.error || 'Login failed. Please check your credentials.';
+                        alertContainer.appendChild(alert);
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-danger';
+                    alert.textContent = 'An error occurred. Please try again later.';
+                    alertContainer.appendChild(alert);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Admin Dashboard</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div th:replace="common/header :: header"></div>
+    
+    <div class="dashboard-container">
+        <div th:replace="common/sidebar :: sidebar"></div>
+        
+        <div class="main-content">
+            <h1>Company Admin Dashboard</h1>
+            <h3 th:text="${'Welcome to ' + company.name + ' Dashboard'}">Welcome to Company Dashboard</h3>
+            
+            <div class="dashboard-summary">
+                <div class="summary-card">
+                    <h3>Total Users</h3>
+                    <p class="count" th:text="${totalUsers}">0</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Support Agents</h3>
+                    <p class="count" th:text="${totalAgents + '/' + company.maxAgents}">0/10</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Customers</h3>
+                    <p class="count" th:text="${totalCustomers + '/' + company.maxCustomers}">0/1000</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Open Tickets</h3>
+                    <p class="count" th:text="${openTickets}">0</p>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="/company-admin/users" class="btn primary-btn">Manage Users</a>
+                <a href="/company-admin/agents/register" class="btn secondary-btn">Register Agent</a>
+                <a href="/company-admin/tickets" class="btn secondary-btn">View Tickets</a>
+                <a href="/company-admin/analytics" class="btn secondary-btn">Analytics</a>
+            </div>
+            
+            <div class="recent-activity">
+                <h2>Recent Activity</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>User</th>
+                            <th>Action</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="activity : ${recentActivities}">
+                            <td th:text="${#temporals.format(activity.timestamp, 'yyyy-MM-dd HH:mm')}">2023-01-01</td>
+                            <td th:text="${activity.userName}">John Doe</td>
+                            <td th:text="${activity.action}">Ticket Created</td>
+                            <td th:text="${activity.details}">New support request</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="common/footer :: footer"></div>
+    <script src="/js/dashboard.js"></script>
+</body>
+</html>

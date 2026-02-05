@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Reports</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div th:replace="common/header :: header"></div>
+    
+    <div class="dashboard-container">
+        <div th:replace="common/sidebar :: sidebar"></div>
+        
+        <div class="main-content">
+            <h1>Performance Reports</h1>
+            
+            <div class="report-filters">
+                <div class="filter-group">
+                    <label for="reportType">Report Type:</label>
+                    <select id="reportType" onchange="changeReportType()">
+                        <option value="agent">Agent Performance</option>
+                        <option value="ticket">Ticket Analysis</option>
+                        <option value="customer">Customer Satisfaction</option>
+                        <option value="category">Category Analysis</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="timePeriod">Time Period:</label>
+                    <select id="timePeriod" onchange="updateReport()">
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month" selected>This Month</option>
+                        <option value="quarter">This Quarter</option>
+                        <option value="year">This Year</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                </div>
+                
+                <div id="customPeriod" class="filter-group" style="display:none;">
+                    <label for="startDate">From:</label>
+                    <input type="date" id="startDate">
+                    <label for="endDate">To:</label>
+                    <input type="date" id="endDate">
+                    <button onclick="applyCustomPeriod()" class="btn small-btn">Apply</button>
+                </div>
+                
+                <div class="filter-group" id="agentFilter">
+                    <label for="agent">Agent:</label>
+                    <select id="agent" onchange="updateReport()">
+                        <option value="all">All Agents</option>
+                        <option th:each="agent : ${agents}" th:value="${agent.id}" th:text="${agent.fullName}">John Doe</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Agent Performance Report -->
+            <div id="agentReport" class="report-section">
+                <h2>Agent Performance Report</h2>
+                
+                <div class="performance-metrics">
+                    <div class="metric-card">
+                        <h3>Tickets Handled</h3>
+                        <p class="count" id="ticketsHandled">42</p>
+                        <p class="comparison" id="ticketsHandledComparison">+12% vs previous period</p>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Avg. Resolution Time</h3>
+                        <p class="count" id="avgResolutionTime">5.3 hours</p>
+                        <p class="comparison" id="avgResolutionTimeComparison">-8% vs previous period</p>
+                    </div>
+                    <div class="metric-card">
+                        <h3>First Response Time</h3>
+                        <p class="count" id="firstResponseTime">37 minutes</p>
+                        <p class="comparison" id="firstResponseTimeComparison">-15% vs previous period</p>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Customer Satisfaction</h3>
+                        <p class="count" id="customerSatisfaction">4.7/5</p>
+                        <p class="comparison" id="customerSatisfactionComparison">+0.2 vs previous period</p>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-card">
+                        <h3>Tickets by Status</h3>
+                        <canvas id="agentStatusChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Resolution Time Trend</h3>
+                        <canvas id="agentResolutionChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-card wide">
+                        <h3>Performance Comparison</h3>
+                        <canvas id="agentComparisonChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="recent-reviews">
+                    <h3>Recent Customer Reviews</h3>
+                    <div class="reviews-list">
+                        <div th:each="review : ${recentReviews}" class="review-item">
+                            <div class="review-header">
+                                <div class="star-rating-display">
+                                    <span th:each="i : ${#numbers.sequence(1, 5)}">
+                                        <i class="fas fa-star" th:classappend="${i <= review.rating ? 'filled' : ''}"></i>
+                                    </span>
+                                </div>
+                                <span class="review-date" th:text="${#temporals.format(review.createdAt, 'yyyy-MM-dd')}">2023-01-05</span>
+                            </div>
+                            <p class="review-content" th:text="${review.feedback}">Great support! Very helpful and quick to respond.</p>
+                            <p class="review-ticket" th:text="${'Ticket: ' + review.ticketNumber}">Ticket: TKT-20230101-000042</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Ticket Analysis Report -->
+            <div id="ticketReport" class="report-section" style="display:none;">
+                <h2>Ticket Analysis Report</h2>
+                
+                <div class="chart-container">
+                    <div class="chart-card">
+                        <h3>Tickets by Priority</h3>
+                        <canvas id="ticketPriorityChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Tickets by Status</h3>
+                        <canvas id="ticketStatusChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-card">
+                        <h3>Resolution Time by Priority</h3>
+                        <canvas id="resolutionByPriorityChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Tickets by Source</h3>
+                        <canvas id="ticketSourceChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="tickets-table">
+                    <h3>Ticket Stats by Category</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Total Tickets</th>
+                                <th>Avg. Resolution Time</th>
+                                <th>Satisfaction Rating</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="stat : ${categoryStats}">
+                                <td th:text="${stat.categoryName}">Technical Issues</td>
+                                <td th:text="${stat.totalTickets}">156</td>
+                                <td th:text="${stat.avgResolutionTime + ' hours'}">4.2 hours</td>
+                                <td th:text="${stat.satisfactionRating + '/5'}">4.3/5</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="report-actions">
+                <button onclick="printReport()" class="btn secondary-btn">Print Report</button>
+                <button onclick="exportReport('pdf')" class="btn secondary-btn">Export as PDF</button>
+                <button onclick="exportReport('excel')" class="btn secondary-btn">Export as Excel</button>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="common/footer :: footer"></div>
+    <script th:inline="javascript">
+        // Get data from Thymeleaf
+        const agentPerformanceData = /*[[${agentPerformanceData}]]*/ {};
+        const ticketAnalysisData = /*[[${ticketAnalysisData}]]*/ {};
+        const customerSatisfactionData = /*[[${customerSatisfactionData}]]*/ {};
+        const categoryAnalysisData = /*[[${categoryAnalysisData}]]*/ {};
+    </script>
+    <script src="/js/performance-reports.js"></script>
+</body>
+</html>

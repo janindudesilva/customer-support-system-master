@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Company - Customer Support System</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>Select a Company</h1>
+                <p>Choose the company you want to register with</p>
+            </div>
+            
+            <div id="alert-container"></div>
+            
+            <div class="auth-form">
+                <div class="company-list">
+                    <div id="company-cards-container" class="company-cards">
+                        <!-- Company cards will be dynamically inserted here -->
+                        <div class="loading">Loading companies...</div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <a href="/auth/login" class="btn secondary-btn">Back to Login</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const companyCardsContainer = document.getElementById('company-cards-container');
+            const alertContainer = document.getElementById('alert-container');
+            
+            // Fetch active companies
+            async function fetchCompanies() {
+                try {
+                    const response = await fetch('/api/auth/companies');
+                    
+                    if (response.ok) {
+                        const companies = await response.json();
+                        
+                        // Clear loading message
+                        companyCardsContainer.innerHTML = '';
+                        
+                        if (companies.length === 0) {
+                            companyCardsContainer.innerHTML = '<p class="no-data-message">No active companies available for registration.</p>';
+                            return;
+                        }
+                        
+                        // Create company cards
+                        companies.forEach(company => {
+                            const card = document.createElement('div');
+                            card.className = 'company-card';
+                            card.setAttribute('data-company-id', company.id);
+                            
+                            const logo = document.createElement('div');
+                            logo.className = 'company-logo';
+                            logo.innerHTML = `<span>${company.name.charAt(0)}</span>`;
+                            
+                            const name = document.createElement('h3');
+                            name.textContent = company.name;
+                            
+                            const info = document.createElement('div');
+                            info.className = 'company-info';
+                            
+                            if (company.website) {
+                                const website = document.createElement('p');
+                                website.innerHTML = `<i class="fas fa-globe"></i> <a href="${company.website}" target="_blank">${company.website}</a>`;
+                                info.appendChild(website);
+                            }
+                            
+                            if (company.email) {
+                                const email = document.createElement('p');
+                                email.innerHTML = `<i class="fas fa-envelope"></i> ${company.email}`;
+                                info.appendChild(email);
+                            }
+                            
+                            const selectBtn = document.createElement('button');
+                            selectBtn.className = 'btn primary-btn';
+                            selectBtn.textContent = 'Select';
+                            selectBtn.addEventListener('click', () => {
+                                // Store company ID and redirect to registration
+                                sessionStorage.setItem('registrationCompanyId', company.id);
+                                sessionStorage.setItem('registrationCompanyName', company.name);
+                                window.location.href = '/customer/registration';
+                            });
+                            
+                            card.appendChild(logo);
+                            card.appendChild(name);
+                            card.appendChild(info);
+                            card.appendChild(selectBtn);
+                            
+                            companyCardsContainer.appendChild(card);
+                        });
+                    } else {
+                        const data = await response.json();
+                        throw new Error(data.error || 'Failed to fetch companies');
+                    }
+                } catch (error) {
+                    console.error('Error fetching companies:', error);
+                    companyCardsContainer.innerHTML = '';
+                    
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-danger';
+                    alert.textContent = 'Error loading companies. Please try again later.';
+                    alertContainer.appendChild(alert);
+                }
+            }
+            
+            // Initialize
+            fetchCompanies();
+        });
+    </script>
+</body>
+</html>

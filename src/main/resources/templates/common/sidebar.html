@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+</head>
+<body>
+    <div th:fragment="sidebar" class="sidebar">
+        <nav class="main-nav">
+            <ul>
+                <li>
+                    <a href="/agent/dashboard" class="nav-item">
+                        <i class="icon dashboard-icon"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/agent/ticket-queue" class="nav-item">
+                        <i class="icon ticket-icon"></i>
+                        <span>Ticket Queue</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/agent/profile" class="nav-item">
+                        <i class="icon profile-icon"></i>
+                        <span>My Profile</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/agent/knowledge-base" class="nav-item">
+                        <i class="icon kb-icon"></i>
+                        <span>Knowledge Base</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/agent/reports" class="nav-item">
+                        <i class="icon reports-icon"></i>
+                        <span>Reports</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/agent/settings" class="nav-item">
+                        <i class="icon settings-icon"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</body>
+</html>

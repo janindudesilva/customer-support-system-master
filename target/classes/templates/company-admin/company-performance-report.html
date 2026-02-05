@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="${companyName} != null ? companyName + ' · Performance Report' : 'Company Performance Report'">Company Performance Report</title>
+    <style>
+        @page {
+            margin: 32px;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            color: #1b1d2b;
+            margin: 0;
+            font-size: 12px;
+            line-height: 1.6;
+            background: #ffffff;
+        }
+
+        h1, h2, h3, h4 {
+            color: #0f172a;
+            margin: 0;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-bottom: 6px;
+        }
+
+        h3 {
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+
+        p {
+            margin: 0;
+        }
+
+        .report-header {
+            display: table;
+            width: 100%;
+            margin-bottom: 18px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 12px;
+        }
+
+        .header-left {
+            display: table-cell;
+            width: 60%;
+            vertical-align: top;
+        }
+
+        .header-right {
+            display: table-cell;
+            width: 40%;
+            vertical-align: top;
+            text-align: right;
+            font-size: 11px;
+        }
+
+        .header-meta span {
+            display: block;
+            color: #475569;
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #2563eb;
+            margin-bottom: 10px;
+        }
+
+        .summary-table,
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+        }
+
+        .summary-table th,
+        .summary-table td,
+        .data-table th,
+        .data-table td {
+            border: 1px solid #e2e8f0;
+            padding: 8px 10px;
+            text-align: left;
+        }
+
+        .summary-table th {
+            background: #f1f5f9;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+            color: #1e293b;
+        }
+
+        .summary-table td.value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .data-table th {
+            background: #0f172a;
+            color: #f8fafc;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-size: 11px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .badge.success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge.danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .grid-2 {
+            width: 100%;
+            border-spacing: 0;
+            border-collapse: collapse;
+        }
+
+        .grid-2 td {
+            width: 50%;
+            vertical-align: top;
+            padding: 0 8px 12px 0;
+        }
+
+        .grid-2 td:last-child {
+            padding-right: 0;
+        }
+
+        .empty-state {
+            padding: 10px 12px;
+            background: #f8fafc;
+            border: 1px dashed #cbd5f5;
+            color: #475569;
+            font-style: italic;
+        }
+
+        .subdued {
+            color: #475569;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+<section class="report-header">
+    <div class="header-left">
+    <h1>Company Performance Intelligence</h1>
+    <p class="subdued" th:text="${companyName} != null ? companyName : 'Company'"></p>
+    </div>
+    <div class="header-right header-meta">
+        <span><strong>Generated:</strong> <span th:text="${generatedAtFormatted}">-</span></span>
+        <span><strong>Prepared By:</strong> Oryzo Command Center</span>
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-title">Summary Indicators</div>
+    <table class="summary-table">
+        <tr>
+            <th>Total Tickets</th>
+            <td class="value" th:text="${summary.totalTickets}">0</td>
+            <th>Open Tickets</th>
+            <td class="value" th:text="${summary.openTickets}">0</td>
+        </tr>
+        <tr>
+            <th>Resolved Tickets</th>
+            <td class="value" th:text="${summary.resolvedTickets}">0</td>
+            <th>Escalated Tickets</th>
+            <td class="value" th:text="${summary.escalatedTickets}">0</td>
+        </tr>
+        <tr>
+            <th>Avg Resolution (hrs)</th>
+            <td class="value" th:text="${summary.averageResolutionHours != null ? #numbers.formatDecimal(summary.averageResolutionHours, 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</td>
+            <th>Tickets · Last 30 Days</th>
+            <td class="value" th:text="${summary.ticketsLast30Days}">0</td>
+        </tr>
+        <tr>
+            <th>Customer Satisfaction</th>
+            <td class="value" th:text="${summary.customerSatisfactionScore != null ? #numbers.formatDecimal(summary.customerSatisfactionScore, 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</td>
+            <th>Active Agents</th>
+            <td class="value" th:text="${summary.activeAgents}">0</td>
+        </tr>
+        <tr>
+            <th>Available Agents</th>
+            <td class="value" th:text="${summary.availableAgents}">0</td>
+            <th>Customers Served</th>
+            <td class="value" th:text="${summary.customersServed}">0</td>
+        </tr>
+    </table>
+</section>
+
+<section class="section">
+    <div class="section-title">Agent Performance Overview</div>
+    <table class="data-table" th:if="${agents != null and !agents.isEmpty()}">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Agent</th>
+            <th>Assigned</th>
+            <th>Active</th>
+            <th>Resolved</th>
+            <th>Avg Resolution (hrs)</th>
+            <th>Satisfaction</th>
+            <th>Load</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="agent, iterStat : ${agents}" th:if="${iterStat.index} < 15">
+            <td th:text="${iterStat.index + 1}">1</td>
+            <td>
+                <strong th:text="${agent.agentName}">Agent Name</strong>
+                <div class="subdued" th:text="${(agent.department != null ? agent.department : '—') + ' · ' + (agent.specialization != null ? agent.specialization : 'General')}"></div>
+            </td>
+            <td th:text="${agent.assignedTickets}">0</td>
+            <td th:text="${agent.activeTickets}">0</td>
+            <td th:text="${agent.resolvedTickets}">0</td>
+            <td th:text="${agent.averageResolutionHours != null ? #numbers.formatDecimal(agent.averageResolutionHours, 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</td>
+            <td th:text="${agent.satisfactionScore != null ? #numbers.formatDecimal(agent.satisfactionScore, 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</td>
+            <td th:text="${(agent.currentLoad != null ? agent.currentLoad : 0) + '/' + (agent.maxCapacity != null ? agent.maxCapacity : 0)}">0/0</td>
+            <td>
+                <span th:classappend="${agent.available} ? ' badge success' : ' badge danger'"
+                      th:text="${agent.available ? 'AVAILABLE' : 'OFFLINE'}">AVAILABLE</span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="empty-state" th:if="${agents == null or agents.isEmpty()}">No agent performance data recorded yet.</div>
+</section>
+
+<section class="section">
+    <div class="section-title">Ticket Intelligence</div>
+    <table class="grid-2">
+        <tr>
+            <td>
+                <h3>Status Breakdown</h3>
+                <table class="data-table" th:if="${tickets.statusBreakdown != null and !tickets.statusBreakdown.isEmpty()}">
+                    <thead><tr><th>Status</th><th>Count</th></tr></thead>
+                    <tbody>
+                    <tr th:each="entry : ${tickets.statusBreakdown.entrySet()}">
+                        <td th:text="${#strings.replace(entry.key, '_', ' ')}">Open</td>
+                        <td th:text="${entry.value}">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="empty-state" th:if="${tickets.statusBreakdown == null or tickets.statusBreakdown.isEmpty()}">No ticket status data available.</div>
+            </td>
+            <td>
+                <h3>Priority Distribution</h3>
+                <table class="data-table" th:if="${tickets.priorityBreakdown != null and !tickets.priorityBreakdown.isEmpty()}">
+                    <thead><tr><th>Priority</th><th>Count</th></tr></thead>
+                    <tbody>
+                    <tr th:each="entry : ${tickets.priorityBreakdown.entrySet()}">
+                        <td th:text="${#strings.replace(entry.key, '_', ' ')}">Medium</td>
+                        <td th:text="${entry.value}">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="empty-state" th:if="${tickets.priorityBreakdown == null or tickets.priorityBreakdown.isEmpty()}">No priority distribution recorded.</div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <h3>Top Categories</h3>
+                <table class="data-table" th:if="${tickets.topCategories != null and !tickets.topCategories.isEmpty()}">
+                    <thead><tr><th>Category</th><th>Count</th></tr></thead>
+                    <tbody>
+                    <tr th:each="category : ${tickets.topCategories}">
+                        <td th:text="${category.name}">Billing</td>
+                        <td th:text="${category.count}">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="empty-state" th:if="${tickets.topCategories == null or tickets.topCategories.isEmpty()}">No categories recorded yet.</div>
+            </td>
+            <td>
+                <h3>Monthly Ticket Trends</h3>
+                <table class="data-table" th:if="${tickets.monthlyTrends != null and !tickets.monthlyTrends.isEmpty()}">
+                    <thead><tr><th>Month</th><th>Total</th><th>Resolved</th><th>Escalated</th></tr></thead>
+                    <tbody>
+                    <tr th:each="trend : ${tickets.monthlyTrends}">
+                        <td th:text="${trend.label}">2025-01</td>
+                        <td th:text="${trend.total}">0</td>
+                        <td th:text="${trend.resolved}">0</td>
+                        <td th:text="${trend.escalated}">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="empty-state" th:if="${tickets.monthlyTrends == null or tickets.monthlyTrends.isEmpty()}">Trend data becomes available once historical tickets are captured.</div>
+            </td>
+        </tr>
+    </table>
+</section>
+
+<section class="section">
+    <div class="section-title">Customer Insights</div>
+    <table class="grid-2">
+        <tr>
+            <td>
+                <h3>Engagement Snapshot</h3>
+                <table class="summary-table">
+                    <tr><th>Total Customers</th><td class="value" th:text="${customers.totalCustomers}">0</td></tr>
+                    <tr><th>Active Customers</th><td class="value" th:text="${customers.activeCustomers}">0</td></tr>
+                    <tr><th>New This Month</th><td class="value" th:text="${customers.newCustomersThisMonth}">0</td></tr>
+                    <tr><th>Average Satisfaction</th><td class="value" th:text="${customers.averageSatisfaction != null ? #numbers.formatDecimal(customers.averageSatisfaction, 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</td></tr>
+                </table>
+            </td>
+            <td>
+                <h3>Preferred Contact Methods</h3>
+                <table class="data-table" th:if="${customers.contactPreferences != null and !customers.contactPreferences.isEmpty()}">
+                    <thead><tr><th>Method</th><th>Count</th></tr></thead>
+                    <tbody>
+                    <tr th:each="entry : ${customers.contactPreferences.entrySet()}">
+                        <td th:text="${#strings.replace(entry.key, '_', ' ')}">Email</td>
+                        <td th:text="${entry.value}">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="empty-state" th:if="${customers.contactPreferences == null or customers.contactPreferences.isEmpty()}">No contact preference data recorded.</div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <h3>Customer Segments</h3>
+                <table class="data-table" th:if="${customers.customerTypes != null and !customers.customerTypes.isEmpty()}">
+                    <thead><tr><th>Segment</th><th>Count</th></tr></thead>
+                    <tbody>
+                    <tr th:each="entry : ${customers.customerTypes.entrySet()}">
+                        <td th:text="${#strings.replace(entry.key, '_', ' ')}">Enterprise</td>
+                        <td th:text="${entry.value}">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="empty-state" th:if="${customers.customerTypes == null or customers.customerTypes.isEmpty()}">Customer segmentation will appear once classifications are captured.</div>
+            </td>
+        </tr>
+    </table>
+</section>
+
+<section class="section">
+    <div class="section-title">Review Pulse</div>
+    <table class="grid-2">
+        <tr>
+            <td>
+                <h3>Experience KPIs</h3>
+                <table class="summary-table">
+                    <tr><th>Total Reviews</th><td class="value" th:text="${reviews.totalReviews}">0</td></tr>
+                    <tr><th>Average Rating</th><td class="value" th:text="${reviews.averageRating != null ? #numbers.formatDecimal(reviews.averageRating, 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</td></tr>
+                    <tr><th>Recommendation Rate (%)</th><td class="value" th:text="${reviews.recommendationRate != null ? #numbers.formatDecimal(reviews.recommendationRate, 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</td></tr>
+                </table>
+            </td>
+            <td>
+                <h3>Rating Distribution</h3>
+                <table class="data-table" th:if="${reviews.ratingDistribution != null and !reviews.ratingDistribution.isEmpty()}">
+                    <thead><tr><th>Rating</th><th>Count</th></tr></thead>
+                    <tbody>
+                    <tr th:each="entry : ${reviews.ratingDistribution.entrySet()}">
+                        <td th:text="${entry.key}">5</td>
+                        <td th:text="${entry.value}">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="empty-state" th:if="${reviews.ratingDistribution == null or reviews.ratingDistribution.isEmpty()}">No review sentiment captured yet.</div>
+            </td>
+        </tr>
+    </table>
+
+    <h3>Recent Highlighted Reviews</h3>
+    <table class="data-table" th:if="${reviews.recentReviews != null and !reviews.recentReviews.isEmpty()}">
+        <thead><tr><th>Customer</th><th>Agent</th><th>Ticket</th><th>Rating</th><th>Feedback</th><th>Date</th></tr></thead>
+        <tbody>
+        <tr th:each="review : ${reviews.recentReviews}">
+            <td th:text="${review.customerName != null ? review.customerName : 'Anonymous'}">Customer</td>
+            <td th:text="${review.agentName != null ? review.agentName : 'Support Team'}">Agent</td>
+            <td th:text="${review.ticketId}">0</td>
+            <td th:text="${review.rating}">0</td>
+            <td th:text="${review.feedback != null ? review.feedback : '-'}">-</td>
+            <td th:text="${review.createdAt != null ? #temporals.format(review.createdAt, 'yyyy-MM-dd HH:mm') : '-'}">-</td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="empty-state" th:if="${reviews.recentReviews == null or reviews.recentReviews.isEmpty()}">Customer feedback highlights will surface as reviews are collected.</div>
+</section>
+
+<section class="section">
+    <div class="section-title">Recent Analytics Telemetry</div>
+    <table class="data-table" th:if="${analytics != null and !analytics.isEmpty()}">
+        <thead>
+        <tr><th>Metric</th><th>Value</th><th>Period</th><th>Recorded</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="metric : ${analytics}">
+            <td th:text="${metric.metricName != null ? #strings.replace(metric.metricName, '_', ' ') : 'Metric'}">Total Tickets</td>
+            <td th:text="${metric.metricValue != null ? #numbers.formatDecimal(metric.metricValue.doubleValue(), 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</td>
+            <td th:text="${(metric.periodStart != null ? #temporals.format(metric.periodStart, 'yyyy-MM-dd') : '—') + ' → ' + (metric.periodEnd != null ? #temporals.format(metric.periodEnd, 'yyyy-MM-dd') : (metric.periodStart != null ? #temporals.format(metric.periodStart, 'yyyy-MM-dd') : '—'))}">—</td>
+            <td th:text="${metric.createdAt != null ? #temporals.format(metric.createdAt, 'yyyy-MM-dd HH:mm') : '—'}">—</td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="empty-state" th:if="${analytics == null or analytics.isEmpty()}">Analytics telemetry will populate as scheduled metrics are recorded.</div>
+</section>
+
+<footer class="subdued" style="text-align: center; margin-top: 18px; font-size: 10px;">
+    Generated via Oryzo Command Center · Confidential · For internal analytics use only
+</footer>
+</body>
+</html>

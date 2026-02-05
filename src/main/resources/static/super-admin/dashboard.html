@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oryzo Super Admin Console</title>
+    <style>
+        :root {
+            --color-bg: #05060b;
+            --color-surface: rgba(13, 17, 23, 0.85);
+            --color-surface-alt: rgba(22, 27, 34, 0.85);
+            --color-border: #232a35;
+            --color-border-subtle: rgba(88, 166, 255, 0.12);
+            --color-fg: #e6edf3;
+            --color-fg-muted: #9da6b7;
+            --color-accent: #58a6ff;
+            --color-purple: #a371f7;
+            --color-success: #3fb950;
+            --color-warning: #f2cc60;
+            --color-danger: #f85149;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--color-bg);
+            color: var(--color-fg);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: -40% -60% -30% -60%;
+            background: radial-gradient(circle at 18% 18%, rgba(121, 192, 255, 0.35), transparent 20%),
+                        radial-gradient(circle at 78% 12%, rgba(167, 119, 255, 0.3), transparent 50%),
+                        radial-gradient(circle at 50% 90%, rgba(247, 120, 186, 0.22), transparent 10%);
+            z-index: 0;
+            filter: blur(140px);
+            opacity: 0.7;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: rgba(13, 17, 23, 0.85);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.45rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--color-fg-muted);
+        }
+
+        .logout-btn {
+            background: linear-gradient(120deg, rgba(121, 192, 255, 0.12), rgba(167, 119, 255, 0.18));
+            border: 1px solid rgba(88, 166, 255, 0.35);
+            color: var(--color-fg);
+            padding: 0.55rem 1.25rem;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px rgba(88, 166, 255, 0.25);
+            border-color: rgba(121, 192, 255, 0.55);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2.5rem 2rem 4rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.75rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border-subtle);
+            border-radius: 18px;
+            padding: 1.75rem;
+            box-shadow: 0 18px 40px rgba(5, 6, 11, 0.45);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::after {
+            content: "";
+            position: absolute;
+            inset: 1px;
+            border-radius: 17px;
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.08), transparent 65%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 24px 50px rgba(5, 6, 11, 0.55);
+            border-color: rgba(167, 119, 255, 0.32);
+        }
+
+        .card:hover::after {
+            opacity: 1;
+        }
+
+        .card h3 {
+            color: var(--color-fg);
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .card p {
+            color: var(--color-fg-muted);
+            line-height: 1.6;
+            margin-bottom: 1.25rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--color-purple), var(--color-accent));
+            color: var(--color-fg);
+            border: none;
+            padding: 0.75rem 1.6rem;
+            border-radius: 999px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 10px 24px rgba(79, 110, 255, 0.25);
+            margin: 0.15rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 36px rgba(89, 125, 255, 0.35);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, rgba(121, 192, 255, 0.22), rgba(167, 119, 255, 0.35));
+            border: 1px solid rgba(121, 192, 255, 0.45);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: var(--color-surface-alt);
+            border: 1px solid rgba(35, 42, 53, 0.9);
+            border-radius: 16px;
+            padding: 1.6rem;
+            text-align: center;
+            box-shadow: inset 0 0 0 1px rgba(88, 166, 255, 0.08);
+        }
+
+        .stat-number {
+            font-size: 2.1rem;
+            font-weight: 700;
+            color: var(--color-accent);
+        }
+
+        .stat-label {
+            margin-top: 0.45rem;
+            color: var(--color-fg-muted);
+            letter-spacing: 0.3px;
+        }
+
+        .company-list {
+            background: var(--color-surface);
+            border-radius: 20px;
+            padding: 1.9rem;
+            border: 1px solid rgba(35, 42, 53, 0.85);
+            box-shadow: 0 22px 55px rgba(5, 6, 11, 0.55);
+            margin-bottom: 2.5rem;
+        }
+
+        .company-item {
+            border: 1px solid var(--color-border-subtle);
+            border-radius: 14px;
+            padding: 1.15rem 1.35rem;
+            background: rgba(12, 18, 26, 0.85);
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+            margin-bottom: 1.1rem;
+        }
+
+        .company-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .company-item:hover {
+            transform: translateY(-2px);
+            border-color: rgba(167, 119, 255, 0.32);
+            box-shadow: 0 16px 32px rgba(5, 6, 11, 0.45);
+        }
+
+        .company-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.6rem;
+            gap: 1rem;
+        }
+
+        .company-name {
+            font-weight: 600;
+            color: var(--color-fg);
+            font-size: 1.1rem;
+        }
+
+        .company-status {
+            padding: 0.35rem 0.9rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .status-active {
+            background: rgba(63, 185, 80, 0.18);
+            color: var(--color-success);
+        }
+
+        .status-inactive {
+            background: rgba(248, 81, 73, 0.18);
+            color: var(--color-danger);
+        }
+
+        .status-suspended {
+            background: rgba(242, 204, 96, 0.18);
+            color: var(--color-warning);
+        }
+
+        .company-meta {
+            color: var(--color-fg-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--color-fg-muted);
+        }
+
+        .error {
+            background: rgba(248, 81, 73, 0.12);
+            color: var(--color-danger);
+            border: 1px solid rgba(248, 81, 73, 0.35);
+            padding: 1rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+        }
+
+        .success {
+            background: rgba(63, 185, 80, 0.12);
+            color: var(--color-success);
+            border: 1px solid rgba(63, 185, 80, 0.35);
+            padding: 1rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--color-fg-muted);
+            padding: 1.6rem;
+            border: 1px dashed rgba(88, 166, 255, 0.2);
+            border-radius: 14px;
+            background: rgba(12, 18, 26, 0.75);
+            margin-top: 1.25rem;
+        }
+
+        .feedback-review-card {
+            border: 1px solid var(--color-border-subtle);
+            border-radius: 16px;
+            padding: 1.35rem 1.5rem;
+            background: rgba(12, 18, 26, 0.85);
+            box-shadow: 0 18px 40px rgba(5, 6, 11, 0.45);
+            margin-bottom: 1.2rem;
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .feedback-review-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(167, 119, 255, 0.32);
+            box-shadow: 0 22px 48px rgba(5, 6, 11, 0.55);
+        }
+
+        .feedback-review-card h4 {
+            margin-bottom: 0.55rem;
+            color: var(--color-fg);
+        }
+
+        .feedback-review-card p {
+            color: var(--color-fg-muted);
+            line-height: 1.6;
+        }
+
+        .feedback-rating {
+            color: #f1b722;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            margin-bottom: 0.75rem;
+        }
+
+        .feedback-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            color: var(--color-fg-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .feedback-meta span {
+            background: rgba(12, 18, 26, 0.65);
+            border: 1px solid rgba(88, 166, 255, 0.12);
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+        }
+
+        .feedback-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .feedback-actions button {
+            border: none;
+            color: white;
+            padding: 0.6rem 1.3rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .feedback-actions button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        .btn-approve {
+            background: linear-gradient(135deg, rgba(63, 185, 80, 0.85), rgba(46, 160, 67, 0.85));
+        }
+
+        .btn-reject {
+            background: linear-gradient(135deg, rgba(248, 81, 73, 0.85), rgba(241, 105, 122, 0.9));
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            inset: 0;
+            background-color: rgba(2, 6, 12, 0.85);
+            backdrop-filter: blur(12px);
+            overflow-y: auto;
+            padding: 2.2rem 1.6rem;
+        }
+
+        .modal-content {
+            background: rgba(13, 18, 28, 0.95);
+            margin: 0 auto;
+            padding: 2.1rem;
+            border-radius: 20px;
+            width: 92%;
+            max-width: 860px;
+            position: relative;
+            max-height: calc(100vh - 3rem);
+            overflow-y: auto;
+            border: 1px solid rgba(88, 166, 255, 0.2);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+        }
+
+        #registerCompanyModal .modal-content,
+        #editCompanyModal .modal-content {
+            max-width: 920px;
+            padding: 2.4rem;
+        }
+
+        .close {
+            position: absolute;
+            right: 18px;
+            top: 18px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: rgba(157, 166, 183, 0.8);
+            transition: color 0.2s ease;
+        }
+
+        .close:hover {
+            color: var(--color-fg);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(88, 166, 255, 0.25);
+            border-radius: 10px;
+            font-size: 1rem;
+            background: rgba(10, 14, 20, 0.85);
+            color: var(--color-fg);
+        }
+
+        .form-group textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: rgba(167, 119, 255, 0.5);
+            box-shadow: 0 0 0 3px rgba(167, 119, 255, 0.25);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-row .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-full-width {
+            grid-column: 1 / -1;
+        }
+
+        #companyDetails h4 {
+            color: var(--color-accent);
+            margin-bottom: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .container {
+                padding: 2rem 1.5rem 3rem;
+            }
+
+            .modal {
+                padding: 1.5rem 1rem;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 1.75rem;
+                margin: 10px auto;
+                border-radius: 18px;
+            }
+
+            #registerCompanyModal .modal-content,
+            #editCompanyModal .modal-content {
+                padding: 1.8rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🎫 Oryzo Super Admin Console</div>
+        <div class="user-info">
+            <span id="userName">Loading...</span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="stats" id="statsContainer">
+            <div class="stat-card">
+                <div class="stat-number" id="totalCompanies">-</div>
+                <div class="stat-label">Total Companies</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="activeCompanies">-</div>
+                <div class="stat-label">Active Companies</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalUsers">-</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3>🏢 Register New Company</h3>
+                <p>Add a new company to the system</p>
+                <button class="btn" onclick="showRegisterCompanyModal()">Register Company</button>
+            </div>
+            <!-- <div class="card">
+                <h3>📊 System Analytics</h3>
+                <p>View system-wide analytics and reports</p>
+                <button class="btn btn-secondary" onclick="viewAnalytics()">View Analytics</button>
+            </div> -->
+            <div class="card">
+                <h3>🛡️ Moderate Feedback</h3>
+                <p>Review platform feedback submitted by company admins</p>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+                    <button class="btn" onclick="loadPendingFeedback()">View Pending Feedback</button>
+                    <button class="btn btn-secondary" onclick="loadApprovedFeedback()">View Approved Feedback</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="company-list">
+            <h3>🏢 Registered Companies</h3>
+            <div id="companiesContainer">
+                <div class="loading">Loading companies...</div>
+            </div>
+        </div>
+
+        <div class="company-list">
+            <h3>🛡️ Pending System Feedback</h3>
+            <div id="feedbackModerationContainer">
+                <div class="loading">Loading feedback...</div>
+            </div>
+            <div id="feedbackModerationEmpty" class="empty-state" style="display: none;">
+                All caught up! No feedback submissions are waiting for review.
+            </div>
+        </div>
+
+        <div class="company-list">
+            <h3>🌟 Approved System Feedback</h3>
+            <div id="approvedFeedbackContainer">
+                <div class="loading">Loading approved feedback...</div>
+            </div>
+            <div id="approvedFeedbackEmpty" class="empty-state" style="display: none;">
+                No approved feedback is currently visible on the landing page.
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Company Modal -->
+    <div id="registerCompanyModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('registerCompanyModal')">&times;</span>
+            <h2>Register New Company</h2>
+            <form id="registerCompanyForm">
+                <h3 style="color: #667eea; margin-bottom: 1rem;">Company Information</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="companyName">Company Name:</label>
+                        <input type="text" id="companyName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="companyEmail">Company Email:</label>
+                        <input type="email" id="companyEmail" name="email" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="companyPhone">Phone:</label>
+                        <input type="tel" id="companyPhone" name="phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="companyWebsite">Website:</label>
+                        <input type="url" id="companyWebsite" name="website">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="companyAddress">Address:</label>
+                    <textarea id="companyAddress" name="address"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="subscriptionPlan">Subscription Plan:</label>
+                        <select id="subscriptionPlan" name="subscriptionPlan">
+                            <option value="BASIC">Basic</option>
+                            <option value="PREMIUM">Premium</option>
+                            <option value="ENTERPRISE">Enterprise</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="maxAgents">Max Agents:</label>
+                        <input type="number" id="maxAgents" name="maxAgents" value="10" min="1">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="maxCustomers">Max Customers:</label>
+                    <input type="number" id="maxCustomers" name="maxCustomers" value="1000" min="1">
+                </div>
+                
+                <!-- Company Admin Details -->
+                <h3 style="color: #667eea; margin-top: 2rem; margin-bottom: 1rem; padding-top: 1rem; border-top: 2px solid #eee;">Company Administrator</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="adminFirstName">Admin First Name:</label>
+                        <input type="text" id="regAdminFirstName" name="adminFirstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminLastName">Admin Last Name:</label>
+                        <input type="text" id="regAdminLastName" name="adminLastName" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="adminEmail">Admin Email:</label>
+                        <input type="email" id="regAdminEmail" name="adminEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminPhone">Admin Phone:</label>
+                        <input type="tel" id="regAdminPhone" name="adminPhone">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="adminPassword">Admin Password:</label>
+                        <input type="password" id="regAdminPassword" name="adminPassword" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label for="adminConfirmPassword">Confirm Admin Password:</label>
+                        <input type="password" id="regAdminConfirmPassword" name="adminConfirmPassword" required minlength="6">
+                    </div>
+                </div>
+                
+                <div id="companyError" class="error" style="display: none;"></div>
+                <div id="companySuccess" class="success" style="display: none;"></div>
+                <button type="submit" class="btn" style="width: 100%;">Register Company</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Company Modal -->
+    <div id="viewCompanyModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('viewCompanyModal')">&times;</span>
+            <h2>Company Details</h2>
+            <div id="companyDetails">
+                <div class="loading">Loading company details...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Company Modal -->
+    <div id="editCompanyModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('editCompanyModal')">&times;</span>
+            <h2>Edit Company</h2>
+            <form id="editCompanyForm">
+                <input type="hidden" id="editCompanyId" name="id">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editCompanyName">Company Name:</label>
+                        <input type="text" id="editCompanyName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editCompanyEmail">Company Email:</label>
+                        <input type="email" id="editCompanyEmail" name="email" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editCompanyPhone">Phone:</label>
+                        <input type="tel" id="editCompanyPhone" name="phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="editCompanyWebsite">Website:</label>
+                        <input type="url" id="editCompanyWebsite" name="website">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editCompanyAddress">Address:</label>
+                    <textarea id="editCompanyAddress" name="address"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editSubscriptionPlan">Subscription Plan:</label>
+                        <select id="editSubscriptionPlan" name="subscriptionPlan">
+                            <option value="BASIC">Basic</option>
+                            <option value="PREMIUM">Premium</option>
+                            <option value="ENTERPRISE">Enterprise</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editCompanyStatus">Status:</label>
+                        <select id="editCompanyStatus" name="status">
+                            <option value="ACTIVE">Active</option>
+                            <option value="INACTIVE">Inactive</option>
+                            <option value="SUSPENDED">Suspended</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editMaxAgents">Max Agents:</label>
+                        <input type="number" id="editMaxAgents" name="maxAgents" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="editMaxCustomers">Max Customers:</label>
+                        <input type="number" id="editMaxCustomers" name="maxCustomers" min="1">
+                    </div>
+                </div>
+                <div id="editCompanyError" class="error" style="display: none;"></div>
+                <div id="editCompanySuccess" class="success" style="display: none;"></div>
+                <button type="submit" class="btn" style="width: 100%;">Update Company</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Assign Company Admin Modal -->
+    <div id="assignAdminModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('assignAdminModal')">&times;</span>
+            <h2>Assign Company Administrator</h2>
+            <form id="assignAdminForm">
+                <input type="hidden" id="assignCompanyId" name="companyId">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="adminFirstName">First Name:</label>
+                        <input type="text" id="adminFirstName" name="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminLastName">Last Name:</label>
+                        <input type="text" id="adminLastName" name="lastName" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="adminEmail">Email:</label>
+                        <input type="email" id="adminEmail" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminPhone">Phone:</label>
+                        <input type="tel" id="adminPhone" name="phone">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="adminPassword">Password:</label>
+                        <input type="password" id="adminPassword" name="password" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password:</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" required minlength="6">
+                    </div>
+                </div>
+                
+                <div id="assignAdminError" class="error" style="display: none;"></div>
+                <div id="assignAdminSuccess" class="success" style="display: none;"></div>
+                <button type="submit" class="btn" style="width: 100%;">Create Company Admin</button>
+            </form>
+        </div>
+    </div>    <script>
+        let currentUser = null;
+        let userToken = null;
+
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            userToken = localStorage.getItem('token');
+            currentUser = JSON.parse(localStorage.getItem('user'));
+            
+            if (!userToken || !currentUser || currentUser.role !== 'SUPER_ADMIN') {
+                window.location.href = '/';
+                return;
+            }
+            
+            document.getElementById('userName').textContent = `${currentUser.firstName} ${currentUser.lastName}`;
+            loadDashboardData();
+        });
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        }
+
+        async function loadDashboardData() {
+            try {
+                // Load companies
+                const companiesResponse = await fetch('/api/super-admin/companies', {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+                
+                if (companiesResponse.ok) {
+                    const companies = await companiesResponse.json();
+                    displayCompanies(companies);
+                    updateStats(companies);
+                    await loadPendingFeedback();
+                    await loadApprovedFeedback();
+                } else {
+                    document.getElementById('companiesContainer').innerHTML = '<div class="error">Error loading companies</div>';
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                document.getElementById('companiesContainer').innerHTML = '<div class="error">Error loading data</div>';
+            }
+        }
+
+        function displayCompanies(companies) {
+            const container = document.getElementById('companiesContainer');
+            
+            if (companies.length === 0) {
+                container.innerHTML = '<div class="loading">No companies found. Register the first company!</div>';
+                return;
+            }
+            
+            container.innerHTML = companies.map(company => `
+                <div class="company-item">
+                    <div class="company-header">
+                        <div class="company-name">${company.name}</div>
+                        <div class="company-status status-${company.status.toLowerCase()}">
+                            ${company.status}
+                        </div>
+                    </div>
+                    <div class="company-meta">
+                        <strong>Email:</strong> ${company.email} | 
+                        <strong>Plan:</strong> ${company.subscriptionPlan} |
+                        <strong>Max Agents:</strong> ${company.maxAgents} |
+                        <strong>Max Customers:</strong> ${company.maxCustomers}
+                    </div>
+                    <div style="margin-top: 0.5rem;">
+                        <button class="btn" onclick="viewCompany(${company.id})">View Details</button>
+                        <button class="btn btn-secondary" onclick="editCompany(${company.id})">Edit</button>
+                        <button class="btn" onclick="assignAdmin(${company.id})" style="background: #28a745;">Assign Admin</button>
+                        <button class="btn" onclick="deleteCompany(${company.id})" style="background: #dc3545;">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateStats(companies) {
+            const total = companies.length;
+            const active = companies.filter(c => c.status === 'ACTIVE').length;
+            
+            document.getElementById('totalCompanies').textContent = total;
+            document.getElementById('activeCompanies').textContent = active;
+            document.getElementById('totalUsers').textContent = '-'; // Would need separate API call
+        }
+
+        async function loadPendingFeedback() {
+            const container = document.getElementById('feedbackModerationContainer');
+            const emptyState = document.getElementById('feedbackModerationEmpty');
+
+            if (!container) {
+                return;
+            }
+
+            container.innerHTML = '<div class="loading">Loading feedback...</div>';
+            if (emptyState) {
+                emptyState.style.display = 'none';
+            }
+
+            try {
+                const response = await fetch('/api/system-feedback/pending', {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load pending feedback');
+                }
+
+                const items = await response.json();
+                container.innerHTML = '';
+
+                if (!Array.isArray(items) || items.length === 0) {
+                    if (emptyState) {
+                        emptyState.style.display = 'block';
+                    }
+                    return;
+                }
+
+                items.forEach(item => {
+                    container.appendChild(createFeedbackReviewCard(item));
+                });
+            } catch (error) {
+                console.error('Error loading system feedback:', error);
+                container.innerHTML = '<div class="error">Unable to load pending feedback right now.</div>';
+            }
+        }
+
+        async function loadApprovedFeedback() {
+            const container = document.getElementById('approvedFeedbackContainer');
+            const emptyState = document.getElementById('approvedFeedbackEmpty');
+
+            if (!container) {
+                return;
+            }
+
+            container.innerHTML = '<div class="loading">Loading approved feedback...</div>';
+            if (emptyState) {
+                emptyState.style.display = 'none';
+            }
+
+            try {
+                const response = await fetch('/api/system-feedback/status/APPROVED', {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load approved feedback');
+                }
+
+                const items = await response.json();
+                container.innerHTML = '';
+
+                if (!Array.isArray(items) || items.length === 0) {
+                    if (emptyState) {
+                        emptyState.style.display = 'block';
+                    }
+                    return;
+                }
+
+                items.forEach(item => {
+                    container.appendChild(createApprovedFeedbackCard(item));
+                });
+            } catch (error) {
+                console.error('Error loading approved system feedback:', error);
+                container.innerHTML = '<div class="error">Unable to load approved feedback right now.</div>';
+            }
+        }
+
+        function createFeedbackReviewCard(item) {
+            const card = document.createElement('div');
+            card.className = 'feedback-review-card';
+
+            const title = document.createElement('h4');
+            title.textContent = item.title || 'System Feedback';
+            card.appendChild(title);
+
+            const body = document.createElement('p');
+            body.textContent = item.feedback || 'No written feedback provided.';
+            card.appendChild(body);
+
+            const ratingEl = document.createElement('div');
+            ratingEl.className = 'feedback-rating';
+            const ratingValue = Math.max(0, Math.min(5, item.rating || 0));
+            ratingEl.textContent = '★'.repeat(ratingValue) + '☆'.repeat(5 - ratingValue);
+            card.appendChild(ratingEl);
+
+            const meta = document.createElement('div');
+            meta.className = 'feedback-meta';
+
+            const companyChip = document.createElement('span');
+            companyChip.textContent = item.companyName ? `Company: ${item.companyName}` : 'Company: Unknown';
+
+            const adminChip = document.createElement('span');
+            adminChip.textContent = item.adminName ? `Admin: ${item.adminName}` : 'Admin: Not provided';
+
+            const timeChip = document.createElement('span');
+            timeChip.textContent = formatFeedbackTimestamp(item.createdAt);
+
+            meta.appendChild(companyChip);
+            meta.appendChild(adminChip);
+            meta.appendChild(timeChip);
+
+            card.appendChild(meta);
+
+            const actions = document.createElement('div');
+            actions.className = 'feedback-actions';
+
+            const approveBtn = document.createElement('button');
+            approveBtn.className = 'btn-approve';
+            approveBtn.textContent = 'Approve';
+            approveBtn.addEventListener('click', () => updateFeedbackStatus(item.id, 'APPROVED'));
+
+            const rejectBtn = document.createElement('button');
+            rejectBtn.className = 'btn-reject';
+            rejectBtn.textContent = 'Reject';
+            rejectBtn.addEventListener('click', () => updateFeedbackStatus(item.id, 'REJECTED'));
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn-delete';
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.addEventListener('click', () => deleteFeedback(item.id));
+
+            actions.appendChild(approveBtn);
+            actions.appendChild(rejectBtn);
+            actions.appendChild(deleteBtn);
+
+            card.appendChild(actions);
+
+            return card;
+        }
+
+        function createApprovedFeedbackCard(item) {
+            const card = document.createElement('div');
+            card.className = 'feedback-review-card approved';
+
+            const title = document.createElement('h4');
+            title.textContent = item.title || 'System Feedback';
+            card.appendChild(title);
+
+            const body = document.createElement('p');
+            body.textContent = item.feedback || 'No written feedback provided.';
+            card.appendChild(body);
+
+            const ratingEl = document.createElement('div');
+            ratingEl.className = 'feedback-rating';
+            const ratingValue = Math.max(0, Math.min(5, item.rating || 0));
+            ratingEl.textContent = '★'.repeat(ratingValue) + '☆'.repeat(5 - ratingValue);
+            card.appendChild(ratingEl);
+
+            const meta = document.createElement('div');
+            meta.className = 'feedback-meta';
+
+            const companyChip = document.createElement('span');
+            companyChip.textContent = item.companyName ? `Company: ${item.companyName}` : 'Company: Unknown';
+
+            const adminChip = document.createElement('span');
+            adminChip.textContent = item.adminName ? `Admin: ${item.adminName}` : 'Admin: Not provided';
+
+            const timeChip = document.createElement('span');
+            timeChip.textContent = formatFeedbackTimestamp(item.updatedAt || item.createdAt);
+
+            meta.appendChild(companyChip);
+            meta.appendChild(adminChip);
+            meta.appendChild(timeChip);
+
+            card.appendChild(meta);
+
+            const actions = document.createElement('div');
+            actions.className = 'feedback-actions';
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn-delete';
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.addEventListener('click', () => deleteFeedback(item.id, item.title));
+
+            const note = document.createElement('span');
+            note.className = 'status-hint';
+            note.textContent = 'Deleting removes this from the landing page immediately.';
+
+            actions.appendChild(deleteBtn);
+            actions.appendChild(note);
+
+            card.appendChild(actions);
+
+            return card;
+        }
+
+        function formatFeedbackTimestamp(value) {
+            if (!value) {
+                return 'Submitted just now';
+            }
+            const date = new Date(value);
+            return `Submitted ${date.toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`;
+        }
+
+        async function updateFeedbackStatus(id, status) {
+            if (!id || !status) {
+                return;
+            }
+
+            const actionText = status === 'APPROVED' ? 'approve' : 'reject';
+            const confirmed = confirm(`Are you sure you want to ${actionText} this feedback?`);
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/system-feedback/${id}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify({ status })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: 'Failed to update feedback status' }));
+                    throw new Error(errorData.error || 'Failed to update feedback status');
+                }
+
+                await loadPendingFeedback();
+                await loadApprovedFeedback();
+            } catch (error) {
+                alert(error.message || 'Unable to update feedback. Please try again.');
+            }
+        }
+
+        async function deleteFeedback(id, title) {
+            if (!id) {
+                return;
+            }
+
+            const confirmed = confirm(`Delete "${title || 'this feedback'}"? It will be removed from the landing page.`);
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/system-feedback/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: 'Failed to delete feedback' }));
+                    throw new Error(errorData.error || 'Failed to delete feedback');
+                }
+
+                await loadApprovedFeedback();
+                // Also refresh pending queue in case a pending card was removed elsewhere
+                await loadPendingFeedback();
+            } catch (error) {
+                alert(error.message || 'Unable to delete feedback. Please try again.');
+            }
+        }
+
+        async function deleteFeedback(id) {
+            if (!id) {
+                return;
+            }
+
+            const confirmed = confirm('Delete this feedback permanently? This action cannot be undone.');
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/system-feedback/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+
+                if (response.status !== 204 && !response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: 'Failed to delete feedback' }));
+                    throw new Error(errorData.error || 'Failed to delete feedback');
+                }
+
+                await loadPendingFeedback();
+                alert('Feedback deleted successfully.');
+            } catch (error) {
+                alert(error.message || 'Unable to delete feedback. Please try again.');
+            }
+        }
+
+        function showRegisterCompanyModal() {
+            document.getElementById('registerCompanyModal').style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            // Hide error and success messages for all modals
+            const errorElements = document.querySelectorAll('.error');
+            const successElements = document.querySelectorAll('.success');
+            errorElements.forEach(el => el.style.display = 'none');
+            successElements.forEach(el => el.style.display = 'none');
+        }
+
+        document.getElementById('registerCompanyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            
+            // Check password confirmation
+            if (formData.get('adminPassword') !== formData.get('adminConfirmPassword')) {
+                document.getElementById('companyError').textContent = 'Admin passwords do not match';
+                document.getElementById('companyError').style.display = 'block';
+                return;
+            }
+            
+            const companyRegistrationData = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                address: formData.get('address'),
+                website: formData.get('website'),
+                subscriptionPlan: formData.get('subscriptionPlan'),
+                maxAgents: parseInt(formData.get('maxAgents')),
+                maxCustomers: parseInt(formData.get('maxCustomers')),
+                adminFirstName: formData.get('adminFirstName'),
+                adminLastName: formData.get('adminLastName'),
+                adminEmail: formData.get('adminEmail'),
+                adminPhone: formData.get('adminPhone'),
+                adminPassword: formData.get('adminPassword')
+            };
+            
+            try {
+                const response = await fetch('/api/super-admin/companies', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(companyRegistrationData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('companySuccess').textContent = 'Company and admin registered successfully!';
+                    document.getElementById('companySuccess').style.display = 'block';
+                    document.getElementById('companyError').style.display = 'none';
+                    
+                    setTimeout(() => {
+                        closeModal('registerCompanyModal');
+                        e.target.reset();
+                        loadDashboardData();
+                    }, 2000);
+                } else {
+                    document.getElementById('companyError').textContent = result.error || result || 'Failed to register company';
+                    document.getElementById('companyError').style.display = 'block';
+                }
+            } catch (error) {
+                document.getElementById('companyError').textContent = 'Network error. Please try again.';
+                document.getElementById('companyError').style.display = 'block';
+            }
+        });
+
+        // Edit company form submission
+        document.getElementById('editCompanyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const companyData = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                address: formData.get('address'),
+                website: formData.get('website'),
+                subscriptionPlan: formData.get('subscriptionPlan'),
+                maxAgents: parseInt(formData.get('maxAgents')),
+                maxCustomers: parseInt(formData.get('maxCustomers')),
+                status: formData.get('status')
+            };
+            
+            const companyId = formData.get('id');
+            
+            try {
+                const response = await fetch(`/api/super-admin/companies/${companyId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(companyData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('editCompanySuccess').textContent = 'Company updated successfully!';
+                    document.getElementById('editCompanySuccess').style.display = 'block';
+                    document.getElementById('editCompanyError').style.display = 'none';
+                    
+                    setTimeout(() => {
+                        closeModal('editCompanyModal');
+                        loadDashboardData();
+                    }, 2000);
+                } else {
+                    document.getElementById('editCompanyError').textContent = result.error || 'Failed to update company';
+                    document.getElementById('editCompanyError').style.display = 'block';
+                }
+            } catch (error) {
+                document.getElementById('editCompanyError').textContent = 'Network error. Please try again.';
+                document.getElementById('editCompanyError').style.display = 'block';
+            }
+        });
+
+        async function viewCompany(companyId) {
+            try {
+                const response = await fetch(`/api/super-admin/companies/${companyId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const company = await response.json();
+                    displayCompanyDetails(company);
+                    document.getElementById('viewCompanyModal').style.display = 'block';
+                } else {
+                    alert('Error loading company details');
+                }
+            } catch (error) {
+                console.error('Error fetching company details:', error);
+                alert('Network error. Please try again.');
+            }
+        }
+
+        async function editCompany(companyId) {
+            try {
+                const response = await fetch(`/api/super-admin/companies/${companyId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const company = await response.json();
+                    populateEditForm(company);
+                    document.getElementById('editCompanyModal').style.display = 'block';
+                } else {
+                    alert('Error loading company details');
+                }
+            } catch (error) {
+                console.error('Error fetching company details:', error);
+                alert('Network error. Please try again.');
+            }
+        }
+
+        function displayCompanyDetails(company) {
+            const detailsContainer = document.getElementById('companyDetails');
+            detailsContainer.innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <h4>Basic Information</h4>
+                        <p><strong>Name:</strong> ${company.name}</p>
+                        <p><strong>Email:</strong> ${company.email}</p>
+                        <p><strong>Phone:</strong> ${company.phone || 'Not provided'}</p>
+                        <p><strong>Website:</strong> ${company.website ? `<a href="${company.website}" target="_blank">${company.website}</a>` : 'Not provided'}</p>
+                        <p><strong>Status:</strong> <span class="company-status status-${company.status.toLowerCase()}">${company.status}</span></p>
+                    </div>
+                    <div>
+                        <h4>Subscription Details</h4>
+                        <p><strong>Plan:</strong> ${company.subscriptionPlan}</p>
+                        <p><strong>Max Agents:</strong> ${company.maxAgents}</p>
+                        <p><strong>Current Agents:</strong> ${company.currentAgents || 0}</p>
+                        <p><strong>Max Customers:</strong> ${company.maxCustomers}</p>
+                        <p><strong>Current Customers:</strong> ${company.currentCustomers || 0}</p>
+                        <p><strong>Created:</strong> ${new Date(company.createdAt).toLocaleDateString()}</p>
+                        <p><strong>Last Updated:</strong> ${new Date(company.updatedAt).toLocaleDateString()}</p>
+                    </div>
+                </div>
+                ${company.address ? `
+                    <div style="margin-top: 1rem;">
+                        <h4>Address</h4>
+                        <p>${company.address}</p>
+                    </div>
+                ` : ''}
+                ${company.companyAdmins && company.companyAdmins.length > 0 ? `
+                    <div style="margin-top: 1rem;">
+                        <h4>Company Administrators</h4>
+                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px;">
+                            ${company.companyAdmins.map(admin => `
+                                <div style="margin-bottom: 0.5rem; padding: 0.5rem; background: white; border-radius: 3px;">
+                                    <p><strong>${admin.firstName} ${admin.lastName}</strong></p>
+                                    <p style="margin: 0.25rem 0; color: #666;"><i class="fas fa-envelope"></i> ${admin.email}</p>
+                                    ${admin.phone ? `<p style="margin: 0.25rem 0; color: #666;"><i class="fas fa-phone"></i> ${admin.phone}</p>` : ''}
+                                    <p style="margin: 0.25rem 0; color: #666; font-size: 0.9rem;">Added: ${new Date(admin.createdAt).toLocaleDateString()}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : `
+                    <div style="margin-top: 1rem;">
+                        <h4>Company Administrators</h4>
+                        <p style="color: #666; font-style: italic;">No company administrators assigned yet.</p>
+                    </div>
+                `}
+            `;
+        }
+
+        function populateEditForm(company) {
+            document.getElementById('editCompanyId').value = company.id;
+            document.getElementById('editCompanyName').value = company.name;
+            document.getElementById('editCompanyEmail').value = company.email;
+            document.getElementById('editCompanyPhone').value = company.phone || '';
+            document.getElementById('editCompanyAddress').value = company.address || '';
+            document.getElementById('editCompanyWebsite').value = company.website || '';
+            document.getElementById('editSubscriptionPlan').value = company.subscriptionPlan;
+            document.getElementById('editMaxAgents').value = company.maxAgents;
+            document.getElementById('editMaxCustomers').value = company.maxCustomers;
+            document.getElementById('editCompanyStatus').value = company.status;
+        }
+
+        async function assignAdmin(companyId) {
+            try {
+                const response = await fetch(`/api/super-admin/companies/${companyId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const company = await response.json();
+                    document.getElementById('assignCompanyId').value = companyId;
+                    document.getElementById('assignAdminModal').style.display = 'block';
+                } else {
+                    alert('Error loading company details');
+                }
+            } catch (error) {
+                console.error('Error fetching company details:', error);
+                alert('Network error. Please try again.');
+            }
+        }
+
+        async function deleteCompany(companyId) {
+            if (confirm('Are you sure you want to delete this company? This action cannot be undone and will delete all associated data.')) {
+                try {
+                    const response = await fetch(`/api/super-admin/companies/${companyId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${userToken}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        alert('Company deleted successfully!');
+                        loadDashboardData();
+                    } else {
+                        const result = await response.json();
+                        alert('Error deleting company: ' + (result.error || 'Unknown error'));
+                    }
+                } catch (error) {
+                    console.error('Error deleting company:', error);
+                    alert('Network error. Please try again.');
+                }
+            }
+        }
+
+        function viewAnalytics() {
+            // Implement analytics viewing
+            alert('Analytics coming soon!');
+        }
+
+        // Assign Admin form submission
+        document.getElementById('assignAdminForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            
+            // Check password confirmation
+            if (formData.get('password') !== formData.get('confirmPassword')) {
+                document.getElementById('assignAdminError').textContent = 'Passwords do not match';
+                document.getElementById('assignAdminError').style.display = 'block';
+                return;
+            }
+            
+            const adminData = {
+                companyId: parseInt(formData.get('companyId')),
+                firstName: formData.get('firstName'),
+                lastName: formData.get('lastName'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                password: formData.get('password')
+            };
+            
+            try {
+                const response = await fetch('/api/super-admin/company-admin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(adminData)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    document.getElementById('assignAdminSuccess').textContent = result.message || 'Company admin created successfully!';
+                    document.getElementById('assignAdminSuccess').style.display = 'block';
+                    document.getElementById('assignAdminError').style.display = 'none';
+                    
+                    // Reload the dashboard to reflect changes
+                    loadDashboardData();
+                    
+                    setTimeout(() => {
+                        closeModal('assignAdminModal');
+                        e.target.reset();
+                        document.getElementById('assignAdminSuccess').style.display = 'none';
+                    }, 2000);
+                } else {
+                    const result = await response.json();
+                    document.getElementById('assignAdminError').textContent = result.error || 'Failed to create company admin';
+                    document.getElementById('assignAdminError').style.display = 'block';
+                    document.getElementById('assignAdminSuccess').style.display = 'none';
+                }
+            } catch (error) {
+                document.getElementById('assignAdminError').textContent = 'Network error. Please try again.';
+                document.getElementById('assignAdminError').style.display = 'block';
+            }
+        });
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modals = ['registerCompanyModal', 'viewCompanyModal', 'editCompanyModal', 'assignAdminModal'];
+            modals.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (event.target === modal) {
+                    closeModal(modalId);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

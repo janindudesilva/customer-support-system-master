@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Base</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div th:replace="common/header :: header"></div>
+    
+    <div class="dashboard-container">
+        <div th:replace="common/sidebar :: sidebar"></div>
+        
+        <div class="main-content">
+            <h1>Knowledge Base</h1>
+            
+            <div class="kb-search">
+                <form action="/knowledge-base/search" method="GET" class="search-form">
+                    <input type="text" name="keyword" placeholder="Search for answers..." th:value="${keyword}" class="search-input">
+                    <button type="submit" class="btn primary-btn">Search</button>
+                </form>
+            </div>
+            
+            <div class="kb-featured" th:if="${featuredFaqs != null && !featuredFaqs.empty}">
+                <h2>Featured Articles</h2>
+                <div class="featured-articles">
+                    <div th:each="faq : ${featuredFaqs}" class="featured-article">
+                        <h3>
+                            <a th:href="@{/knowledge-base/article/{id}(id=${faq.id})}" th:text="${faq.question}">How to set up two-factor authentication?</a>
+                        </h3>
+                        <p th:text="${#strings.abbreviate(#strings.unescapeJava(#strings.replace(#strings.replace(faq.answer, '<p>', ''), '</p>', '')), 150)}">
+                            Learn how to secure your account with two-factor authentication. This adds an extra layer of security to your account...
+                        </p>
+                        <div class="article-meta">
+                            <span class="category" th:if="${faq.categoryName != null}" th:text="${faq.categoryName}">Security</span>
+                            <span class="views" th:text="${faq.viewCount + ' views'}">120 views</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="kb-categories">
+                <h2>Browse by Category</h2>
+                <div class="category-grid">
+                    <div th:each="category : ${categories}" class="category-card" 
+                         th:style="${'border-top: 4px solid ' + category.colorCode}">
+                        <h3>
+                            <a th:href="@{/knowledge-base/category/{id}(id=${category.id})}" th:text="${category.name}">Account Management</a>
+                        </h3>
+                        <p th:if="${category.description}" th:text="${#strings.abbreviate(category.description, 100)}">
+                            Learn how to manage your account, update your profile, and adjust your settings.
+                        </p>
+                        <span class="article-count" th:text="${category.faqCount + ' articles'}">15 articles</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="kb-popular">
+                <h2>Most Popular Articles</h2>
+                <div class="article-list">
+                    <div th:each="faq : ${popularFaqs}" class="article-item">
+                        <h3>
+                            <a th:href="@{/knowledge-base/article/{id}(id=${faq.id})}" th:text="${faq.question}">How do I reset my password?</a>
+                        </h3>
+                        <div class="article-meta">
+                            <span class="category" th:if="${faq.categoryName != null}" th:text="${faq.categoryName}">Account</span>
+                            <span class="views" th:text="${faq.viewCount + ' views'}">250 views</span>
+                            <span class="helpful" th:text="${faq.helpfulCount + ' found helpful'}">180 found helpful</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="kb-recent">
+                <h2>Recently Added</h2>
+                <div class="article-list">
+                    <div th:each="faq : ${recentFaqs}" class="article-item">
+                        <h3>
+                            <a th:href="@{/knowledge-base/article/{id}(id=${faq.id})}" th:text="${faq.question}">How to export my data?</a>
+                        </h3>
+                        <div class="article-meta">
+                            <span class="category" th:if="${faq.categoryName != null}" th:text="${faq.categoryName}">Data Management</span>
+                            <span class="date" th:text="${'Added ' + #temporals.format(faq.createdAt, 'yyyy-MM-dd')}">Added 2023-06-15</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="contact-support">
+                <h2>Still Need Help?</h2>
+                <p>Can't find the answer you're looking for? Our support team is here to help.</p>
+                <div class="support-options">
+                    <a href="/customer/tickets/create" class="btn primary-btn">Create Support Ticket</a>
+                    <a href="/faqs" class="btn secondary-btn">Browse FAQs</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="common/footer :: footer"></div>
+    <script src="/js/knowledge-base.js"></script>
+</body>
+</html>
