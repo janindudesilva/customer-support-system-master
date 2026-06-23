@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Admin - FAQ Management</title>
+    <style>
+        :root {
+            --bg-gradient: radial-gradient(circle at 20% 20%, rgba(91, 33, 182, 0.18), transparent 55%),
+                radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.2), transparent 55%),
+                radial-gradient(circle at 45% 90%, rgba(236, 72, 153, 0.18), transparent 65%),
+                #020617;
+            --panel: rgba(15, 23, 42, 0.78);
+            --panel-alt: rgba(17, 24, 39, 0.72);
+            --border: rgba(148, 163, 184, 0.2);
+            --border-strong: rgba(148, 163, 184, 0.35);
+            --fg: #e2e8f0;
+            --fg-muted: #94a3b8;
+            --accent: linear-gradient(135deg, #a855f7 0%, #38bdf8 50%, #22d3ee 100%);
+            --success: #22c55e;
+            --warning: #f97316;
+            --feature: #60a5fa;
+            --shadow: 0 30px 90px -32px rgba(15, 23, 42, 0.85);
+            --glass-blur: blur(18px);
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg-gradient);
+            color: var(--fg);
+            font-family: inherit;
+            line-height: 1.6;
+        }
+
+        .background-aurora {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 10% 15%, rgba(56, 189, 248, 0.18), transparent 45%),
+                radial-gradient(circle at 85% 10%, rgba(244, 114, 182, 0.16), transparent 55%),
+                radial-gradient(circle at 50% 90%, rgba(45, 212, 191, 0.16), transparent 60%);
+            filter: blur(120px);
+            opacity: 0.45;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            background: rgba(10, 12, 23, 0.85);
+            border-bottom: 1px solid var(--border);
+            padding: 1.6rem 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(18px);
+            box-shadow: 0 28px 60px rgba(2, 6, 23, 0.55);
+        }
+
+        .header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .header-brand {
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: #94a3ff;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: clamp(1.6rem, 2vw, 2.1rem);
+            letter-spacing: -0.02em;
+        }
+
+        .header-subtitle {
+            margin: 0;
+            color: var(--fg-muted);
+            font-size: 0.95rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.85rem;
+            align-items: center;
+        }
+
+        .btn {
+            border: 1px solid transparent;
+            border-radius: 999px;
+            padding: 0.7rem 1.4rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.25s ease, filter 0.2s ease;
+            background: var(--accent);
+            color: #f8fafc;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.25), transparent 60%);
+            mix-blend-mode: screen;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 35px rgba(56, 189, 248, 0.32);
+        }
+
+        .btn:hover::after {
+            opacity: 1;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #f8fafc;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--fg);
+            border-color: rgba(148, 163, 184, 0.28);
+        }
+
+        .btn-ghost:hover {
+            border-color: rgba(148, 163, 184, 0.6);
+            background: rgba(148, 163, 184, 0.12);
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.5);
+        }
+
+        .layout {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 2.5rem auto 4rem;
+            padding: 0 2rem 2rem;
+        }
+
+        .filters, .cards, .table-wrapper, .empty-state, .modal {
+            background: var(--panel);
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            backdrop-filter: var(--glass-blur);
+        }
+
+        .filters {
+            padding: 1.6rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--fg-muted);
+            letter-spacing: 0.05em;
+            display: block;
+            margin-bottom: 0.35rem;
+        }
+
+        input[type="text"], textarea, select, input[type="number"] {
+            width: 100%;
+            padding: 0.65rem 0.85rem;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 10px;
+            background: rgba(10, 12, 23, 0.6);
+            color: var(--fg);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: rgba(56, 189, 248, 0.8);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+            outline: none;
+        }
+
+        textarea { min-height: 120px; resize: vertical; }
+
+        .toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 999px;
+            padding: 0.45rem 0.8rem;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.1rem;
+            padding: 1.4rem 1.6rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.2) 0%, rgba(99, 102, 241, 0.18) 100%);
+            border-radius: 16px;
+            padding: 1.2rem;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+        }
+
+        .card-title {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--fg-muted);
+            margin-bottom: 0.35rem;
+        }
+
+        .card-value {
+            font-size: 1.95rem;
+            font-weight: 700;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(10, 12, 23, 0.4);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 0.9rem 1.05rem;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+        }
+
+        th {
+            background: rgba(15, 23, 42, 0.86);
+            color: #cbd5f5;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        tr:hover {
+            background: rgba(59, 130, 246, 0.08);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.28rem 0.65rem;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            border: 1px solid transparent;
+        }
+
+        .badge-published {
+            background: rgba(34, 197, 94, 0.18);
+            border-color: rgba(74, 222, 128, 0.45);
+            color: #4ade80;
+        }
+
+        .badge-draft {
+            background: rgba(249, 115, 22, 0.18);
+            border-color: rgba(251, 146, 60, 0.45);
+            color: #fb923c;
+        }
+
+        .badge-featured {
+            background: rgba(59, 130, 246, 0.18);
+            border-color: rgba(96, 165, 250, 0.45);
+            color: #93c5fd;
+        }
+
+        .action-btn {
+            border: none;
+            background: transparent;
+            color: #7dd3fc;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .action-btn:hover {
+            color: #38bdf8;
+        }
+
+        .empty-state {
+            padding: 3rem;
+            text-align: center;
+            color: var(--fg-muted);
+            border: 1px dashed rgba(148, 163, 184, 0.35);
+        }
+
+        .toast {
+            position: fixed;
+            right: 2rem;
+            bottom: 2rem;
+            background: rgba(15, 23, 42, 0.92);
+            color: var(--fg);
+            padding: 0.95rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            box-shadow: 0 30px 60px rgba(2, 6, 23, 0.65);
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 25;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.72);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 40;
+            backdrop-filter: blur(8px);
+            padding: 1.5rem;
+        }
+
+        .modal-backdrop.show {
+            display: flex;
+        }
+
+        .modal {
+            width: min(640px, 92vw);
+            padding: 2.1rem;
+            background: rgba(15, 23, 42, 0.92);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 45px 75px rgba(2, 6, 23, 0.75);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.3rem;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.8rem;
+            margin-top: 1.6rem;
+        }
+
+        .chips {
+            display: flex;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+        }
+
+        .chip {
+            background: rgba(148, 163, 184, 0.16);
+            padding: 0.25rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            color: var(--fg-muted);
+            border: 1px solid rgba(148, 163, 184, 0.28);
+        }
+
+        @media (max-width: 900px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.1rem;
+                padding: 1.4rem 1.8rem;
+            }
+
+            .layout {
+                padding: 0 1.4rem 2rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .header-actions {
+                width: 100%;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+
+            table {
+                min-width: 640px;
+            }
+
+            .filters {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="background-aurora"></div>
+<header class="header">
+    <div class="header-left">
+        <span class="header-brand">Oryzo</span>
+        <h1>FAQ Knowledge Base</h1>
+        <p class="header-subtitle">Curate self-service journeys your customers will love.</p>
+    </div>
+    <div class="header-actions">
+        <button class="btn btn-ghost" onclick="window.location.href='/company-admin/dashboard.html'">⬅ Dashboard</button>
+        <button class="btn" onclick="logout()">Logout</button>
+    </div>
+</header>
+
+<main class="layout">
+    <section class="filters">
+        <div>
+            <label for="searchInput">Search FAQs</label>
+            <input type="text" id="searchInput" placeholder="Search questions, answers, keywords" oninput="renderFaqs()">
+        </div>
+        <div>
+            <label for="categoryFilter">Category</label>
+            <select id="categoryFilter" onchange="renderFaqs()">
+                <option value="">All categories</option>
+            </select>
+        </div>
+        <div class="toggle">
+            <input type="checkbox" id="publishedOnly" onchange="renderFaqs()">
+            <label for="publishedOnly" style="margin:0; text-transform:none; letter-spacing:0; font-size:0.9rem; color:#111827;">Published only</label>
+        </div>
+        <div class="toggle">
+            <input type="checkbox" id="featuredOnly" onchange="renderFaqs()">
+            <label for="featuredOnly" style="margin:0; text-transform:none; letter-spacing:0; font-size:0.9rem; color:#111827;">Featured only</label>
+        </div>
+        <div style="align-self:flex-end;">
+            <button class="btn btn-primary" style="width:100%;" onclick="openFaqModal()">＋ New FAQ</button>
+        </div>
+    </section>
+
+    <section class="cards">
+        <div class="card">
+            <div class="card-title">Total FAQs</div>
+            <div class="card-value" id="totalFaqs">0</div>
+        </div>
+        <div class="card">
+            <div class="card-title">Published</div>
+            <div class="card-value" id="publishedFaqs">0</div>
+        </div>
+        <div class="card">
+            <div class="card-title">Featured</div>
+            <div class="card-value" id="featuredFaqs">0</div>
+        </div>
+        <div class="card">
+            <div class="card-title">Avg Helpful Score</div>
+            <div class="card-value" id="helpfulScore">0</div>
+        </div>
+    </section>
+
+    <section class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Question</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Insights</th>
+                    <th style="width:140px; text-align:right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="faqTableBody">
+                <tr><td colspan="5" class="empty-state">Loading FAQs…</td></tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+
+<div class="modal-backdrop" id="faqModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 id="modalTitle">Create FAQ</h2>
+            <button class="action-btn" onclick="closeFaqModal()">✖</button>
+        </div>
+        <form id="faqForm" onsubmit="submitFaq(event)">
+            <input type="hidden" id="faqId">
+            <div style="display:grid; gap:1rem;">
+                <div>
+                    <label for="faqQuestion">Question</label>
+                    <input type="text" id="faqQuestion" required>
+                </div>
+                <div>
+                    <label for="faqAnswer">Answer</label>
+                    <textarea id="faqAnswer" required></textarea>
+                </div>
+                <div>
+                    <label for="faqCategory">Category</label>
+                    <select id="faqCategory">
+                        <option value="">Uncategorized</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="faqKeywords">Keywords (comma separated)</label>
+                    <input type="text" id="faqKeywords" placeholder="billing, refunds, escalation">
+                </div>
+                <div style="display:flex; gap:1rem;">
+                    <label class="toggle"><input type="checkbox" id="faqPublished" checked> Published</label>
+                    <label class="toggle"><input type="checkbox" id="faqFeatured"> Featured</label>
+                    <div style="flex:1;">
+                        <label for="faqSortOrder">Sort Order</label>
+                        <input type="number" id="faqSortOrder" min="0" value="0">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn" onclick="closeFaqModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save FAQ</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    let currentUser = null;
+    let userToken = null;
+    let faqCache = [];
+    let categoriesCache = [];
+    let editingFaqId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        userToken = localStorage.getItem('token');
+        currentUser = JSON.parse(localStorage.getItem('user'));
+        if (!userToken || !currentUser || currentUser.role !== 'COMPANY_ADMIN') {
+            window.location.href = '/';
+            return;
+        }
+        loadCategories();
+        loadFaqs();
+    });
+
+    function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/';
+    }
+
+    async function loadCategories() {
+        try {
+            const response = await fetch(`/api/categories/company/${currentUser.companyId}/active`, {
+                headers: { 'Authorization': `Bearer ${userToken}` }
+            });
+            if (!response.ok) throw new Error('Unable to load categories');
+            categoriesCache = await response.json();
+            const selects = [document.getElementById('categoryFilter'), document.getElementById('faqCategory')];
+            selects.forEach(select => {
+                select.innerHTML = select === selects[1] ? '<option value="">Uncategorized</option>' : '<option value="">All categories</option>';
+                categoriesCache.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.id;
+                    option.textContent = category.name;
+                    select.appendChild(option);
+                });
+            });
+        } catch (error) {
+            showToast(error.message, true);
+        }
+    }
+
+    async function loadFaqs() {
+        const tbody = document.getElementById('faqTableBody');
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Loading FAQs…</td></tr>';
+        try {
+            const response = await fetch(`/api/faqs/company/${currentUser.companyId}`, {
+                headers: { 'Authorization': `Bearer ${userToken}` }
+            });
+            if (!response.ok) throw new Error('Unable to load FAQs');
+            faqCache = await response.json();
+            renderFaqs();
+        } catch (error) {
+            tbody.innerHTML = `<tr><td colspan="5" class="empty-state">${error.message}</td></tr>`;
+            showToast(error.message, true);
+        }
+    }
+
+    function renderFaqs() {
+        const tbody = document.getElementById('faqTableBody');
+        if (!faqCache.length) {
+            tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No FAQs yet. Create your first knowledge base article.</td></tr>';
+            updateStats([]);
+            return;
+        }
+        const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+        const categoryFilter = document.getElementById('categoryFilter').value;
+        const publishedOnly = document.getElementById('publishedOnly').checked;
+        const featuredOnly = document.getElementById('featuredOnly').checked;
+
+        const filtered = faqCache.filter(faq => {
+            if (publishedOnly && !faq.isPublished) return false;
+            if (featuredOnly && !faq.isFeatured) return false;
+            if (categoryFilter && String(faq.categoryId || '') !== categoryFilter) return false;
+            if (!searchTerm) return true;
+            const haystack = `${faq.question || ''} ${faq.answer || ''} ${faq.keywords || ''}`.toLowerCase();
+            return haystack.includes(searchTerm);
+        });
+
+        updateStats(filtered);
+
+        if (!filtered.length) {
+            tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No FAQs match the selected filters.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = filtered.map(faq => `
+            <tr>
+                <td>
+                    <strong>${escapeHtml(faq.question)}</strong>
+                    <div style="color:#6b7280; font-size:0.85rem; margin-top:0.3rem;">${escapeHtml(truncate(faq.answer, 120))}</div>
+                    ${renderKeywords(faq.keywords)}
+                </td>
+                <td>${escapeHtml(faq.categoryName || 'General')}</td>
+                <td>
+                    <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+                        <span class="badge ${faq.isPublished ? 'badge-published' : 'badge-draft'}">${faq.isPublished ? 'Published' : 'Draft'}</span>
+                        ${faq.isFeatured ? '<span class="badge badge-featured">Featured</span>' : ''}
+                    </div>
+                </td>
+                <td>
+                    <div style="display:flex; flex-direction:column; gap:0.2rem; font-size:0.85rem;">
+                        <span>Views: ${faq.viewCount || 0}</span>
+                        <span>Helpful: ${faq.helpfulCount || 0}</span>
+                        <span>Not helpful: ${faq.notHelpfulCount || 0}</span>
+                    </div>
+                </td>
+                <td style="text-align:right; display:flex; gap:0.5rem; justify-content:flex-end;">
+                    <button class="action-btn" onclick="openFaqModal(${faq.id})">Edit</button>
+                    <button class="action-btn" style="color:#ef4444;" onclick="deleteFaq(${faq.id})">Delete</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function updateStats(data) {
+        const working = data.length ? data : faqCache;
+        const published = working.filter(faq => faq.isPublished).length;
+        const featured = working.filter(faq => faq.isFeatured).length;
+        const helpfulScores = working.map(faq => faq.helpfulnessScore || 0);
+        const avgHelpful = helpfulScores.length ? (helpfulScores.reduce((a,b) => a + b, 0) / helpfulScores.length) : 0;
+        document.getElementById('totalFaqs').textContent = working.length;
+        document.getElementById('publishedFaqs').textContent = published;
+        document.getElementById('featuredFaqs').textContent = featured;
+        document.getElementById('helpfulScore').textContent = avgHelpful.toFixed(2);
+    }
+
+    function renderKeywords(keywords) {
+        if (!keywords) return '';
+        const parts = keywords.split(',').map(k => k.trim()).filter(Boolean);
+        if (!parts.length) return '';
+        return `<div class="chips">${parts.map(part => `<span class="chip">${escapeHtml(part)}</span>`).join('')}</div>`;
+    }
+
+    function openFaqModal(faqId) {
+        editingFaqId = faqId || null;
+        document.getElementById('faqForm').reset();
+        document.getElementById('faqSortOrder').value = 0;
+        document.getElementById('faqPublished').checked = true;
+        document.getElementById('faqFeatured').checked = false;
+        document.getElementById('faqCategory').value = '';
+
+        if (faqId) {
+            const faq = faqCache.find(item => item.id === faqId);
+            if (!faq) {
+                showToast('FAQ not found', true);
+                return;
+            }
+            document.getElementById('modalTitle').textContent = 'Edit FAQ';
+            document.getElementById('faqId').value = faq.id;
+            document.getElementById('faqQuestion').value = faq.question || '';
+            document.getElementById('faqAnswer').value = faq.answer || '';
+            document.getElementById('faqKeywords').value = faq.keywords || '';
+            document.getElementById('faqPublished').checked = !!faq.isPublished;
+            document.getElementById('faqFeatured').checked = !!faq.isFeatured;
+            document.getElementById('faqSortOrder').value = faq.sortOrder ?? 0;
+            document.getElementById('faqCategory').value = faq.categoryId || '';
+        } else {
+            document.getElementById('modalTitle').textContent = 'Create FAQ';
+        }
+
+        document.getElementById('faqModal').classList.add('show');
+    }
+
+    function closeFaqModal() {
+        document.getElementById('faqModal').classList.remove('show');
+    }
+
+    async function submitFaq(event) {
+        event.preventDefault();
+        const createdOrUpdatedBy = currentUser.userId || currentUser.id;
+        if (!createdOrUpdatedBy) {
+            showToast('User context missing. Please login again.', true);
+            return;
+        }
+        const payload = {
+            companyId: currentUser.companyId,
+            question: document.getElementById('faqQuestion').value.trim(),
+            answer: document.getElementById('faqAnswer').value.trim(),
+            keywords: document.getElementById('faqKeywords').value.trim(),
+            isPublished: document.getElementById('faqPublished').checked,
+            isFeatured: document.getElementById('faqFeatured').checked,
+            sortOrder: parseInt(document.getElementById('faqSortOrder').value, 10) || 0
+        };
+        const categoryValue = document.getElementById('faqCategory').value;
+        payload.categoryId = categoryValue ? parseInt(categoryValue, 10) : null;
+
+        if (!payload.question || !payload.answer) {
+            showToast('Question and answer are required', true);
+            return;
+        }
+
+        try {
+            let response;
+            if (editingFaqId) {
+                response = await fetch(`/api/faqs/${editingFaqId}?updatedById=${createdOrUpdatedBy}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                response = await fetch(`/api/faqs?createdById=${createdOrUpdatedBy}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+            }
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || 'Failed to save FAQ');
+            }
+            showToast(`FAQ ${editingFaqId ? 'updated' : 'created'} successfully`);
+            closeFaqModal();
+            await loadFaqs();
+        } catch (error) {
+            showToast(error.message || 'Unable to save FAQ', true);
+        }
+    }
+
+    async function deleteFaq(faqId) {
+        if (!confirm('Delete this FAQ? This action cannot be undone.')) return;
+        try {
+            const response = await fetch(`/api/faqs/${faqId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${userToken}` }
+            });
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(text || 'Failed to delete FAQ');
+            }
+            showToast('FAQ deleted');
+            await loadFaqs();
+        } catch (error) {
+            showToast(error.message || 'Unable to delete FAQ', true);
+        }
+    }
+
+    function truncate(text, length) {
+        if (!text) return '';
+        return text.length > length ? text.slice(0, length) + '…' : text;
+    }
+
+    function escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        if (typeof str !== 'string') str = String(str);
+        return str.replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    }
+
+    let toastTimeout;
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.style.background = isError ? '#dc2626' : '#1f2937';
+        toast.classList.add('show');
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => toast.classList.remove('show'), 3200);
+    }
+</script>
+</body>
+</html>

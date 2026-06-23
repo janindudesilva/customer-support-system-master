@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oryzo Command Center · Company Performance</title>
+    <style>
+        :root {
+            --bg: radial-gradient(circle at 12% 20%, rgba(88, 166, 255, 0.25), transparent 55%),
+                  radial-gradient(circle at 80% 5%, rgba(163, 113, 247, 0.18), transparent 50%),
+                  radial-gradient(circle at 40% 95%, rgba(236, 72, 153, 0.16), transparent 55%),
+                  #05060b;
+            --panel: rgba(16, 20, 29, 0.84);
+            --panel-alt: rgba(18, 24, 36, 0.88);
+            --border: rgba(92, 111, 163, 0.22);
+            --border-strong: rgba(88, 166, 255, 0.35);
+            --fg: #e6edf3;
+            --fg-muted: #a6b3c8;
+            --accent: linear-gradient(135deg, #a971f7 0%, #58a6ff 45%, #2dd4bf 100%);
+            --accent-soft: rgba(88, 166, 255, 0.18);
+            --success: #3fb950;
+            --warning: #f2cc60;
+            --danger: #f85149;
+            --info: #2dd4bf;
+            --shadow: 0 28px 70px rgba(6, 10, 18, 0.76);
+            --font: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--fg);
+            font-family: var(--font);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .aurora {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(circle at 10% 20%, rgba(88, 166, 255, 0.18), transparent 45%),
+                        radial-gradient(circle at 90% 15%, rgba(233, 121, 178, 0.16), transparent 50%),
+                        radial-gradient(circle at 50% 85%, rgba(45, 212, 191, 0.16), transparent 55%);
+            filter: blur(120px);
+            opacity: 0.55;
+            z-index: 0;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: rgba(7, 10, 18, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.6rem 2.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+        }
+
+        .brand {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .brand-label {
+            font-size: 0.8rem;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: #9fb3ff;
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: clamp(1.5rem, 2.3vw, 2.2rem);
+            letter-spacing: -0.02em;
+        }
+
+        .brand-subtitle {
+            margin: 0;
+            color: var(--fg-muted);
+            font-size: 0.95rem;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        button {
+            font-family: inherit;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            padding: 0.65rem 1.35rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border 0.2s ease;
+        }
+
+        .btn-back {
+            background: rgba(15, 23, 42, 0.65);
+            border-color: var(--border);
+            color: var(--fg-muted);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #0b1220;
+            box-shadow: 0 15px 30px rgba(88, 166, 255, 0.28);
+        }
+
+        .btn[disabled] {
+            opacity: 0.6;
+            cursor: wait;
+            box-shadow: none;
+        }
+
+        .btn:hover:not([disabled]) {
+            transform: translateY(-2px);
+        }
+
+        main {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2.4rem 2.2rem 3.6rem;
+        }
+
+        .meta-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .meta-bar h2 {
+            margin: 0;
+            font-size: clamp(1.35rem, 2vw, 1.8rem);
+        }
+
+        .meta-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.35rem 0.85rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            background: rgba(56, 189, 248, 0.16);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            color: #e0f2fe;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .summary-card {
+            background: var(--panel);
+            border: 1px solid rgba(88, 166, 255, 0.14);
+            border-radius: 20px;
+            padding: 1.6rem;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-card::after {
+            content: "";
+            position: absolute;
+            inset: 1px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.12), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .summary-card:hover::after {
+            opacity: 1;
+        }
+
+        .summary-label {
+            color: var(--fg-muted);
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .summary-value {
+            margin-top: 0.6rem;
+            font-size: clamp(1.7rem, 2.6vw, 2.2rem);
+            font-weight: 700;
+        }
+
+        .summary-trend {
+            margin-top: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-size: 0.85rem;
+            color: var(--fg-muted);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 1.75rem;
+        }
+
+        .panel {
+            background: var(--panel-alt);
+            border: 1px solid rgba(88, 166, 255, 0.12);
+            border-radius: 20px;
+            padding: 1.8rem;
+            box-shadow: var(--shadow);
+        }
+
+        .panel header {
+            position: static;
+            backdrop-filter: none;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+            margin-bottom: 1.2rem;
+        }
+
+        .panel-title {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .panel-title h3 {
+            margin: 0;
+            font-size: 1.35rem;
+        }
+
+        .panel-title span {
+            color: var(--fg-muted);
+            font-size: 0.9rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.92rem;
+        }
+
+        thead tr {
+            background: rgba(15, 23, 42, 0.68);
+        }
+
+        th, td {
+            padding: 0.75rem 0.95rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+        }
+
+        tbody tr:hover {
+            background: rgba(15, 23, 42, 0.4);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.2rem 0.65rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        .badge.success { background: rgba(63, 185, 80, 0.16); color: var(--success); border: 1px solid rgba(63, 185, 80, 0.4); }
+        .badge.warning { background: rgba(242, 204, 96, 0.16); color: var(--warning); border: 1px solid rgba(242, 204, 96, 0.35); }
+        .badge.danger { background: rgba(248, 81, 73, 0.16); color: var(--danger); border: 1px solid rgba(248, 81, 73, 0.35); }
+        .badge.info { background: rgba(45, 212, 191, 0.16); color: var(--info); border: 1px solid rgba(45, 212, 191, 0.35); }
+
+        .insight-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.2rem;
+        }
+
+        .insight-card {
+            background: rgba(12, 16, 28, 0.65);
+            border: 1px solid rgba(88, 166, 255, 0.12);
+            border-radius: 16px;
+            padding: 1.1rem 1.2rem;
+        }
+
+        .insight-card h4 {
+            margin: 0 0 0.6rem;
+            font-size: 1rem;
+        }
+
+        .insight-card ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 0.45rem;
+        }
+
+        .insight-card li {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--fg-muted);
+        }
+
+        .progress-bar {
+            margin-top: 0.35rem;
+            background: rgba(148, 163, 184, 0.15);
+            border-radius: 999px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .progress-bar span {
+            display: block;
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(135deg, rgba(169, 113, 247, 0.75), rgba(88, 166, 255, 0.95));
+        }
+
+        .timeline-list {
+            display: grid;
+            gap: 0.9rem;
+        }
+
+        .timeline-item {
+            background: rgba(11, 17, 30, 0.68);
+            border: 1px solid rgba(88, 166, 255, 0.12);
+            padding: 1rem 1.2rem;
+            border-radius: 14px;
+        }
+
+        .timeline-item h4 {
+            margin: 0 0 0.4rem;
+            font-size: 1rem;
+        }
+
+        .timeline-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem 1rem;
+            color: var(--fg-muted);
+            font-size: 0.82rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2.4rem;
+            color: var(--fg-muted);
+            border: 1px dashed rgba(148, 163, 184, 0.26);
+            border-radius: 16px;
+            background: rgba(12, 16, 28, 0.35);
+        }
+
+        .analytics-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.1rem;
+            font-size: 0.9rem;
+        }
+
+        .analytics-table th, .analytics-table td {
+            padding: 0.65rem 0.8rem;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+        }
+
+        .analytics-table th {
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.75rem;
+            color: var(--fg-muted);
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 1.2rem 1.4rem;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            main {
+                padding: 1.6rem 1.2rem 2.4rem;
+            }
+
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .meta-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="aurora"></div>
+<header>
+    <div class="header-content">
+        <div class="brand">
+            <span class="brand-label">ORYZO · Intelligence Fabric</span>
+            <h1>Company Performance Intelligence</h1>
+            <p class="brand-subtitle">Real-time performance telemetry across support operations</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-back" type="button" onclick="navigateBack()">⟵ Back to Dashboard</button>
+            <button class="btn btn-primary" type="button" id="downloadBtn" onclick="downloadReport()">⬇︎ Export PDF</button>
+        </div>
+    </div>
+</header>
+<main>
+    <section class="meta-bar">
+        <h2 id="companyName">Company Report</h2>
+        <div class="meta-info">
+            <span class="tag" id="generatedAt">Generated: —</span>
+            <span class="tag" id="timezone">Timezone: —</span>
+        </div>
+    </section>
+
+    <section id="reportContent">
+        <div class="summary-grid" id="summaryGrid">
+            <!-- summary cards rendered via JS -->
+        </div>
+
+        <div class="content-grid">
+            <article class="panel" id="agentsPanel">
+                <div class="panel-title">
+                    <h3>Agent Performance Overview</h3>
+                    <span id="agentCount">— agents</span>
+                </div>
+                <div class="panel-body" id="agentTableWrapper"></div>
+            </article>
+
+            <article class="panel" id="ticketsPanel">
+                <div class="panel-title">
+                    <h3>Ticket Intelligence</h3>
+                    <span>Breakdown by status, priority, category & trend</span>
+                </div>
+                <div class="panel-body" id="ticketInsights"></div>
+            </article>
+
+            <article class="panel" id="customersPanel">
+                <div class="panel-title">
+                    <h3>Customer Insights</h3>
+                    <span>Engagement, satisfaction & segmentation</span>
+                </div>
+                <div class="panel-body" id="customerInsights"></div>
+            </article>
+
+            <article class="panel" id="reviewsPanel">
+                <div class="panel-title">
+                    <h3>Review Pulse</h3>
+                    <span>Sentiment, recommendation & highlights</span>
+                </div>
+                <div class="panel-body" id="reviewInsights"></div>
+            </article>
+
+            <article class="panel" id="analyticsPanel">
+                <div class="panel-title">
+                    <h3>Recent Analytics Telemetry</h3>
+                    <span>Last 12 recorded metrics</span>
+                </div>
+                <div class="panel-body" id="analyticsInsights"></div>
+            </article>
+        </div>
+    </section>
+</main>
+
+<script>
+    let currentUser = null;
+    let userToken = null;
+    let reportCache = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        userToken = localStorage.getItem('token');
+        const storedUser = localStorage.getItem('user');
+        currentUser = storedUser ? JSON.parse(storedUser) : null;
+
+        if (!userToken || !currentUser || currentUser.role !== 'COMPANY_ADMIN') {
+            window.location.href = '/';
+            return;
+        }
+
+        document.getElementById('companyName').textContent = `${currentUser.companyName || 'Company'} · Performance Report`;
+        const timezoneTag = document.getElementById('timezone');
+        timezoneTag.textContent = `Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`;
+
+        loadPerformanceReport();
+    });
+
+    function navigateBack() {
+        window.location.href = '/company-admin/dashboard.html';
+    }
+
+    async function loadPerformanceReport() {
+        setGeneratedAt();
+        toggleDownload(true);
+
+        try {
+            const response = await fetch(`/api/company-admin/performance?companyId=${currentUser.companyId}`, {
+                headers: {
+                    'Authorization': `Bearer ${userToken}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to load performance data');
+            }
+
+            reportCache = await response.json();
+            renderReport(reportCache);
+        } catch (error) {
+            console.error(error);
+            renderErrorState(error.message);
+        } finally {
+            toggleDownload(false);
+        }
+    }
+
+    function setGeneratedAt() {
+        const generatedTag = document.getElementById('generatedAt');
+        const now = new Date();
+        generatedTag.textContent = `Generated: ${now.toLocaleString()}`;
+    }
+
+    function toggleDownload(disabled) {
+        const btn = document.getElementById('downloadBtn');
+        btn.disabled = disabled;
+        btn.textContent = disabled ? 'Generating…' : '⬇︎ Export PDF';
+    }
+
+    function renderReport(report) {
+        renderSummary(report.summary);
+        renderAgentTable(report.agents || []);
+        renderTicketInsights(report.tickets);
+        renderCustomerInsights(report.customers);
+        renderReviewInsights(report.reviews);
+        renderAnalytics(report.analytics || []);
+    }
+
+    function renderSummary(summary = {}) {
+        const config = [
+            { label: 'Total Tickets', value: summary.totalTickets },
+            { label: 'Open Tickets', value: summary.openTickets },
+            { label: 'Resolved Tickets', value: summary.resolvedTickets },
+            { label: 'Escalated Tickets', value: summary.escalatedTickets },
+            { label: 'Avg Resolution (hrs)', value: formatNumber(summary.averageResolutionHours, true) },
+            { label: 'Tickets · Last 30 Days', value: summary.ticketsLast30Days },
+            { label: 'Customer Satisfaction', value: formatNumber(summary.customerSatisfactionScore, true) },
+            { label: 'Active Agents', value: summary.activeAgents },
+            { label: 'Available Agents', value: summary.availableAgents },
+            { label: 'Customers Served', value: summary.customersServed }
+        ];
+
+        const container = document.getElementById('summaryGrid');
+        container.innerHTML = config.map(item => `
+            <div class="summary-card">
+                <span class="summary-label">${item.label}</span>
+                <div class="summary-value">${formatNumber(item.value)}</div>
+            </div>
+        `).join('');
+    }
+
+    function renderAgentTable(agents) {
+        const wrapper = document.getElementById('agentTableWrapper');
+        document.getElementById('agentCount').textContent = `${agents.length} agents`;
+
+        if (!agents.length) {
+            wrapper.innerHTML = `<div class="empty-state">No agent performance data available yet.</div>`;
+            return;
+        }
+
+        const rows = agents.slice(0, 20).map(agent => `
+            <tr>
+                <td>
+                    <strong>${escapeHtml(agent.agentName || 'Unnamed Agent')}</strong>
+                    <div class="subtitle">${escapeHtml(agent.department || '—')} · ${escapeHtml(agent.specialization || 'General')}</div>
+                </td>
+                <td>${formatNumber(agent.assignedTickets)}</td>
+                <td>${formatNumber(agent.activeTickets)}</td>
+                <td>${formatNumber(agent.resolvedTickets)}</td>
+                <td>${formatNumber(agent.averageResolutionHours, true)}</td>
+                <td>${formatNumber(agent.satisfactionScore, true)}</td>
+                <td>${formatNumber(agent.currentLoad)}/${formatNumber(agent.maxCapacity)}</td>
+                <td>
+                    <span class="badge ${agent.available ? 'success' : 'danger'}">
+                        ${agent.available ? 'Available' : 'Offline'}
+                    </span>
+                </td>
+            </tr>
+        `).join('');
+
+        wrapper.innerHTML = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>Agent</th>
+                        <th>Assigned</th>
+                        <th>Active</th>
+                        <th>Resolved</th>
+                        <th>Avg Resolution (hrs)</th>
+                        <th>Satisfaction</th>
+                        <th>Load</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rows}
+                </tbody>
+            </table>
+        `;
+    }
+
+    function renderTicketInsights(tickets = {}) {
+        const container = document.getElementById('ticketInsights');
+        if (!tickets || (!tickets.statusBreakdown && !tickets.priorityBreakdown)) {
+            container.innerHTML = `<div class="empty-state">No ticket insights to display.</div>`;
+            return;
+        }
+
+        const statusItems = mapToList(tickets.statusBreakdown);
+        const priorityItems = mapToList(tickets.priorityBreakdown);
+        const categories = tickets.topCategories || [];
+        const trends = tickets.monthlyTrends || [];
+
+        container.innerHTML = `
+            <div class="insight-grid">
+                <div class="insight-card">
+                    <h4>Status Breakdown</h4>
+                    ${renderInsightList(statusItems)}
+                </div>
+                <div class="insight-card">
+                    <h4>Priority Distribution</h4>
+                    ${renderInsightList(priorityItems)}
+                </div>
+                <div class="insight-card">
+                    <h4>Top Categories</h4>
+                    ${categories.length ? `
+                        <ul>
+                            ${categories.map(cat => `<li><span>${escapeHtml(cat.name || 'Uncategorised')}</span><span>${formatNumber(cat.count)}</span></li>`).join('')}
+                        </ul>` : `<p class="empty-state">No categorised tickets yet.</p>`}
+                </div>
+            </div>
+            <div style="margin-top: 1.4rem;">
+                <h4 style="margin-bottom: 0.6rem;">Monthly Ticket Trends</h4>
+                ${trends.length ? `
+                    <table class="analytics-table">
+                        <thead>
+                            <tr><th>Month</th><th>Total</th><th>Resolved</th><th>Escalated</th></tr>
+                        </thead>
+                        <tbody>
+                            ${trends.map(item => `
+                                <tr>
+                                    <td>${escapeHtml(item.label)}</td>
+                                    <td>${formatNumber(item.total)}</td>
+                                    <td>${formatNumber(item.resolved)}</td>
+                                    <td>${formatNumber(item.escalated)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>` : `<div class="empty-state">Trend data will appear once monthly ticket history is available.</div>`}
+            </div>
+        `;
+    }
+
+    function renderInsightList(items) {
+        if (!items.length) {
+            return '<p class="empty-state" style="padding: 1.1rem;">No data</p>';
+        }
+        const total = items.reduce((sum, item) => sum + (item.value || 0), 0) || 1;
+        return `
+            <ul>
+                ${items.map(item => {
+                    const percent = Math.round(((item.value || 0) / total) * 100);
+                    return `
+                        <li>
+                            <span>${escapeHtml(item.label)}</span>
+                            <span>${formatNumber(item.value)} (${percent}%)</span>
+                        </li>
+                        <div class="progress-bar"><span style="width: ${Math.max(percent, 4)}%;"></span></div>
+                    `;
+                }).join('')}
+            </ul>
+        `;
+    }
+
+    function renderCustomerInsights(customers = {}) {
+        const container = document.getElementById('customerInsights');
+        if (!Object.keys(customers).length) {
+            container.innerHTML = `<div class="empty-state">Customer engagement data will surface once activity is recorded.</div>`;
+            return;
+        }
+
+        const contactPrefs = mapToList(customers.contactPreferences);
+        const types = mapToList(customers.customerTypes);
+
+        container.innerHTML = `
+            <div class="insight-grid" style="margin-bottom: 1.4rem;">
+                <div class="insight-card">
+                    <h4>Active Customers</h4>
+                    <ul>
+                        <li><span>Total Customers</span><span>${formatNumber(customers.totalCustomers)}</span></li>
+                        <li><span>Active Customers</span><span>${formatNumber(customers.activeCustomers)}</span></li>
+                        <li><span>New this Month</span><span>${formatNumber(customers.newCustomersThisMonth)}</span></li>
+                        <li><span>Avg Satisfaction</span><span>${formatNumber(customers.averageSatisfaction, true)}</span></li>
+                    </ul>
+                </div>
+                <div class="insight-card">
+                    <h4>Preferred Contact Methods</h4>
+                    ${renderInsightList(contactPrefs)}
+                </div>
+                <div class="insight-card">
+                    <h4>Customer Segments</h4>
+                    ${renderInsightList(types)}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderReviewInsights(reviews = {}) {
+        const container = document.getElementById('reviewInsights');
+        if (!Object.keys(reviews).length) {
+            container.innerHTML = `<div class="empty-state">Reviews will appear after customers share feedback.</div>`;
+            return;
+        }
+
+        const distribution = Object.entries(reviews.ratingDistribution || {})
+            .sort((a, b) => Number(b[0]) - Number(a[0]))
+            .map(([rating, value]) => ({ label: `${rating} ★`, value }));
+
+        const recent = reviews.recentReviews || [];
+
+        container.innerHTML = `
+            <div class="insight-grid" style="margin-bottom: 1.4rem;">
+                <div class="insight-card">
+                    <h4>Review KPIs</h4>
+                    <ul>
+                        <li><span>Total Reviews</span><span>${formatNumber(reviews.totalReviews)}</span></li>
+                        <li><span>Average Rating</span><span>${formatNumber(reviews.averageRating, true)}</span></li>
+                        <li><span>Recommendation Rate</span><span>${formatNumber(reviews.recommendationRate, true)}%</span></li>
+                    </ul>
+                </div>
+                <div class="insight-card">
+                    <h4>Rating Distribution</h4>
+                    ${renderInsightList(distribution)}
+                </div>
+            </div>
+            <div>
+                <h4 style="margin-bottom: 0.6rem;">Recent Reviews</h4>
+                ${recent.length ? `<div class="timeline-list">
+                    ${recent.map(item => `
+                        <div class="timeline-item">
+                            <h4>${escapeHtml(item.customerName || 'Anonymous')} → ${escapeHtml(item.agentName || 'Support Team')}</h4>
+                            <div class="timeline-meta">
+                                <span>Ticket #${item.ticketId || '—'}</span>
+                                <span>Rating: ${item.rating || '—'} ★</span>
+                                <span>${formatDate(item.createdAt)}</span>
+                            </div>
+                            ${item.feedback ? `<p style="margin-top: 0.6rem; color: var(--fg-muted);">“${escapeHtml(item.feedback)}”</p>` : ''}
+                        </div>
+                    `).join('')}
+                </div>` : `<div class="empty-state">No reviews captured in the recent window.</div>`}
+            </div>
+        `;
+    }
+
+    function renderAnalytics(analytics = []) {
+        const container = document.getElementById('analyticsInsights');
+        if (!analytics.length) {
+            container.innerHTML = `<div class="empty-state">Analytics metrics will populate after scheduled telemetry runs.</div>`;
+            return;
+        }
+
+        container.innerHTML = `
+            <table class="analytics-table">
+                <thead>
+                    <tr><th>Metric</th><th>Value</th><th>Period</th><th>Recorded</th></tr>
+                </thead>
+                <tbody>
+                    ${analytics.map(item => `
+                        <tr>
+                            <td>${escapeHtml(formatMetricName(item.metricName))}</td>
+                            <td>${formatNumber(item.metricValue)}</td>
+                            <td>${formatPeriod(item.periodStart, item.periodEnd)}</td>
+                            <td>${formatDate(item.createdAt)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+
+    function renderErrorState(message) {
+        document.getElementById('reportContent').innerHTML = `<div class="empty-state">${escapeHtml(message)}</div>`;
+    }
+
+    function mapToList(map) {
+        if (!map) return [];
+        return Object.entries(map).map(([key, value]) => ({ label: prettifyLabel(key), value: value ?? 0 }));
+    }
+
+    function prettifyLabel(label) {
+        if (!label) return 'Unknown';
+        return label
+            .toString()
+            .replace(/_/g, ' ')
+            .toLowerCase()
+            .replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function formatNumber(value, fixed = false) {
+        if (value === null || value === undefined || Number.isNaN(Number(value))) {
+            return fixed ? '0.00' : '0';
+        }
+        const number = Number(value);
+        if (fixed) {
+            return number.toFixed(2);
+        }
+        return number.toLocaleString();
+    }
+
+    function formatDate(value) {
+        if (!value) return '—';
+        const date = new Date(value);
+        return isNaN(date.getTime()) ? '—' : date.toLocaleString();
+    }
+
+    function formatPeriod(start, end) {
+        if (!start && !end) return '—';
+        const startStr = start ? new Date(start).toLocaleDateString() : '—';
+        const endStr = end ? new Date(end).toLocaleDateString() : startStr;
+        return `${startStr} → ${endStr}`;
+    }
+
+    function formatMetricName(name) {
+        if (!name) return 'Metric';
+        return name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    async function downloadReport() {
+        toggleDownload(true);
+
+        try {
+            const response = await fetch(`/api/company-admin/performance/pdf?companyId=${currentUser.companyId}`, {
+                headers: {
+                    'Authorization': `Bearer ${userToken}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to generate PDF report');
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            const timestamp = new Date().toISOString().split('T')[0];
+            const companySlug = buildCompanySlug(currentUser.companyName);
+            link.href = url;
+            link.download = `${companySlug}-performance-${timestamp}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('PDF download failed', error);
+            alert('Unable to download the PDF report. Please try again.');
+        } finally {
+            toggleDownload(false);
+        }
+    }
+
+    function buildCompanySlug(name) {
+        if (!name) {
+            return 'company';
+        }
+        return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'company';
+    }
+</script>
+</body>
+</html>

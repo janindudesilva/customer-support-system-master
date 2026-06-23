@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ Management</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div th:replace="common/header :: header"></div>
+    
+    <div class="dashboard-container">
+        <div th:replace="common/sidebar :: sidebar"></div>
+        
+        <div class="main-content">
+            <h1>FAQ Management</h1>
+            
+            <div class="search-container">
+                <form action="/admin/faqs/search" method="GET">
+                    <input type="text" name="keyword" placeholder="Search FAQs..." th:value="${keyword}">
+                    <button type="submit" class="btn search-btn">Search</button>
+                </form>
+                <div class="filter-options">
+                    <select id="categoryFilter" onchange="filterByCategory()">
+                        <option value="">All Categories</option>
+                        <option th:each="category : ${categories}" 
+                                th:value="${category.id}" 
+                                th:text="${category.name}">Category Name</option>
+                    </select>
+                    <select id="statusFilter" onchange="filterByStatus()">
+                        <option value="">All Statuses</option>
+                        <option value="published">Published</option>
+                        <option value="unpublished">Unpublished</option>
+                        <option value="featured">Featured</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="/admin/faqs/create" class="btn primary-btn">Create New FAQ</a>
+                <a href="/admin/categories" class="btn secondary-btn">Manage Categories</a>
+            </div>
+            
+            <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+            <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+            
+            <div class="faq-list">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Question</th>
+                            <th>Category</th>
+                            <th>Views</th>
+                            <th>Helpful</th>
+                            <th>Status</th>
+                            <th>Last Updated</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="faq : ${faqs}">
+                            <td th:text="${faq.id}">1</td>
+                            <td th:text="${faq.question}">How do I reset my password?</td>
+                            <td th:text="${faq.categoryName != null ? faq.categoryName : 'Uncategorized'}">Account</td>
+                            <td th:text="${faq.viewCount}">120</td>
+                            <td th:text="${faq.helpfulCount + ' (' + #numbers.formatDecimal(faq.helpfulnessScore, 0, 0) + '%)'}">80 (85%)</td>
+                            <td>
+                                <span class="badge" th:classappend="${faq.isPublished ? 'badge-success' : 'badge-warning'}" 
+                                      th:text="${faq.isPublished ? 'Published' : 'Draft'}">Published</span>
+                                <span class="badge badge-featured" th:if="${faq.isFeatured}">Featured</span>
+                            </td>
+                            <td th:text="${#temporals.format(faq.updatedAt, 'yyyy-MM-dd')}">2023-01-01</td>
+                            <td class="actions">
+                                <a th:href="@{/admin/faqs/{id}(id=${faq.id})}" class="btn view-btn">View</a>
+                                <a th:href="@{/admin/faqs/{id}/edit(id=${faq.id})}" class="btn edit-btn">Edit</a>
+                                <button th:if="${!faq.isPublished}" th:onclick="'publishFaq(' + ${faq.id} + ')'" class="btn success-btn">Publish</button>
+                                <button th:if="${faq.isPublished}" th:onclick="'unpublishFaq(' + ${faq.id} + ')'" class="btn warning-btn">Unpublish</button>
+                                <button th:if="${!faq.isFeatured}" th:onclick="'featureFaq(' + ${faq.id} + ')'" class="btn feature-btn">Feature</button>
+                                <button th:if="${faq.isFeatured}" th:onclick="'unfeatureFaq(' + ${faq.id} + ')'" class="btn unfeature-btn">Unfeature</button>
+                                <button th:onclick="'deleteFaq(' + ${faq.id} + ')'" class="btn danger-btn">Delete</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="no-data-message" th:if="${faqs.empty}">
+                    <p>No FAQs found. <a href="/admin/faqs/create">Create a new FAQ</a> to get started.</p>
+                </div>
+                
+                <div class="pagination" th:if="${totalPages > 1}">
+                    <a th:href="@{/admin/faqs(page=1)}" class="page-link">First</a>
+                    <a th:if="${currentPage > 1}" th:href="@{/admin/faqs(page=${currentPage - 1})}" class="page-link">Previous</a>
+                    <span th:each="i : ${#numbers.sequence(1, totalPages)}">
+                        <a th:if="${i != currentPage}" th:href="@{/admin/faqs(page=${i})}" class="page-link" th:text="${i}">1</a>
+                        <span th:if="${i == currentPage}" class="current-page" th:text="${i}">1</span>
+                    </span>
+                    <a th:if="${currentPage < totalPages}" th:href="@{/admin/faqs(page=${currentPage + 1})}" class="page-link">Next</a>
+                    <a th:href="@{/admin/faqs(page=${totalPages})}" class="page-link">Last</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="common/footer :: footer"></div>
+    <script src="/js/faq-management.js"></script>
+</body>
+</html>

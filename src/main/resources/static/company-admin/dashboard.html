@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oryzo Company Command Center</title>
+    <style>
+        :root {
+            --color-bg: #05060b;
+            --color-surface: rgba(13, 17, 23, 0.85);
+            --color-surface-alt: rgba(22, 27, 34, 0.85);
+            --color-border: #232a35;
+            --color-fg: #e6edf3;
+            --color-fg-muted: #9da6b7;
+            --color-accent: #58a6ff;
+            --color-purple: #a371f7;
+            --color-success: #3fb950;
+            --color-warning: #f2cc60;
+            --color-danger: #f85149;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--color-bg);
+            color: var(--color-fg);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: -40% -60% -30% -60%;
+            background: radial-gradient(circle at 18% 18%, rgba(121, 192, 255, 0.35), transparent 20%),
+                        radial-gradient(circle at 78% 12%, rgba(167, 119, 255, 0.3), transparent 50%),
+                        radial-gradient(circle at 50% 90%, rgba(247, 120, 186, 0.22), transparent 10%);
+            z-index: 0;
+            filter: blur(140px);
+            opacity: 0.7;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: rgba(13, 17, 23, 0.82);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.45rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--color-fg-muted);
+        }
+
+        .logout-btn {
+            background: linear-gradient(120deg, rgba(121, 192, 255, 0.12), rgba(167, 119, 255, 0.18));
+            border: 1px solid rgba(88, 166, 255, 0.35);
+            color: var(--color-fg);
+            padding: 0.55rem 1.25rem;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, border 0.2s;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px rgba(88, 166, 255, 0.25);
+            border-color: rgba(121, 192, 255, 0.55);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2.5rem 2rem 3.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.75rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .card {
+            background: var(--color-surface);
+            border: 1px solid rgba(88, 166, 255, 0.12);
+            border-radius: 18px;
+            padding: 1.75rem;
+            box-shadow: 0 18px 40px rgba(5, 6, 11, 0.45);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::after {
+            content: "";
+            position: absolute;
+            inset: 1px;
+            border-radius: 17px;
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.08), transparent 65%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 24px 50px rgba(5, 6, 11, 0.55);
+            border-color: rgba(167, 119, 255, 0.3);
+        }
+
+        .card:hover::after {
+            opacity: 1;
+        }
+
+        .card h3 {
+            color: var(--color-fg);
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .card p {
+            color: var(--color-fg-muted);
+            line-height: 1.6;
+            margin-bottom: 1.25rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--color-purple), var(--color-accent));
+            color: var(--color-fg);
+            border: none;
+            padding: 0.75rem 1.6rem;
+            border-radius: 999px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 10px 24px rgba(79, 110, 255, 0.25);
+            margin: 0.15rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 36px rgba(89, 125, 255, 0.35);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, rgba(121, 192, 255, 0.2), rgba(167, 119, 255, 0.35));
+            border: 1px solid rgba(121, 192, 255, 0.4);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: var(--color-surface-alt);
+            border: 1px solid rgba(35, 42, 53, 0.9);
+            border-radius: 16px;
+            padding: 1.6rem;
+            text-align: center;
+            box-shadow: inset 0 0 0 1px rgba(88, 166, 255, 0.08);
+        }
+
+        .stat-number {
+            font-size: 2.1rem;
+            font-weight: 700;
+            color: var(--color-accent);
+        }
+
+        .stat-label {
+            margin-top: 0.45rem;
+            color: var(--color-fg-muted);
+            letter-spacing: 0.3px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--color-fg-muted);
+        }
+
+        .error {
+            background: rgba(248, 81, 73, 0.12);
+            color: var(--color-danger);
+            border: 1px solid rgba(248, 81, 73, 0.35);
+            padding: 1rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+        }
+
+        .success {
+            background: rgba(63, 185, 80, 0.12);
+            color: var(--color-success);
+            border: 1px solid rgba(63, 185, 80, 0.35);
+            padding: 1rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .container {
+                padding: 2rem 1.5rem 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">� Oryzo Company Command Center</div>
+        <div class="user-info">
+            <span id="userName">Loading...</span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="stats" id="statsContainer">
+            <div class="stat-card">
+                <div class="stat-number" id="totalTickets">-</div>
+                <div class="stat-label">Total Tickets</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="openTickets">-</div>
+                <div class="stat-label">Open Tickets</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalAgents">-</div>
+                <div class="stat-label">Support Agents</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalCustomers">-</div>
+                <div class="stat-label">Customers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="averageRating">-</div>
+                <div class="stat-label">Avg. Satisfaction</div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3>👥 Manage Users</h3>
+                <p>Add, edit, and manage support agents and customers</p>
+                <button class="btn" onclick="navigateTo('/company-admin/user-management.html')">Manage Users</button>
+            </div>
+            <div class="card">
+                <h3>🎫 Ticket Management</h3>
+                <p>Monitor and manage all company tickets</p>
+                <button class="btn btn-secondary" onclick="navigateTo('/company-admin/ticket-management.html')">View Tickets</button>
+            </div>
+            <div class="card">
+                <h3>📚 FAQ Management</h3>
+                <p>Create and manage knowledge base content</p>
+                <button class="btn" onclick="navigateTo('/company-admin/faq-management.html')">Manage FAQs</button>
+            </div>
+            <div class="card">
+                <h3>⭐ Manage Reviews</h3>
+                <p>Moderate feedback and explore performance insights</p>
+                <button class="btn" onclick="navigateTo('/company-admin/review-management.html')">Manage Reviews</button>
+            </div>
+            <div class="card">
+                <h3>💡 System Feedback</h3>
+                <p>Share platform feedback and track super admin approvals</p>
+                <button class="btn btn-secondary" onclick="navigateTo('/company-admin/system-feedback.html')">Share Feedback</button>
+            </div>
+
+            <div class="card">
+                <h3>📊 Company Performance</h3>
+                <p>View company performance metrics</p>
+                <button class="btn" onclick="navigateTo('/company-admin/company-performance.html')">View Metrics</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let userToken = null;
+
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            userToken = localStorage.getItem('token');
+            currentUser = JSON.parse(localStorage.getItem('user'));
+            
+            if (!userToken || !currentUser || currentUser.role !== 'COMPANY_ADMIN') {
+                window.location.href = '/';
+                return;
+            }
+            
+            document.getElementById('userName').textContent = `${currentUser.firstName} ${currentUser.lastName}`;
+            loadDashboardData();
+        });
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        }
+
+        async function loadDashboardData() {
+            try {
+                // Load dashboard statistics
+                const statsResponse = await fetch(`/api/company-admin/dashboard/stats?companyId=${currentUser.companyId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+                
+                if (statsResponse.ok) {
+                    const stats = await statsResponse.json();
+                    updateStats(stats);
+                } else {
+                    console.error('Error loading dashboard stats');
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        function updateStats(stats) {
+            document.getElementById('totalTickets').textContent = stats.totalTickets || 0;
+            document.getElementById('openTickets').textContent = stats.openTickets || 0;
+            document.getElementById('totalAgents').textContent = stats.totalAgents || 0;
+            document.getElementById('totalCustomers').textContent = stats.totalCustomers || 0;
+            document.getElementById('averageRating').textContent = stats.averageRating ? stats.averageRating.toFixed(1) : '0.0';
+        }
+
+        function navigateTo(path) {
+            window.location.href = path;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oryzo • Register New Company</title>
+    <style>
+        :root {
+            --color-bg: #05060b;
+            --color-surface: rgba(13, 17, 23, 0.85);
+            --color-surface-alt: rgba(22, 27, 34, 0.85);
+            --color-border: #232a35;
+            --color-border-subtle: rgba(88, 166, 255, 0.12);
+            --color-fg: #e6edf3;
+            --color-fg-muted: #9da6b7;
+            --color-accent: #58a6ff;
+            --color-purple: #a371f7;
+            --color-success: #3fb950;
+            --color-warning: #f2cc60;
+            --color-danger: #f85149;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--color-bg);
+            color: var(--color-fg);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: -40% -60% -30% -60%;
+            background: radial-gradient(circle at 18% 18%, rgba(121, 192, 255, 0.35), transparent 20%),
+                        radial-gradient(circle at 78% 12%, rgba(167, 119, 255, 0.3), transparent 50%),
+                        radial-gradient(circle at 50% 90%, rgba(247, 120, 186, 0.22), transparent 10%);
+            z-index: 0;
+            filter: blur(140px);
+            opacity: 0.7;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: rgba(13, 17, 23, 0.85);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.45rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--color-fg-muted);
+        }
+
+        .logout-btn {
+            background: linear-gradient(120deg, rgba(121, 192, 255, 0.12), rgba(167, 119, 255, 0.18));
+            border: 1px solid rgba(88, 166, 255, 0.35);
+            color: var(--color-fg);
+            padding: 0.55rem 1.25rem;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px rgba(88, 166, 255, 0.25);
+            border-color: rgba(121, 192, 255, 0.55);
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 2.5rem 2rem 4rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .page-intro {
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+
+        .page-intro h1 {
+            font-size: 2.25rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .page-intro p {
+            color: var(--color-fg-muted);
+            max-width: 620px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .alert {
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            margin-bottom: 1.25rem;
+            border: 1px solid;
+        }
+
+        .alert-danger {
+            background: rgba(248, 81, 73, 0.12);
+            border-color: rgba(248, 81, 73, 0.35);
+            color: var(--color-danger);
+        }
+
+        .alert-success {
+            background: rgba(63, 185, 80, 0.12);
+            border-color: rgba(63, 185, 80, 0.35);
+            color: var(--color-success);
+        }
+
+        .form-shell {
+            background: var(--color-surface);
+            border-radius: 20px;
+            padding: 2.2rem;
+            border: 1px solid rgba(35, 42, 53, 0.85);
+            box-shadow: 0 22px 55px rgba(5, 6, 11, 0.55);
+        }
+
+        .form-section-title {
+            font-size: 1.25rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.15rem 1.25rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 0.45rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(88, 166, 255, 0.25);
+            border-radius: 10px;
+            font-size: 1rem;
+            background: rgba(10, 14, 20, 0.85);
+            color: var(--color-fg);
+        }
+
+        .form-group textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: rgba(167, 119, 255, 0.5);
+            box-shadow: 0 0 0 3px rgba(167, 119, 255, 0.25);
+        }
+
+        .error {
+            margin-top: 0.4rem;
+            font-size: 0.85rem;
+            color: var(--color-danger);
+        }
+
+        .grid-full {
+            grid-column: 1 / -1;
+        }
+
+        .form-actions {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--color-purple), var(--color-accent));
+            color: var(--color-fg);
+            border: none;
+            padding: 0.75rem 1.6rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 10px 24px rgba(79, 110, 255, 0.25);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 36px rgba(89, 125, 255, 0.35);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, rgba(121, 192, 255, 0.22), rgba(167, 119, 255, 0.35));
+            border: 1px solid rgba(121, 192, 255, 0.45);
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .container {
+                padding: 2rem 1.5rem 3rem;
+            }
+
+            .form-shell {
+                padding: 1.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">✨ Oryzo Company Onboarding</div>
+        <div class="user-info">
+            <span th:text="${adminName}">Super Admin</span>
+            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                <button type="submit" class="logout-btn">Logout</button>
+            </form>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="page-intro">
+            <h1>Bring A New Company Into Oryzo</h1>
+            <p>Capture the essentials, provision the first administrator, and launch a tailored workspace in minutes.</p>
+        </section>
+
+        <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+        <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+
+        <section class="form-shell">
+            <form th:action="@{/api/super-admin/companies/register}" th:object="${companyRegistrationDTO}" method="POST">
+                <h2 class="form-section-title">Company Information</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="name">Company Name *</label>
+                        <input type="text" id="name" th:field="*{name}" required>
+                        <span class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Company Email *</label>
+                        <input type="email" id="email" th:field="*{email}" required>
+                        <span class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" th:field="*{phone}">
+                        <span class="error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></span>
+                    </div>
+                    <div class="form-group grid-full">
+                        <label for="address">Address</label>
+                        <textarea id="address" th:field="*{address}" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="website">Website</label>
+                        <input type="url" id="website" th:field="*{website}">
+                    </div>
+                    <div class="form-group">
+                        <label for="subscriptionPlan">Subscription Plan</label>
+                        <select id="subscriptionPlan" th:field="*{subscriptionPlan}">
+                            <option value="BASIC">Basic</option>
+                            <option value="PREMIUM">Premium</option>
+                            <option value="ENTERPRISE">Enterprise</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="maxAgents">Maximum Agents</label>
+                        <input type="number" id="maxAgents" th:field="*{maxAgents}" min="1" max="1000">
+                    </div>
+                    <div class="form-group">
+                        <label for="maxCustomers">Maximum Customers</label>
+                        <input type="number" id="maxCustomers" th:field="*{maxCustomers}" min="1" max="10000">
+                    </div>
+                </div>
+
+                <h2 class="form-section-title" style="margin-top: 2rem;">Admin Information</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="adminFirstName">Admin First Name *</label>
+                        <input type="text" id="adminFirstName" th:field="*{adminFirstName}" required>
+                        <span class="error" th:if="${#fields.hasErrors('adminFirstName')}" th:errors="*{adminFirstName}"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminLastName">Admin Last Name *</label>
+                        <input type="text" id="adminLastName" th:field="*{adminLastName}" required>
+                        <span class="error" th:if="${#fields.hasErrors('adminLastName')}" th:errors="*{adminLastName}"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminEmail">Admin Email *</label>
+                        <input type="email" id="adminEmail" th:field="*{adminEmail}" required>
+                        <span class="error" th:if="${#fields.hasErrors('adminEmail')}" th:errors="*{adminEmail}"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminPhone">Admin Phone</label>
+                        <input type="tel" id="adminPhone" th:field="*{adminPhone}">
+                        <span class="error" th:if="${#fields.hasErrors('adminPhone')}" th:errors="*{adminPhone}"></span>
+                    </div>
+                    <div class="form-group grid-full">
+                        <label for="adminPassword">Admin Password *</label>
+                        <input type="password" id="adminPassword" th:field="*{adminPassword}" required>
+                        <span class="error" th:if="${#fields.hasErrors('adminPassword')}" th:errors="*{adminPassword}"></span>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn">Register Company</button>
+                    <a th:href="@{/super-admin/companies}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

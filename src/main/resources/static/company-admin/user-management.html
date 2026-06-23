@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Admin - User Management</title>
+    <style>
+        :root {
+            --bg-gradient: radial-gradient(circle at 20% 20%, rgba(91, 33, 182, 0.2), transparent 55%),
+                radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.2), transparent 55%),
+                radial-gradient(circle at 45% 90%, rgba(236, 72, 153, 0.18), transparent 60%),
+                #020617;
+            --panel: rgba(15, 23, 42, 0.78);
+            --panel-alt: rgba(17, 24, 39, 0.72);
+            --border: rgba(148, 163, 184, 0.18);
+            --border-strong: rgba(148, 163, 184, 0.35);
+            --fg: #e2e8f0;
+            --fg-muted: #94a3b8;
+            --accent: linear-gradient(135deg, #a855f7 0%, #38bdf8 50%, #22d3ee 100%);
+            --success: #22c55e;
+            --warning: #f97316;
+            --danger: #ef4444;
+            --shadow: 0 35px 90px -30px rgba(15, 23, 42, 0.85);
+            --glass-blur: blur(18px);
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg-gradient);
+            color: var(--fg);
+            font-family: inherit;
+            line-height: 1.6;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .background-aurora {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.18), transparent 45%),
+                radial-gradient(circle at 90% 10%, rgba(244, 114, 182, 0.16), transparent 50%),
+                radial-gradient(circle at 50% 90%, rgba(45, 212, 191, 0.14), transparent 55%);
+            filter: blur(120px);
+            opacity: 0.45;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            background: rgba(10, 12, 23, 0.85);
+            border-bottom: 1px solid var(--border);
+            padding: 1.6rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(18px);
+            box-shadow: 0 24px 60px rgba(2, 6, 23, 0.55);
+        }
+
+        .header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .header-brand {
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: #94a3ff;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: clamp(1.6rem, 2vw, 2.1rem);
+            letter-spacing: -0.02em;
+        }
+
+        .header-subtitle {
+            margin: 0;
+            color: var(--fg-muted);
+            font-size: 0.95rem;
+        }
+
+        .header-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            background: rgba(56, 189, 248, 0.16);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            color: #e0f2fe;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: #f8fafc;
+            border: 1px solid transparent;
+            padding: 0.7rem 1.5rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            transition: transform 0.2s ease, box-shadow 0.25s ease, filter 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.28), transparent 60%);
+            mix-blend-mode: screen;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 35px rgba(56, 189, 248, 0.35);
+        }
+
+        .btn:hover::after {
+            opacity: 1;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            color: var(--fg);
+        }
+
+        .btn-secondary:hover {
+            border-color: rgba(148, 163, 184, 0.6);
+            background: rgba(148, 163, 184, 0.12);
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.5);
+        }
+
+        .ghost-button {
+            background: transparent;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            color: var(--fg-muted);
+            padding: 0.65rem 1.3rem;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .ghost-button:hover {
+            color: var(--fg);
+            border-color: rgba(148, 163, 184, 0.6);
+            background: rgba(148, 163, 184, 0.12);
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 2.5rem auto 4rem;
+            padding: 0 2rem 2rem;
+        }
+
+        .intro-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .info-card {
+            background: rgba(15, 23, 42, 0.62);
+            border-radius: 20px;
+            padding: 1.8rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            backdrop-filter: var(--glass-blur);
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .info-card h2 {
+            margin: 0;
+            font-size: 1.3rem;
+        }
+
+        .info-card p {
+            margin: 0;
+            color: var(--fg-muted);
+        }
+
+        .info-card .btn {
+            align-self: flex-start;
+            margin-top: 0.5rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.8rem;
+        }
+
+        .tab {
+            padding: 0.8rem 1.6rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.45);
+            color: var(--fg-muted);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.08);
+        }
+
+        .tab:hover {
+            color: var(--fg);
+            border-color: rgba(148, 163, 184, 0.4);
+        }
+
+        .tab.active {
+            background: rgba(56, 189, 248, 0.16);
+            border-color: rgba(56, 189, 248, 0.5);
+            color: #e0f2fe;
+            box-shadow: 0 10px 28px rgba(56, 189, 248, 0.28);
+        }
+
+        .panel {
+            background: var(--panel);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            backdrop-filter: var(--glass-blur);
+            padding: 2.2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1.4rem;
+            margin-bottom: 1.6rem;
+        }
+
+        .panel-header h2 {
+            margin: 0;
+            font-size: 1.45rem;
+        }
+
+        .panel-subtitle {
+            margin: 0.35rem 0 0;
+            color: var(--fg-muted);
+            max-width: 480px;
+        }
+
+        .panel-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(10, 12, 23, 0.4);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 0.95rem 1.1rem;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+            text-align: left;
+        }
+
+        th {
+            background: rgba(15, 23, 42, 0.82);
+            font-weight: 600;
+            color: #cbd5f5;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        tr:hover {
+            background: rgba(59, 130, 246, 0.08);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.32rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 1px solid transparent;
+        }
+
+        .status-active {
+            background: rgba(34, 197, 94, 0.22);
+            color: #4ade80;
+            border-color: rgba(74, 222, 128, 0.45);
+        }
+
+        .status-inactive {
+            background: rgba(249, 115, 22, 0.2);
+            color: #fb923c;
+            border-color: rgba(251, 146, 60, 0.45);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2.4rem;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 16px;
+            border: 1px dashed rgba(148, 163, 184, 0.35);
+            color: var(--fg-muted);
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            backdrop-filter: blur(8px);
+            padding: 1.5rem;
+        }
+
+        .modal-backdrop.show {
+            display: flex;
+        }
+
+        .modal {
+            background: rgba(15, 23, 42, 0.92);
+            border-radius: 20px;
+            width: min(660px, 94vw);
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2.4rem;
+            position: relative;
+            box-shadow: 0 45px 75px rgba(2, 6, 23, 0.75);
+            border: 1px solid var(--border);
+            backdrop-filter: var(--glass-blur);
+        }
+
+        .modal h2 {
+            margin-top: 0;
+            margin-bottom: 1.6rem;
+            font-size: 1.4rem;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.2rem;
+            right: 1.2rem;
+            background: transparent;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: var(--fg-muted);
+        }
+
+        .modal-close:hover {
+            color: var(--fg);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.3rem;
+            margin-bottom: 1.6rem;
+        }
+
+        .form-full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.45rem;
+            color: var(--fg-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.74rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.7rem 0.85rem;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            background: rgba(10, 12, 23, 0.65);
+            color: var(--fg);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: rgba(56, 189, 248, 0.8);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+            outline: none;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .toast {
+            position: fixed;
+            right: 2rem;
+            bottom: 2rem;
+            background: rgba(15, 23, 42, 0.92);
+            color: var(--fg);
+            padding: 0.95rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            box-shadow: 0 30px 60px rgba(2, 6, 23, 0.65);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateY(20px);
+            z-index: 30;
+        }
+
+        .toast.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 900px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.2rem;
+                padding: 1.4rem 1.8rem;
+            }
+
+            .container {
+                padding: 0 1.25rem 2rem;
+            }
+
+            .panel {
+                padding: 1.6rem;
+            }
+
+            .panel-actions {
+                width: 100%;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .tabs {
+                overflow-x: auto;
+                padding-bottom: 0.5rem;
+            }
+
+            table {
+                min-width: 640px;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="background-aurora"></div>
+<header class="header">
+    <div class="header-left">
+        <span class="header-brand">Oryzo</span>
+        <h1>Company User Management</h1>
+        <p class="header-subtitle">Company Code <span class="header-tag" id="companyCode">-</span></p>
+    </div>
+    <div class="header-actions">
+        <button class="btn-secondary" onclick="window.location.href='/company-admin/dashboard.html'">⬅ Dashboard</button>
+        <button class="btn" onclick="logout()">Logout</button>
+    </div>
+</header>
+
+<main class="container">
+    <section class="intro-grid">
+        <article class="info-card">
+            <h2>Support Agents</h2>
+            <p>Shape world-class coverage by aligning specialists to every queue and workflow.</p>
+            <button class="btn" type="button" onclick="openAgentModal()">Add Agent</button>
+        </article>
+        <article class="info-card">
+            <h2>Customers</h2>
+            <p>Maintain rich customer context so every conversation feels proactive and personal.</p>
+            <button class="btn" type="button" onclick="openCustomerModal()">Add Customer</button>
+        </article>
+    </section>
+
+    <div class="tabs">
+        <button class="tab active" id="agentsTab" onclick="switchTab('agents')">Support Agents</button>
+        <button class="tab" id="customersTab" onclick="switchTab('customers')">Customers</button>
+    </div>
+
+    <section class="panel" id="agentsSection">
+        <div class="panel-header">
+            <div>
+                <h2>Agent Directory</h2>
+                <p class="panel-subtitle">Monitor capacity, shifts, and availability for each specialist in real time.</p>
+            </div>
+            <div class="panel-actions">
+                <button class="ghost-button" type="button" onclick="loadAgents()">Refresh</button>
+                <button class="btn" type="button" onclick="openAgentModal()">New Agent</button>
+            </div>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Agent</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Department</th>
+                        <th>Capacity</th>
+                        <th>Status</th>
+                        <th style="text-align:right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="agentsTableBody">
+                    <tr><td colspan="7" class="empty-state">Loading agents...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="panel" id="customersSection" style="display:none;">
+        <div class="panel-header">
+            <div>
+                <h2>Customer Directory</h2>
+                <p class="panel-subtitle">Track every relationship with clear ticket history and preferences.</p>
+            </div>
+            <div class="panel-actions">
+                <button class="ghost-button" type="button" onclick="loadCustomers()">Refresh</button>
+                <button class="btn" type="button" onclick="openCustomerModal()">New Customer</button>
+            </div>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Type</th>
+                        <th>Total Tickets</th>
+                        <th>Satisfaction</th>
+                        <th style="text-align:right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="customersTableBody">
+                    <tr><td colspan="7" class="empty-state">Loading customers...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<div class="modal-backdrop" id="agentModal">
+    <div class="modal">
+        <button class="modal-close" onclick="closeModal('agentModal')">×</button>
+        <h2 id="agentModalTitle">Add Support Agent</h2>
+        <form id="agentForm">
+            <input type="hidden" id="agentId">
+            <div class="form-grid">
+                <div>
+                    <label for="agentFirstName">First Name</label>
+                    <input type="text" id="agentFirstName" required>
+                </div>
+                <div>
+                    <label for="agentLastName">Last Name</label>
+                    <input type="text" id="agentLastName" required>
+                </div>
+                <div>
+                    <label for="agentEmail">Email</label>
+                    <input type="email" id="agentEmail" required>
+                </div>
+                <div>
+                    <label for="agentPhone">Phone</label>
+                    <input type="tel" id="agentPhone" placeholder="+94123456789">
+                </div>
+                <div>
+                    <label for="agentDepartment">Department</label>
+                    <input type="text" id="agentDepartment" placeholder="Support, Billing, Onboarding">
+                </div>
+                <div>
+                    <label for="agentSpecialization">Specialization</label>
+                    <input type="text" id="agentSpecialization" placeholder="Billing, Onboarding">
+                </div>
+                <div>
+                    <label for="agentMaxTickets">Max Concurrent Tickets</label>
+                    <input type="number" id="agentMaxTickets" min="1" value="10">
+                </div>
+                <div>
+                    <label for="agentAvailability">Availability</label>
+                    <select id="agentAvailability">
+                        <option value="true">Available</option>
+                        <option value="false">Unavailable</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="agentShiftStart">Shift Start</label>
+                    <input type="datetime-local" id="agentShiftStart">
+                </div>
+                <div>
+                    <label for="agentShiftEnd">Shift End</label>
+                    <input type="datetime-local" id="agentShiftEnd">
+                </div>
+                <div class="form-full">
+                    <label for="agentWorkingDays">Working Days</label>
+                    <input type="text" id="agentWorkingDays" placeholder="Mon, Tue, Wed">
+                </div>
+                <div class="form-full" id="agentPasswordWrapper">
+                    <label for="agentPassword">Temporary Password</label>
+                    <input type="password" id="agentPassword" minlength="8" placeholder="Auto-generate" required>
+                </div>
+            </div>
+            <div class="form-footer">
+                <button type="button" class="ghost-button" onclick="closeModal('agentModal')">Cancel</button>
+                <button type="submit" class="btn">Save Agent</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="customerModal">
+    <div class="modal">
+        <button class="modal-close" onclick="closeModal('customerModal')">×</button>
+        <h2 id="customerModalTitle">Add Customer</h2>
+        <form id="customerForm">
+            <input type="hidden" id="customerId">
+            <div class="form-grid">
+                <div>
+                    <label for="customerFirstName">First Name</label>
+                    <input type="text" id="customerFirstName" required>
+                </div>
+                <div>
+                    <label for="customerLastName">Last Name</label>
+                    <input type="text" id="customerLastName" required>
+                </div>
+                <div>
+                    <label for="customerEmail">Email</label>
+                    <input type="email" id="customerEmail" required>
+                </div>
+                <div>
+                    <label for="customerPhone">Phone</label>
+                    <input type="tel" id="customerPhone" placeholder="+94123456789">
+                </div>
+                <div>
+                    <label for="customerType">Customer Type</label>
+                    <select id="customerType">
+                        <option value="INDIVIDUAL">Individual</option>
+                        <option value="BUSINESS">Business</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="customerContactMethod">Preferred Contact</label>
+                    <select id="customerContactMethod">
+                        <option value="EMAIL">Email</option>
+                        <option value="PHONE">Phone</option>
+                        <option value="SMS">SMS</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="customerTimezone">Time Zone</label>
+                    <input type="text" id="customerTimezone" value="UTC">
+                </div>
+                <div>
+                    <label for="customerLanguage">Language</label>
+                    <input type="text" id="customerLanguage" value="en">
+                </div>
+                <div class="form-full">
+                    <label for="customerAddress">Address</label>
+                    <textarea id="customerAddress" placeholder="Customer mailing address..."></textarea>
+                </div>
+                <div class="form-full" id="customerPasswordWrapper">
+                    <label for="customerPassword">Temporary Password</label>
+                    <input type="password" id="customerPassword" minlength="8" placeholder="Temp password" required>
+                </div>
+            </div>
+            <div class="form-footer">
+                <button type="button" class="ghost-button" onclick="closeModal('customerModal')">Cancel</button>
+                <button type="submit" class="btn">Save Customer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    let currentUser = null;
+    let userToken = null;
+    let agentCache = [];
+    let customerCache = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+        userToken = localStorage.getItem('token');
+        currentUser = JSON.parse(localStorage.getItem('user'));
+
+        if (!userToken || !currentUser || currentUser.role !== 'COMPANY_ADMIN') {
+            window.location.href = '/';
+            return;
+        }
+
+        document.getElementById('companyCode').textContent = currentUser.companyId || '-';
+        loadAgents();
+        loadCustomers();
+    });
+
+    function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/';
+    }
+
+    function switchTab(tab) {
+        const agentsTab = document.getElementById('agentsTab');
+        const customersTab = document.getElementById('customersTab');
+        const agentsSection = document.getElementById('agentsSection');
+        const customersSection = document.getElementById('customersSection');
+
+        if (tab === 'agents') {
+            agentsTab.classList.add('active');
+            customersTab.classList.remove('active');
+            agentsSection.style.display = 'block';
+            customersSection.style.display = 'none';
+        } else {
+            customersTab.classList.add('active');
+            agentsTab.classList.remove('active');
+            customersSection.style.display = 'block';
+            agentsSection.style.display = 'none';
+        }
+    }
+
+    function normalizeDateTimeLocal(value) {
+        if (!value) {
+            return null;
+        }
+
+        const trimmed = value.trim();
+        if (!trimmed) {
+            return null;
+        }
+
+        if (trimmed.length === 16) {
+            return `${trimmed}:00`;
+        }
+        return trimmed;
+    }
+
+    function serializeWorkingDaysInput(rawValue) {
+        const trimmed = (rawValue || '').trim();
+        if (!trimmed) {
+            return '[]';
+        }
+
+        try {
+            const parsed = JSON.parse(trimmed);
+            if (Array.isArray(parsed)) {
+                return JSON.stringify(parsed.map(item => String(item).trim()).filter(Boolean));
+            }
+        } catch (e) {
+        }
+
+        const tokens = trimmed
+            .split(/[;,\n]+|\s{2,}/)
+            .map(token => token.trim())
+            .filter(Boolean);
+
+        if (!tokens.length) {
+            tokens.push(trimmed);
+        }
+
+        return JSON.stringify(tokens);
+    }
+
+    function formatWorkingDaysForInput(value) {
+        if (!value) {
+            return '';
+        }
+
+        try {
+            const parsed = JSON.parse(value);
+            if (Array.isArray(parsed)) {
+                return parsed.join(', ');
+            }
+        } catch (e) {
+        }
+
+        return value;
+    }
+
+    async function parseJsonResponse(response) {
+        const clone = response.clone();
+        try {
+            return await response.json();
+        } catch (jsonError) {
+            try {
+                const text = await clone.text();
+                if (!text) {
+                    return {};
+                }
+                return { message: text };
+            } catch (textError) {
+                return {};
+            }
+        }
+    }
+
+    async function loadAgents() {
+        try {
+            const response = await fetch(`/api/company-admin/agents?companyId=${currentUser.companyId}`, {
+                headers: {
+                    'Authorization': `Bearer ${userToken}`
+                }
+            });
+            if (!response.ok) throw new Error('Unable to load agents');
+            agentCache = await response.json();
+            renderAgents();
+        } catch (error) {
+            showToast(error.message, true);
+            document.getElementById('agentsTableBody').innerHTML = `<tr><td colspan="7" class="empty-state">${error.message}</td></tr>`;
+        }
+    }
+
+    function renderAgents() {
+        const tbody = document.getElementById('agentsTableBody');
+        if (!agentCache.length) {
+            tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No support agents yet. Create the first agent!</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = agentCache.map(agent => `
+            <tr>
+                <td>${agent.firstName || ''} ${agent.lastName || ''}</td>
+                <td>${agent.email || '-'}</td>
+                <td>${agent.phone || '-'}</td>
+                <td>${agent.department || '-'}</td>
+                <td>${agent.currentTicketCount || 0} / ${agent.maxConcurrentTickets || 0}</td>
+                <td>
+                    <span class="status-chip ${agent.isAvailable ? 'status-active' : 'status-inactive'}">
+                        ${agent.isAvailable ? 'Available' : 'Unavailable'}
+                    </span>
+                </td>
+                <td style="text-align:right;">
+                    <button class="btn-secondary btn" onclick="editAgent(${agent.id})">Edit</button>
+                    <button class="btn" style="background:#f5576c" onclick="deleteAgent(${agent.id})">Delete</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    async function loadCustomers() {
+        try {
+            const response = await fetch(`/api/company-admin/customers?companyId=${currentUser.companyId}`, {
+                headers: {
+                    'Authorization': `Bearer ${userToken}`
+                }
+            });
+            if (!response.ok) throw new Error('Unable to load customers');
+            customerCache = await response.json();
+            renderCustomers();
+        } catch (error) {
+            showToast(error.message, true);
+            document.getElementById('customersTableBody').innerHTML = `<tr><td colspan="7" class="empty-state">${error.message}</td></tr>`;
+        }
+    }
+
+    function renderCustomers() {
+        const tbody = document.getElementById('customersTableBody');
+        if (!customerCache.length) {
+            tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No customers found. Invite your first customer.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = customerCache.map(customer => `
+            <tr>
+                <td>${customer.firstName || ''} ${customer.lastName || ''}</td>
+                <td>${customer.email || '-'}</td>
+                <td>${customer.phone || '-'}</td>
+                <td>${customer.customerType || '-'}</td>
+                <td>${customer.totalTickets || 0}</td>
+                <td>${customer.satisfactionScore != null ? customer.satisfactionScore.toFixed(2) : '-'}</td>
+                <td style="text-align:right;">
+                    <button class="btn-secondary btn" onclick="editCustomer(${customer.id})">Edit</button>
+                    <button class="btn" style="background:#f5576c" onclick="deleteCustomer(${customer.id})">Delete</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function openAgentModal(agent = null) {
+        document.getElementById('agentModal').classList.add('show');
+        const title = document.getElementById('agentModalTitle');
+        const passwordWrapper = document.getElementById('agentPasswordWrapper');
+        const passwordInput = document.getElementById('agentPassword');
+        const form = document.getElementById('agentForm');
+        form.reset();
+
+        if (agent) {
+            title.textContent = 'Edit Support Agent';
+            passwordWrapper.style.display = 'none';
+            passwordInput.required = false;
+            passwordInput.value = '';
+            passwordInput.disabled = true;
+            document.getElementById('agentId').value = agent.id;
+            document.getElementById('agentFirstName').value = agent.firstName || '';
+            document.getElementById('agentLastName').value = agent.lastName || '';
+            document.getElementById('agentEmail').value = agent.email || '';
+            document.getElementById('agentEmail').disabled = true;
+            document.getElementById('agentPhone').value = agent.phone || '';
+            document.getElementById('agentDepartment').value = agent.department || '';
+            document.getElementById('agentSpecialization').value = agent.specialization || '';
+            document.getElementById('agentMaxTickets').value = agent.maxConcurrentTickets || 10;
+            document.getElementById('agentAvailability').value = agent.isAvailable ? 'true' : 'false';
+            document.getElementById('agentShiftStart').value = agent.shiftStart ? agent.shiftStart.replace(' ', 'T').substring(0, 16) : '';
+            document.getElementById('agentShiftEnd').value = agent.shiftEnd ? agent.shiftEnd.replace(' ', 'T').substring(0, 16) : '';
+            document.getElementById('agentWorkingDays').value = formatWorkingDaysForInput(agent.workingDays);
+        } else {
+            title.textContent = 'Add Support Agent';
+            passwordWrapper.style.display = 'block';
+            passwordInput.required = true;
+            passwordInput.disabled = false;
+            document.getElementById('agentEmail').disabled = false;
+            document.getElementById('agentMaxTickets').value = 10;
+            document.getElementById('agentAvailability').value = 'true';
+        }
+    }
+
+    function openCustomerModal(customer = null) {
+        document.getElementById('customerModal').classList.add('show');
+        const title = document.getElementById('customerModalTitle');
+        const passwordWrapper = document.getElementById('customerPasswordWrapper');
+        const passwordInput = document.getElementById('customerPassword');
+        const form = document.getElementById('customerForm');
+        form.reset();
+
+        if (customer) {
+            title.textContent = 'Edit Customer';
+            passwordWrapper.style.display = 'none';
+            passwordInput.required = false;
+            passwordInput.value = '';
+            passwordInput.disabled = true;
+            document.getElementById('customerId').value = customer.id;
+            document.getElementById('customerFirstName').value = customer.firstName || '';
+            document.getElementById('customerLastName').value = customer.lastName || '';
+            document.getElementById('customerEmail').value = customer.email || '';
+            document.getElementById('customerEmail').disabled = true;
+            document.getElementById('customerPhone').value = customer.phone || '';
+            document.getElementById('customerType').value = customer.customerType || 'INDIVIDUAL';
+            document.getElementById('customerContactMethod').value = customer.preferredContactMethod || 'EMAIL';
+            document.getElementById('customerTimezone').value = customer.timeZone || 'UTC';
+            document.getElementById('customerLanguage').value = customer.languagePreference || 'en';
+            document.getElementById('customerAddress').value = customer.address || '';
+        } else {
+            title.textContent = 'Add Customer';
+            passwordWrapper.style.display = 'block';
+            passwordInput.required = true;
+            passwordInput.disabled = false;
+            document.getElementById('customerEmail').disabled = false;
+            document.getElementById('customerTimezone').value = 'UTC';
+            document.getElementById('customerLanguage').value = 'en';
+        }
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('show');
+    }
+
+    document.getElementById('agentForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const agentId = document.getElementById('agentId').value;
+        const payload = {
+            companyId: currentUser.companyId,
+            firstName: document.getElementById('agentFirstName').value.trim(),
+            lastName: document.getElementById('agentLastName').value.trim(),
+            email: document.getElementById('agentEmail').value.trim(),
+            phone: document.getElementById('agentPhone').value.trim(),
+            department: document.getElementById('agentDepartment').value.trim(),
+            specialization: document.getElementById('agentSpecialization').value.trim(),
+            maxConcurrentTickets: parseInt(document.getElementById('agentMaxTickets').value, 10) || 10,
+            isAvailable: document.getElementById('agentAvailability').value === 'true',
+            shiftStart: normalizeDateTimeLocal(document.getElementById('agentShiftStart').value),
+            shiftEnd: normalizeDateTimeLocal(document.getElementById('agentShiftEnd').value),
+            workingDays: serializeWorkingDaysInput(document.getElementById('agentWorkingDays').value)
+        };
+
+        try {
+            let response;
+            if (agentId) {
+                response = await fetch(`/api/company-admin/agents/${agentId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                payload.password = document.getElementById('agentPassword').value.trim();
+                response = await fetch('/api/company-admin/agents/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+            }
+
+            const result = await parseJsonResponse(response);
+            if (!response.ok) {
+                throw new Error(result?.error || result?.message || 'Unable to save agent');
+            }
+
+            closeModal('agentModal');
+            showToast(agentId ? 'Agent updated successfully' : 'Agent created successfully');
+            await loadAgents();
+        } catch (error) {
+            showToast(error.message, true);
+        }
+    });
+
+    document.getElementById('customerForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const customerId = document.getElementById('customerId').value;
+        const payload = {
+            firstName: document.getElementById('customerFirstName').value.trim(),
+            lastName: document.getElementById('customerLastName').value.trim(),
+            email: document.getElementById('customerEmail').value.trim(),
+            phone: document.getElementById('customerPhone').value.trim(),
+            customerType: document.getElementById('customerType').value,
+            preferredContactMethod: document.getElementById('customerContactMethod').value,
+            timeZone: document.getElementById('customerTimezone').value.trim() || 'UTC',
+            languagePreference: document.getElementById('customerLanguage').value.trim() || 'en',
+            address: document.getElementById('customerAddress').value.trim()
+        };
+
+        try {
+            let response;
+            if (customerId) {
+                response = await fetch(`/api/company-admin/customers/${customerId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                payload.password = document.getElementById('customerPassword').value.trim();
+                response = await fetch(`/api/company-admin/customers?companyId=${currentUser.companyId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+            }
+
+            const result = await parseJsonResponse(response);
+            if (!response.ok) {
+                throw new Error(result?.error || result?.message || 'Unable to save customer');
+            }
+
+            closeModal('customerModal');
+            showToast(customerId ? 'Customer updated successfully' : 'Customer created successfully');
+            await loadCustomers();
+        } catch (error) {
+            showToast(error.message, true);
+        }
+    });
+
+    function editAgent(id) {
+        const agent = agentCache.find(item => item.id === id);
+        if (!agent) {
+            showToast('Unable to locate agent details', true);
+            return;
+        }
+        openAgentModal(agent);
+    }
+
+    async function deleteAgent(id) {
+        if (!confirm('Delete this agent? They will lose access immediately.')) return;
+        try {
+            const response = await fetch(`/api/company-admin/agents/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${userToken}`
+                }
+            });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(result.error || 'Unable to delete agent');
+            showToast('Agent deleted');
+            await loadAgents();
+        } catch (error) {
+            showToast(error.message, true);
+        }
+    }
+
+    function editCustomer(id) {
+        const customer = customerCache.find(item => item.id === id);
+        if (!customer) {
+            showToast('Unable to locate customer details', true);
+            return;
+        }
+        openCustomerModal(customer);
+    }
+
+    async function deleteCustomer(id) {
+        if (!confirm('Delete this customer and all associated data?')) return;
+        try {
+            const response = await fetch(`/api/company-admin/customers/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${userToken}`
+                }
+            });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(result.error || 'Unable to delete customer');
+            showToast('Customer deleted');
+            await loadCustomers();
+        } catch (error) {
+            showToast(error.message, true);
+        }
+    }
+
+    let toastTimeout;
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.style.background = isError ? 'rgba(239, 68, 68, 0.92)' : 'rgba(15, 23, 42, 0.92)';
+        toast.classList.add('show');
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => toast.classList.remove('show'), 3200);
+    }
+</script>
+</body>
+</html>

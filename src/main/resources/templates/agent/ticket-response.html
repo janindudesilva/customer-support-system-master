@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Respond to Ticket</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div th:replace="common/header :: header"></div>
+    
+    <div class="dashboard-container">
+        <div th:replace="common/sidebar :: sidebar"></div>
+        
+        <div class="main-content">
+            <div class="ticket-header">
+                <h1 th:text="${'Ticket #' + ticket.ticketNumber}">Ticket #TKT-20230101-000001</h1>
+                <div class="ticket-badges">
+                    <span class="badge" th:classappend="${'badge-' + ticket.status.toString().toLowerCase()}" th:text="${ticket.status}">OPEN</span>
+                    <span class="badge" th:classappend="${'badge-priority-' + ticket.priority.toString().toLowerCase()}" th:text="${ticket.priority}">MEDIUM</span>
+                </div>
+            </div>
+            
+            <div class="ticket-details">
+                <div class="detail-row">
+                    <div class="detail-group">
+                        <label>Customer:</label>
+                        <span th:text="${ticket.customerName}">John Doe</span>
+                    </div>
+                    <div class="detail-group">
+                        <label>Created:</label>
+                        <span th:text="${#temporals.format(ticket.createdAt, 'yyyy-MM-dd HH:mm')}">2023-01-01 12:00</span>
+                    </div>
+                    <div class="detail-group">
+                        <label>Last Activity:</label>
+                        <span th:text="${#temporals.format(ticket.lastActivity, 'yyyy-MM-dd HH:mm')}">2023-01-01 12:00</span>
+                    </div>
+                    <div class="detail-group">
+                        <label>Category:</label>
+                        <span th:text="${ticket.categoryName != null ? ticket.categoryName : 'Uncategorized'}">Technical Support</span>
+                    </div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-group full-width">
+                        <label>Title:</label>
+                        <span th:text="${ticket.title}">Issue with login</span>
+                    </div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-group full-width">
+                        <label>Description:</label>
+                        <div class="description-box" th:text="${ticket.description}">
+                            I am having trouble logging into my account. I keep getting an error message saying "Invalid credentials" even though I am sure my password is correct.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-row" th:if="${ticket.attachments != null and ticket.attachments != ''}">
+                    <div class="detail-group full-width">
+                        <label>Attachments:</label>
+                        <div class="attachments-box">
+                            <div th:each="attachment : ${attachments}" class="attachment-item">
+                                <a th:href="${attachment.url}" target="_blank" th:text="${attachment.name}">screenshot.png</a>
+                                <span class="attachment-size" th:text="${attachment.size}">250KB</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="response-history">
+                <h2>Response History</h2>
+                
+                <div class="response-thread">
+                    <div th:each="response : ${responses}" class="response-item" th:classappend="${response.userId == currentUserId ? 'agent-response' : 'customer-response'}">
+                        <div class="response-header">
+                            <span class="response-user" th:text="${response.userName}">John Doe</span>
+                            <span class="response-time" th:text="${#temporals.format(response.createdAt, 'yyyy-MM-dd HH:mm')}">2023-01-01 12:00</span>
+                            <span class="response-type" th:if="${response.responseType.name() == 'INTERNAL_NOTE'}">(Internal Note)</span>
+                        </div>
+                        <div class="response-content" th:text="${response.message}">
+                            This is a response message.
+                        </div>
+                        <div class="response-attachments" th:if="${response.attachments != null and response.attachments != ''}">
+                            <div th:each="attachment : ${responseAttachments[response.id]}" class="attachment-item">
+                                <a th:href="${attachment.url}" target="_blank" th:text="${attachment.name}">response_file.pdf</a>
+                                <span class="attachment-size" th:text="${attachment.size}">150KB</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="no-data-message" th:if="${responses.empty}">
+                    <p>No responses yet. Be the first to respond.</p>
+                </div>
+            </div>
+            
+            <div class="response-form">
+                <h2>Add Response</h2>
+                
+                <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+                <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+                
+                <form th:action="@{/api/agents/tickets/{ticketId}/responses(ticketId=${ticket.id})}" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="ticketId" th:value="${ticket.id}">
+                    <input type="hidden" name="userId" th:value="${currentUserId}">
+                    
+                    <div class="form-group">
+                        <label for="responseType">Response Type:</label>
+                        <select id="responseType" name="responseType">
+                            <option value="AGENT_REPLY" selected>Customer Reply</option>
+                            <option value="INTERNAL_NOTE">Internal Note</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message">Message:</label>
+                        <textarea id="message" name="message" rows="6" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="attachments">Attachments:</label>
+                        <input type="file" id="attachments" name="files" multiple>
+                        <p class="help-text">You can upload up to 5 files (max 5MB each). Accepted formats: jpg, png, pdf, doc, docx, txt</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="isPublic" name="isPublic" checked>
+                            <span>Visible to customer</span>
+                        </label>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn primary-btn">Send Response</button>
+                        
+                        <div class="status-actions">
+                            <button type="button" class="btn info-btn" th:if="${ticket.status.name() == 'OPEN'}" th:onclick="'updateStatus(' + ${ticket.id} + ', \'IN_PROGRESS\')'" onclick="return false;">Mark In Progress</button>
+                            <button type="button" class="btn warning-btn" th:if="${ticket.status.name() == 'IN_PROGRESS'}" th:onclick="'updateStatus(' + ${ticket.id} + ', \'PENDING_CUSTOMER\')'" onclick="return false;">Pending Customer</button>
+                            <button type="button" class="btn success-btn" th:if="${ticket.status.name() != 'RESOLVED' && ticket.status.name() != 'CLOSED'}" th:onclick="'resolveTicket(' + ${ticket.id} + ')'" onclick="return false;">Mark Resolved</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="common/footer :: footer"></div>
+    <script src="/js/ticket-response.js"></script>
+</body>
+</html>

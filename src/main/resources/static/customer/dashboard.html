@@ -1,0 +1,2764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oryzo Customer Portal</title>
+    <style>
+        :root {
+            --color-bg: #05060b;
+            --color-surface: rgba(13, 17, 23, 0.85);
+            --color-surface-alt: rgba(22, 27, 34, 0.85);
+            --color-border: #232a35;
+            --color-border-subtle: rgba(88, 166, 255, 0.12);
+            --color-fg: #e6edf3;
+            --color-fg-muted: #9da6b7;
+            --color-accent: #58a6ff;
+            --color-purple: #a371f7;
+            --color-success: #3fb950;
+            --color-warning: #f2cc60;
+            --color-danger: #f85149;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--color-bg);
+            color: var(--color-fg);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: -40% -60% -30% -60%;
+            background: radial-gradient(circle at 18% 18%, rgba(121, 192, 255, 0.35), transparent 20%),
+                        radial-gradient(circle at 78% 12%, rgba(167, 119, 255, 0.3), transparent 50%),
+                        radial-gradient(circle at 50% 90%, rgba(247, 120, 186, 0.22), transparent 10%);
+            z-index: 0;
+            filter: blur(140px);
+            opacity: 0.7;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: rgba(13, 17, 23, 0.85);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.45rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: var(--color-fg);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--color-fg-muted);
+        }
+
+        .logout-btn {
+            background: linear-gradient(120deg, rgba(121, 192, 255, 0.12), rgba(167, 119, 255, 0.18));
+            border: 1px solid rgba(88, 166, 255, 0.35);
+            color: var(--color-fg);
+            padding: 0.55rem 1.25rem;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px rgba(88, 166, 255, 0.25);
+            border-color: rgba(121, 192, 255, 0.55);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2.5rem 2rem 4rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.75rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border-subtle);
+            border-radius: 18px;
+            padding: 1.75rem;
+            box-shadow: 0 18px 40px rgba(5, 6, 11, 0.45);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::after {
+            content: "";
+            position: absolute;
+            inset: 1px;
+            border-radius: 17px;
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.08), transparent 65%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 24px 50px rgba(5, 6, 11, 0.55);
+            border-color: rgba(167, 119, 255, 0.32);
+        }
+
+        .card:hover::after {
+            opacity: 1;
+        }
+
+        .card h3 {
+            color: var(--color-fg);
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .card p {
+            color: var(--color-fg-muted);
+            line-height: 1.6;
+            margin-bottom: 1.25rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--color-purple), var(--color-accent));
+            color: var(--color-fg);
+            border: none;
+            padding: 0.75rem 1.6rem;
+            border-radius: 999px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 10px 24px rgba(79, 110, 255, 0.25);
+            margin: 0.1rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 36px rgba(89, 125, 255, 0.35);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, rgba(121, 192, 255, 0.22), rgba(167, 119, 255, 0.35));
+            border: 1px solid rgba(121, 192, 255, 0.45);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, rgba(248, 81, 73, 0.85), rgba(241, 105, 122, 0.85));
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, rgba(242, 204, 96, 0.85), rgba(255, 180, 86, 0.85));
+            color: #1f1f1f;
+        }
+
+        .ticket-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-top: 0.65rem;
+        }
+
+        .review-summary {
+            background: rgba(15, 22, 32, 0.8);
+            border: 1px solid rgba(88, 166, 255, 0.12);
+            border-radius: 14px;
+            padding: 1.1rem;
+            margin-top: 0.85rem;
+        }
+
+        .review-summary p {
+            margin-top: 0.5rem;
+            color: var(--color-fg-muted);
+            line-height: 1.6;
+        }
+
+        .review-summary small {
+            display: block;
+            margin-top: 0.6rem;
+            color: rgba(157, 166, 183, 0.8);
+        }
+
+        .star-rating {
+            display: inline-flex;
+            gap: 0.35rem;
+        }
+
+        .star-rating button {
+            background: none;
+            border: none;
+            font-size: 1.75rem;
+            color: rgba(157, 166, 183, 0.35);
+            cursor: pointer;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        .star-rating button:hover,
+        .star-rating button:focus {
+            color: #facc15;
+            transform: scale(1.08);
+        }
+
+        .star-rating button.active {
+            color: #f1b722;
+        }
+
+        .star-rating.read-only button {
+            cursor: default;
+            pointer-events: none;
+        }
+
+        .review-edit-window {
+            display: block;
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: #f2a365;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: var(--color-surface-alt);
+            border: 1px solid rgba(35, 42, 53, 0.9);
+            border-radius: 16px;
+            padding: 1.6rem;
+            text-align: center;
+            box-shadow: inset 0 0 0 1px rgba(88, 166, 255, 0.08);
+        }
+
+        .stat-number {
+            font-size: 2.1rem;
+            font-weight: 700;
+            color: var(--color-accent);
+        }
+
+        .stat-label {
+            margin-top: 0.45rem;
+            color: var(--color-fg-muted);
+            letter-spacing: 0.3px;
+        }
+
+        .ticket-list {
+            background: var(--color-surface);
+            border-radius: 20px;
+            padding: 1.75rem;
+            border: 1px solid rgba(35, 42, 53, 0.85);
+            box-shadow: 0 22px 55px rgba(5, 6, 11, 0.55);
+        }
+
+        .ticket-item {
+            border: 1px solid var(--color-border-subtle);
+            border-radius: 14px;
+            padding: 1.1rem 1.25rem;
+            background: rgba(12, 18, 26, 0.85);
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .ticket-item:hover {
+            transform: translateY(-2px);
+            border-color: rgba(167, 119, 255, 0.35);
+            box-shadow: 0 16px 32px rgba(5, 6, 11, 0.45);
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.6rem;
+            gap: 1rem;
+        }
+
+        .ticket-title {
+            font-weight: 600;
+            color: var(--color-fg);
+            font-size: 1.05rem;
+        }
+
+        .ticket-status {
+            padding: 0.35rem 0.9rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: capitalize;
+            letter-spacing: 0.3px;
+        }
+
+        .status-open { background: rgba(88, 166, 255, 0.18); color: var(--color-accent); }
+        .status-in-progress { background: rgba(242, 204, 96, 0.18); color: var(--color-warning); }
+        .status-resolved { background: rgba(63, 185, 80, 0.18); color: var(--color-success); }
+        .status-closed { background: rgba(167, 119, 255, 0.18); color: rgba(206, 171, 255, 0.95); }
+
+        .ticket-meta {
+            color: var(--color-fg-muted);
+            font-size: 0.9rem;
+            line-height: 1.55;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--color-fg-muted);
+        }
+
+        .error {
+            background: rgba(248, 81, 73, 0.12);
+            color: var(--color-danger);
+            border: 1px solid rgba(248, 81, 73, 0.35);
+            padding: 1rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+        }
+
+        .success {
+            background: rgba(63, 185, 80, 0.12);
+            color: var(--color-success);
+            border: 1px solid rgba(63, 185, 80, 0.35);
+            padding: 1rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            inset: 0;
+            padding: 2rem 1.5rem;
+            background-color: rgba(2, 6, 12, 0.85);
+            backdrop-filter: blur(12px);
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: rgba(13, 18, 28, 0.95);
+            margin: auto;
+            padding: 2rem;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 720px;
+            max-height: calc(100vh - 3rem);
+            position: relative;
+            overflow-y: auto;
+            border: 1px solid rgba(88, 166, 255, 0.2);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+        }
+
+        .close {
+            position: absolute;
+            right: 16px;
+            top: 16px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: rgba(157, 166, 183, 0.8);
+            transition: color 0.2s ease;
+        }
+
+        .close:hover {
+            color: var(--color-fg);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(88, 166, 255, 0.25);
+            border-radius: 10px;
+            font-size: 1rem;
+            background: rgba(10, 14, 20, 0.85);
+            color: var(--color-fg);
+        }
+
+        .form-group textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: rgba(167, 119, 255, 0.5);
+            box-shadow: 0 0 0 3px rgba(167, 119, 255, 0.25);
+        }
+
+        .priority-high { color: rgba(248, 81, 73, 0.95); }
+        .priority-medium { color: rgba(242, 204, 96, 0.95); }
+        .priority-low { color: rgba(63, 185, 80, 0.9); }
+
+        .faq-list {
+            max-height: 60vh;
+            overflow-y: auto;
+            margin-top: 1rem;
+            border: 1px solid var(--color-border-subtle);
+            border-radius: 16px;
+            background: rgba(12, 18, 26, 0.75);
+        }
+
+        .faq-list details {
+            border-bottom: 1px solid rgba(35, 42, 53, 0.75);
+            padding: 1rem 1.25rem;
+            transition: background 0.2s ease;
+        }
+
+        .faq-list details:last-child {
+            border-bottom: none;
+        }
+
+        .faq-list details[open] {
+            background: rgba(14, 20, 28, 0.95);
+            box-shadow: inset 0 0 0 1px rgba(88, 166, 255, 0.12);
+        }
+
+        .faq-question {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .faq-question-title {
+            font-weight: 600;
+            color: var(--color-fg);
+            font-size: 1rem;
+        }
+
+        .faq-meta {
+            font-size: 0.85rem;
+            color: var(--color-fg-muted);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .faq-answer {
+            margin-top: 0.75rem;
+            color: var(--color-fg-muted);
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .faq-keywords {
+            margin-top: 0.75rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .faq-chip {
+            background: rgba(167, 119, 255, 0.16);
+            color: rgba(167, 119, 255, 0.95);
+            padding: 0.35rem 0.65rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            letter-spacing: 0.02em;
+        }
+
+        .ticket-detail-body {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .ticket-detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.9rem;
+            padding: 0.85rem;
+            background: rgba(13, 19, 28, 0.85);
+            border-radius: 12px;
+            border: 1px solid rgba(35, 42, 53, 0.8);
+        }
+
+        .ticket-detail-section {
+            background: rgba(10, 14, 20, 0.85);
+            border-radius: 12px;
+            border: 1px solid rgba(88, 166, 255, 0.12);
+            padding: 1rem 1.25rem;
+        }
+
+        .ticket-detail-section h3 {
+            margin-bottom: 0.5rem;
+            color: var(--color-fg);
+            font-weight: 600;
+        }
+
+        .ticket-detail-section p {
+            line-height: 1.6;
+            color: var(--color-fg-muted);
+            white-space: pre-wrap;
+        }
+
+        .conversation-section {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .conversation-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+
+        .conversation-header h3 {
+            margin: 0;
+            color: var(--color-fg);
+        }
+
+        .conversation-note {
+            color: var(--color-fg-muted);
+            font-size: 0.85rem;
+        }
+
+        .conversation-messages {
+            max-height: 340px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding-right: 0.5rem;
+        }
+
+        .conversation-message {
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            background: rgba(13, 18, 28, 0.85);
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            box-shadow: 0 8px 18px rgba(5, 6, 11, 0.4);
+        }
+
+        .conversation-message.agent {
+            align-self: flex-start;
+            border-color: rgba(88, 166, 255, 0.35);
+            background: rgba(88, 166, 255, 0.15);
+        }
+
+        .conversation-message.customer {
+            align-self: flex-end;
+            border-color: rgba(63, 185, 80, 0.35);
+            background: rgba(63, 185, 80, 0.15);
+        }
+
+        .conversation-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--color-fg-muted);
+            gap: 1rem;
+        }
+
+        .conversation-text {
+            color: var(--color-fg);
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .conversation-empty {
+            border: 1px dashed rgba(148, 163, 184, 0.4);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            color: var(--color-fg-muted);
+            background: rgba(12, 18, 26, 0.75);
+        }
+
+        .conversation-form textarea {
+            width: 100%;
+            min-height: 120px;
+            resize: vertical;
+            border: 1px solid rgba(88, 166, 255, 0.25);
+            border-radius: 10px;
+            padding: 0.75rem;
+            font-size: 1rem;
+            font-family: inherit;
+            background: rgba(10, 14, 20, 0.85);
+            color: var(--color-fg);
+        }
+
+        .conversation-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .notice {
+            background: rgba(88, 166, 255, 0.12);
+            border: 1px solid rgba(88, 166, 255, 0.4);
+            color: var(--color-accent);
+            padding: 0.85rem 1.1rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+
+        .knowledge-base-header {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .knowledge-base-header .form-group {
+            margin-bottom: 0;
+        }
+
+        .knowledge-base-header input {
+            border-radius: 999px;
+            padding-left: 1.5rem;
+        }
+
+        .empty-state {
+            padding: 2.5rem 1rem;
+            text-align: center;
+            color: var(--color-fg-muted);
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .container {
+                padding: 2rem 1.5rem 3rem;
+            }
+
+            .ticket-item {
+                padding: 1rem;
+            }
+
+            .modal {
+                padding: 1.5rem 1rem;
+            }
+
+            .modal-content {
+                padding: 1.6rem;
+                border-radius: 16px;
+                max-height: calc(100vh - 2rem);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🎟️ Oryzo Customer Portal</div>
+        <div class="user-info">
+            <span id="userName">Loading...</span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="stats" id="statsContainer">
+            <div class="stat-card">
+                <div class="stat-number" id="totalTickets">-</div>
+                <div class="stat-label">Total Tickets</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="openTickets">-</div>
+                <div class="stat-label">Open Tickets</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="resolvedTickets">-</div>
+                <div class="stat-label">Resolved</div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3>🎫 Create New Ticket</h3>
+                <p>Submit a new support request</p>
+                <button class="btn" onclick="showCreateTicketModal()">Create Ticket</button>
+            </div>
+            <div class="card">
+                <h3>📚 Knowledge Base</h3>
+                <p>Find answers to common questions</p>
+                <button class="btn btn-secondary" onclick="viewKnowledgeBase()">Browse FAQs</button>
+            </div>
+        </div>
+
+        <div class="ticket-list">
+            <h3>📋 My Tickets</h3>
+            <div id="ticketsContainer">
+                <div class="loading">Loading tickets...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Ticket Modal -->
+    <div id="createTicketModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('createTicketModal')">&times;</span>
+            <h2>Create New Ticket</h2>
+            <form id="createTicketForm">
+                <div class="form-group">
+                    <label for="ticketTitle">Title:</label>
+                    <input type="text" id="ticketTitle" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="ticketDescription">Description:</label>
+                    <textarea id="ticketDescription" name="description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="ticketPriority">Priority:</label>
+                    <select id="ticketPriority" name="priority">
+                        <option value="LOW">Low</option>
+                        <option value="MEDIUM" selected>Medium</option>
+                        <option value="HIGH">High</option>
+                        <option value="URGENT">Urgent</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ticketCategory">Category:</label>
+                    <select id="ticketCategory" name="categoryId">
+                        <option value="">Select category...</option>
+                    </select>
+                </div>
+                <div id="ticketError" class="error" style="display: none;"></div>
+                <div id="ticketSuccess" class="success" style="display: none;"></div>
+                <button type="submit" class="btn" style="width: 100%;">Create Ticket</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Ticket Modal -->
+    <div id="viewTicketModal" class="modal">
+        <div class="modal-content" style="max-width: 720px;">
+            <span class="close" onclick="closeModal('viewTicketModal')">&times;</span>
+            <h2>Ticket Details</h2>
+            <div id="viewTicketBody" class="ticket-detail-body">
+                <div class="loading">Loading ticket...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Ticket Modal -->
+    <div id="editTicketModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('editTicketModal')">&times;</span>
+            <h2>Edit Ticket</h2>
+            <form id="editTicketForm">
+                <div class="form-group">
+                    <label for="editTicketTitle">Title:</label>
+                    <input type="text" id="editTicketTitle" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="editTicketDescription">Description:</label>
+                    <textarea id="editTicketDescription" name="description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="editTicketPriority">Priority:</label>
+                    <select id="editTicketPriority" name="priority">
+                        <option value="LOW">Low</option>
+                        <option value="MEDIUM">Medium</option>
+                        <option value="HIGH">High</option>
+                        <option value="URGENT">Urgent</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editTicketCategory">Category:</label>
+                    <select id="editTicketCategory" name="categoryId">
+                        <option value="">Select category...</option>
+                    </select>
+                </div>
+                <div id="ticketEditError" class="error" style="display: none;"></div>
+                <div id="ticketEditSuccess" class="success" style="display: none;"></div>
+                <button type="submit" class="btn" style="width: 100%;">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Knowledge Base Modal -->
+    <div id="knowledgeBaseModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <span class="close" onclick="closeModal('knowledgeBaseModal')">&times;</span>
+            <div class="knowledge-base-header">
+                <h2>Knowledge Base</h2>
+                <p style="color:#6b7280; font-size:0.95rem;">Browse company curated FAQs to find quick answers before opening a ticket.</p>
+                <div class="form-group">
+                    <label for="faqSearchInput" style="font-weight:600; color:#4b5563;">Search FAQs</label>
+                    <input type="text" id="faqSearchInput" placeholder="Search by keywords, question or answer...">
+                </div>
+            </div>
+            <div id="faqListContainer" class="faq-list">
+                <div class="empty-state">Loading knowledge base...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Review Modal -->
+    <div id="reviewModal" class="modal">
+        <div class="modal-content" style="max-width: 520px;">
+            <span class="close" onclick="closeReviewModal()">&times;</span>
+            <h2 id="reviewModalTitle">Leave a Review</h2>
+            <p id="reviewModalSubtitle" style="margin-top: 0.25rem; color: #6b7280;"></p>
+            <form id="reviewForm" style="margin-top: 1rem;">
+                <div class="form-group">
+                    <label for="reviewRating">Overall Satisfaction</label>
+                    <div id="reviewRatingStars" class="star-rating" role="radiogroup" aria-label="Select a star rating">
+                        <button type="button" data-value="1" aria-label="1 star" onclick="setReviewRating(1)">★</button>
+                        <button type="button" data-value="2" aria-label="2 stars" onclick="setReviewRating(2)">★</button>
+                        <button type="button" data-value="3" aria-label="3 stars" onclick="setReviewRating(3)">★</button>
+                        <button type="button" data-value="4" aria-label="4 stars" onclick="setReviewRating(4)">★</button>
+                        <button type="button" data-value="5" aria-label="5 stars" onclick="setReviewRating(5)">★</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="reviewFeedback">Tell us about your experience (optional)</label>
+                    <textarea id="reviewFeedback" placeholder="Share what went well and how we can improve" maxlength="1000"></textarea>
+                </div>
+                <div id="reviewModalError" class="error" style="display:none;"></div>
+                <div id="reviewModalSuccess" class="success" style="display:none;"></div>
+                <button id="reviewSubmitButton" type="submit" class="btn" style="width:100%; margin-top:0.5rem;">Submit Review</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let userToken = null;
+        let currentCustomer = null;
+        let customerProfilePromise = null;
+        let knowledgeBaseFaqs = [];
+        let knowledgeBaseLoading = false;
+        let availableCategories = [];
+        let ticketsCache = [];
+        let currentEditingTicketId = null;
+        let currentViewingTicketId = null;
+        let currentConversationTicketId = null;
+        let ticketConversationCache = new Map();
+        let conversationSubmitting = false;
+    let reviewModalState = { mode: 'create', ticketId: null, reviewId: null, rating: 0 };
+    const REVIEW_EDIT_WINDOW_HOURS = 24;
+        const viewedFaqs = new Set();
+
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            userToken = localStorage.getItem('token');
+            currentUser = JSON.parse(localStorage.getItem('user'));
+            
+            if (!userToken || !currentUser || currentUser.role !== 'CUSTOMER') {
+                window.location.href = '/';
+                return;
+            }
+            
+            document.getElementById('userName').textContent = `${currentUser.firstName} ${currentUser.lastName}`;
+
+            const reviewForm = document.getElementById('reviewForm');
+            if (reviewForm && reviewForm.dataset.listenerAttached !== 'true') {
+                reviewForm.addEventListener('submit', handleReviewSubmit);
+                reviewForm.dataset.listenerAttached = 'true';
+            }
+            initializeStarRating(0);
+
+            const profile = await ensureCustomerProfile();
+            if (!profile) {
+                console.error('Failed to load customer profile for current user');
+                const ticketsContainer = document.getElementById('ticketsContainer');
+                if (ticketsContainer) {
+                    ticketsContainer.innerHTML = '<div class="error">We could not load your customer profile. Ticket actions may be unavailable.</div>';
+                }
+            }
+
+            await loadDashboardData();
+            await loadCategories();
+
+            const faqSearchInput = document.getElementById('faqSearchInput');
+            if (faqSearchInput) {
+                faqSearchInput.addEventListener('input', function(event) {
+                    renderKnowledgeBase(event.target.value);
+                });
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        }
+
+        async function fetchCustomerProfile() {
+            if (!currentUser || !currentUser.userId) {
+                throw new Error('Authenticated user context is missing');
+            }
+
+            const response = await fetch(`/api/customers/by-user/${currentUser.userId}`, {
+                headers: {
+                    'Authorization': `Bearer ${userToken}`
+                }
+            });
+
+            if (response.status === 404) {
+                throw new Error('Customer profile not found for this account');
+            }
+
+            if (!response.ok) {
+                const message = await response.text();
+                throw new Error(message || 'Failed to load customer profile');
+            }
+
+            return await response.json();
+        }
+
+        async function ensureCustomerProfile(forceRefresh = false) {
+            if (!forceRefresh && currentCustomer) {
+                return currentCustomer;
+            }
+
+            if (!customerProfilePromise || forceRefresh) {
+                customerProfilePromise = (async () => {
+                    try {
+                        const profile = await fetchCustomerProfile();
+                        currentCustomer = profile;
+                        return profile;
+                    } catch (error) {
+                        currentCustomer = null;
+                        throw error;
+                    } finally {
+                        customerProfilePromise = null;
+                    }
+                })();
+            }
+
+            try {
+                return await customerProfilePromise;
+            } catch (error) {
+                console.error('Failed to resolve customer profile:', error);
+                return null;
+            }
+        }
+
+        async function loadDashboardData() {
+            const ticketsContainer = document.getElementById('ticketsContainer');
+            
+            if (ticketsContainer) {
+                ticketsContainer.innerHTML = '<div class="loading">Loading tickets...</div>';
+            }
+
+            const customer = await ensureCustomerProfile();
+            if (!customer) {
+                if (ticketsContainer) {
+                    ticketsContainer.innerHTML = '<div class="error">We could not load your tickets because your customer profile is missing.</div>';
+                }
+                updateStats([]);
+                return;
+            }
+
+            try {
+                const ticketsResponse = await fetch(`/api/tickets/customer/${customer.id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+                
+                if (ticketsResponse.ok) {
+                    const tickets = await ticketsResponse.json();
+                    const ticketList = Array.isArray(tickets) ? tickets : [];
+                    ticketsCache = ticketList;
+                    displayTickets(ticketList);
+                    updateStats(ticketList);
+                } else if (ticketsContainer) {
+                    const errorPayload = await ticketsResponse.text();
+                    ticketsContainer.innerHTML = `<div class="error">Error loading tickets: ${escapeHtml(errorPayload || ticketsResponse.statusText)}</div>`;
+                    updateStats([]);
+                    ticketsCache = [];
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                if (ticketsContainer) {
+                    ticketsContainer.innerHTML = '<div class="error">Error loading data</div>';
+                }
+                updateStats([]);
+                ticketsCache = [];
+            }
+        }
+
+        function displayTickets(tickets) {
+            const container = document.getElementById('ticketsContainer');
+
+            if (!container) {
+                return;
+            }
+
+            if (!Array.isArray(tickets) || tickets.length === 0) {
+                container.innerHTML = '<div class="loading">No tickets found. Create your first ticket!</div>';
+                return;
+            }
+            
+            container.innerHTML = tickets.map(ticket => {
+                const statusValue = (ticket.status || 'OPEN').toUpperCase();
+                const priorityValue = (ticket.priority || 'MEDIUM').toUpperCase();
+                const statusClass = `status-${statusValue.toLowerCase().replace(/_/g, '-')}`;
+                const priorityClass = `priority-${priorityValue.toLowerCase()}`;
+                const createdOn = ticket.createdAt ? new Date(ticket.createdAt).toLocaleDateString() : '-';
+                const ticketNumber = ticket.ticketNumber ? escapeHtml(String(ticket.ticketNumber)) : '-';
+                const safeTitle = escapeHtml(ticket.title || 'Untitled Ticket');
+
+                return `
+                    <div class="ticket-item">
+                        <div class="ticket-header">
+                            <div class="ticket-title">${safeTitle}</div>
+                            <div class="ticket-status ${statusClass}">
+                                ${escapeHtml(statusValue.replace(/_/g, ' '))}
+                            </div>
+                        </div>
+                        <div class="ticket-meta">
+                            <strong>Priority:</strong> <span class="${priorityClass}">${escapeHtml(priorityValue)}</span> | 
+                            <strong>Created:</strong> ${escapeHtml(createdOn)} |
+                            <strong>Ticket #:</strong> ${ticketNumber}
+                        </div>
+                        <div class="ticket-actions">
+                            <button class="btn" onclick="viewTicket(${ticket.id})">View Details</button>
+                            ${ticket.canEdit ? `<button class="btn btn-secondary" onclick="openEditTicket(${ticket.id})">Edit</button>` : ''}
+                            ${ticket.canEdit ? `<button class="btn btn-danger" onclick="deleteTicket(${ticket.id})">Delete</button>` : ''}
+                            ${renderReviewActionButtons(ticket)}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderReviewActionButtons(ticket) {
+            if (!ticket) {
+                return '';
+            }
+
+            const status = String(ticket.status || '').toUpperCase();
+            if (status !== 'RESOLVED') {
+                return '';
+            }
+
+            const review = ticket.review || null;
+            const actions = [];
+
+            if (!review) {
+                actions.push(`<button class="btn btn-secondary" onclick="showReviewModal(${ticket.id}, 'create')">Leave Review</button>`);
+                return actions.join('');
+            }
+
+            if (isReviewEditable(review)) {
+                actions.push(`<button class="btn btn-warning" onclick="showReviewModal(${ticket.id}, 'edit')">Edit Review</button>`);
+            } else {
+                actions.push(`<span class="review-edit-window">Edit window ended ${escapeHtml(formatDateTime(review.createdAt))}</span>`);
+            }
+
+            actions.push(`<button class="btn btn-danger" onclick="confirmDeleteReview(${ticket.id})">Delete Review</button>`);
+            return actions.join('');
+        }
+
+        function updateStats(tickets) {
+            const total = tickets.length;
+            const open = tickets.filter(t => {
+                const status = (t.status || '').toUpperCase();
+                return status === 'OPEN' || status === 'IN_PROGRESS';
+            }).length;
+            const resolved = tickets.filter(t => (t.status || '').toUpperCase() === 'RESOLVED').length;
+            
+            document.getElementById('totalTickets').textContent = total;
+            document.getElementById('openTickets').textContent = open;
+            document.getElementById('resolvedTickets').textContent = resolved;
+        }
+
+        async function loadCategories() {
+            const categorySelect = document.getElementById('ticketCategory');
+            if (!categorySelect) {
+                return;
+            }
+
+            categorySelect.innerHTML = '<option value="">Loading categories...</option>';
+
+            const customer = await ensureCustomerProfile();
+            const companyId = customer?.companyId || currentUser?.companyId;
+
+            if (!companyId) {
+                categorySelect.innerHTML = '<option value="">Company not configured</option>';
+                availableCategories = [];
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/categories/company/${companyId}/active`, {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorMessage = await response.text();
+                    console.error('Failed to load categories:', errorMessage || response.statusText);
+                    categorySelect.innerHTML = '<option value="">Unable to load categories</option>';
+                    return;
+                }
+
+                const categories = await response.json();
+
+                if (!Array.isArray(categories) || categories.length === 0) {
+                    categorySelect.innerHTML = '<option value="">No categories available</option>';
+                    availableCategories = [];
+                    return;
+                }
+
+                categorySelect.innerHTML = '<option value="">Select category...</option>';
+                
+                availableCategories = categories;
+
+                categories.forEach(category => {
+                    if (!category || !category.id) {
+                        return;
+                    }
+                    const option = document.createElement('option');
+                    option.value = category.id;
+                    option.textContent = category.name || `Category #${category.id}`;
+                    categorySelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                categorySelect.innerHTML = '<option value="">Error loading categories</option>';
+                availableCategories = [];
+            }
+        }
+
+        function showCreateTicketModal() {
+            document.getElementById('createTicketModal').style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+            }
+
+            const ticketErrorEl = document.getElementById('ticketError');
+            if (ticketErrorEl) {
+                ticketErrorEl.style.display = 'none';
+            }
+
+            const ticketSuccessEl = document.getElementById('ticketSuccess');
+            if (ticketSuccessEl) {
+                ticketSuccessEl.style.display = 'none';
+            }
+
+            if (modalId === 'knowledgeBaseModal') {
+                const searchInput = document.getElementById('faqSearchInput');
+                if (searchInput) {
+                    searchInput.value = '';
+                }
+                if (knowledgeBaseFaqs.length) {
+                    renderKnowledgeBase();
+                } else {
+                    const container = document.getElementById('faqListContainer');
+                    if (container && !knowledgeBaseLoading) {
+                        container.innerHTML = '<div class="empty-state">Browse company curated FAQs to get quick answers.</div>';
+                    }
+                }
+            } else if (modalId === 'editTicketModal') {
+                const editForm = document.getElementById('editTicketForm');
+                if (editForm) {
+                    editForm.reset();
+                }
+
+                const editError = document.getElementById('ticketEditError');
+                const editSuccess = document.getElementById('ticketEditSuccess');
+
+                if (editError) {
+                    editError.style.display = 'none';
+                }
+                if (editSuccess) {
+                    editSuccess.style.display = 'none';
+                }
+
+                currentEditingTicketId = null;
+            } else if (modalId === 'viewTicketModal') {
+                const viewBody = document.getElementById('viewTicketBody');
+                if (viewBody) {
+                    viewBody.innerHTML = '';
+                }
+                currentViewingTicketId = null;
+            }
+        }
+
+        document.getElementById('createTicketForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const customer = await ensureCustomerProfile();
+
+            const ticketErrorEl = document.getElementById('ticketError');
+            const ticketSuccessEl = document.getElementById('ticketSuccess');
+            const submitButton = e.target.querySelector('button[type="submit"]');
+
+            if (submitButton) {
+                submitButton.disabled = true;
+            }
+
+            if (!customer) {
+                if (ticketSuccessEl) {
+                    ticketSuccessEl.style.display = 'none';
+                }
+                if (ticketErrorEl) {
+                    ticketErrorEl.textContent = 'Unable to locate your customer profile. Please contact support.';
+                    ticketErrorEl.style.display = 'block';
+                }
+                if (submitButton) {
+                    submitButton.disabled = false;
+                }
+                return;
+            }
+
+            const companyId = customer.companyId || currentUser.companyId;
+            if (!companyId) {
+                if (ticketSuccessEl) {
+                    ticketSuccessEl.style.display = 'none';
+                }
+                if (ticketErrorEl) {
+                    ticketErrorEl.textContent = 'Your company information is missing. Please contact support.';
+                    ticketErrorEl.style.display = 'block';
+                }
+                if (submitButton) {
+                    submitButton.disabled = false;
+                }
+                return;
+            }
+
+            const rawTitle = formData.get('title') || '';
+            const rawDescription = formData.get('description') || '';
+            const title = rawTitle.trim();
+            const description = rawDescription.trim();
+
+            if (ticketErrorEl) {
+                ticketErrorEl.style.display = 'none';
+            }
+            if (ticketSuccessEl) {
+                ticketSuccessEl.style.display = 'none';
+            }
+
+            if (title.length < 5) {
+                if (ticketErrorEl) {
+                    ticketErrorEl.textContent = 'Title must be at least 5 characters.';
+                    ticketErrorEl.style.display = 'block';
+                }
+                if (submitButton) {
+                    submitButton.disabled = false;
+                }
+                return;
+            }
+
+            if (description.length < 10) {
+                if (ticketErrorEl) {
+                    ticketErrorEl.textContent = 'Description must be at least 10 characters.';
+                    ticketErrorEl.style.display = 'block';
+                }
+                if (submitButton) {
+                    submitButton.disabled = false;
+                }
+                return;
+            }
+
+            const priority = (formData.get('priority') || 'MEDIUM').toString().trim().toUpperCase();
+            const categoryIdValue = formData.get('categoryId');
+
+            const ticketData = {
+                companyId: Number(companyId),
+                customerId: Number(customer.id),
+                title,
+                description,
+                priority,
+                categoryId: categoryIdValue ? parseInt(categoryIdValue, 10) : null,
+                source: 'WEB'
+            };
+            
+            try {
+                const response = await fetch('/api/customers/tickets', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(ticketData)
+                });
+
+                const rawPayload = await response.text();
+                let result = {};
+
+                if (rawPayload) {
+                    try {
+                        result = JSON.parse(rawPayload);
+                    } catch (parseError) {
+                        result = { message: rawPayload };
+                    }
+                }
+
+                if (response.ok) {
+                    if (ticketSuccessEl) {
+                        ticketSuccessEl.textContent = 'Ticket created successfully!';
+                        ticketSuccessEl.style.display = 'block';
+                    }
+                    if (ticketErrorEl) {
+                        ticketErrorEl.style.display = 'none';
+                    }
+                    e.target.reset();
+                    
+                    setTimeout(() => {
+                        closeModal('createTicketModal');
+                        loadDashboardData();
+                    }, 2000);
+                } else {
+                    if (ticketErrorEl) {
+                        const errorMessage = deriveTicketErrorMessage(result, rawPayload);
+                        ticketErrorEl.textContent = errorMessage;
+                        ticketErrorEl.style.display = 'block';
+                    }
+                    if (ticketSuccessEl) {
+                        ticketSuccessEl.style.display = 'none';
+                    }
+                }
+            } catch (error) {
+                if (ticketErrorEl) {
+                    ticketErrorEl.textContent = 'Network error. Please try again.';
+                    ticketErrorEl.style.display = 'block';
+                }
+                if (ticketSuccessEl) {
+                    ticketSuccessEl.style.display = 'none';
+                }
+            } finally {
+                if (submitButton) {
+                    submitButton.disabled = false;
+                }
+            }
+        });
+
+        document.getElementById('editTicketForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            if (!currentEditingTicketId) {
+                return;
+            }
+
+            const ticketErrorEl = document.getElementById('ticketEditError');
+            const ticketSuccessEl = document.getElementById('ticketEditSuccess');
+
+            if (ticketErrorEl) {
+                ticketErrorEl.style.display = 'none';
+            }
+            if (ticketSuccessEl) {
+                ticketSuccessEl.style.display = 'none';
+            }
+
+            const customer = await ensureCustomerProfile();
+            if (!customer) {
+                if (ticketErrorEl) {
+                    ticketErrorEl.textContent = 'Unable to locate your customer profile. Please contact support.';
+                    ticketErrorEl.style.display = 'block';
+                }
+                return;
+            }
+
+            const companyId = customer.companyId || currentUser.companyId;
+            if (!companyId) {
+                if (ticketErrorEl) {
+                    ticketErrorEl.textContent = 'Your company information is missing. Please contact support.';
+                    ticketErrorEl.style.display = 'block';
+                }
+                return;
+            }
+
+            const formData = new FormData(e.target);
+            const rawTitle = formData.get('title') || '';
+            const rawDescription = formData.get('description') || '';
+            const title = rawTitle.trim();
+            const description = rawDescription.trim();
+
+            if (title.length < 5) {
+                if (ticketErrorEl) {
+                    ticketErrorEl.textContent = 'Title must be at least 5 characters.';
+                    ticketErrorEl.style.display = 'block';
+                }
+                return;
+            }
+
+            if (description.length < 10) {
+                if (ticketErrorEl) {
+                    ticketErrorEl.textContent = 'Description must be at least 10 characters.';
+                    ticketErrorEl.style.display = 'block';
+                }
+                return;
+            }
+
+            const ticketData = {
+                companyId: Number(companyId),
+                customerId: Number(customer.id),
+                title,
+                description,
+                priority: formData.get('priority'),
+                categoryId: formData.get('categoryId') ? parseInt(formData.get('categoryId'), 10) : null,
+                source: 'WEB'
+            };
+
+            try {
+                const response = await fetch(`/api/customers/tickets/${currentEditingTicketId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userToken}`
+                    },
+                    body: JSON.stringify(ticketData)
+                });
+
+                const rawPayload = await response.text();
+                let result = {};
+
+                if (rawPayload) {
+                    try {
+                        result = JSON.parse(rawPayload);
+                    } catch (parseError) {
+                        result = { message: rawPayload };
+                    }
+                }
+
+                if (response.ok) {
+                    if (ticketSuccessEl) {
+                        ticketSuccessEl.textContent = 'Ticket updated successfully!';
+                        ticketSuccessEl.style.display = 'block';
+                    }
+                    if (ticketErrorEl) {
+                        ticketErrorEl.style.display = 'none';
+                    }
+
+                    upsertTicketInCache(result);
+                    await loadDashboardData();
+
+                    setTimeout(() => {
+                        closeModal('editTicketModal');
+                    }, 1500);
+                } else {
+                    if (ticketErrorEl) {
+                        const errorMessage = deriveTicketErrorMessage(result, rawPayload);
+                        ticketErrorEl.textContent = errorMessage;
+                        ticketErrorEl.style.display = 'block';
+                    }
+                    if (ticketSuccessEl) {
+                        ticketSuccessEl.style.display = 'none';
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to update ticket', error);
+                if (ticketErrorEl) {
+                    ticketErrorEl.textContent = 'Network error. Please try again.';
+                    ticketErrorEl.style.display = 'block';
+                }
+                if (ticketSuccessEl) {
+                    ticketSuccessEl.style.display = 'none';
+                }
+            }
+        });
+
+        async function viewTicket(ticketId) {
+            const modal = document.getElementById('viewTicketModal');
+            const body = document.getElementById('viewTicketBody');
+
+            if (!modal || !body) {
+                return;
+            }
+
+            modal.style.display = 'block';
+            body.innerHTML = '<div class="loading">Loading ticket...</div>';
+            currentViewingTicketId = ticketId;
+
+            try {
+                const response = await fetch(`/api/customers/tickets/${ticketId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+
+                const rawPayload = await response.text();
+                let ticketData = null;
+
+                if (rawPayload) {
+                    try {
+                        ticketData = JSON.parse(rawPayload);
+                    } catch (error) {
+                        ticketData = null;
+                    }
+                }
+
+                if (!response.ok || !ticketData) {
+                    body.innerHTML = `<div class="error">${escapeHtml(deriveTicketErrorMessage(ticketData, rawPayload || 'Unable to load ticket details'))}</div>`;
+                    return;
+                }
+
+                renderTicketDetails(ticketData);
+                upsertTicketInCache(ticketData);
+            } catch (error) {
+                console.error('Failed to load ticket details', error);
+                body.innerHTML = '<div class="error">Unable to load ticket details right now.</div>';
+            }
+        }
+
+        async function openEditTicket(ticketId) {
+            const modal = document.getElementById('editTicketModal');
+            const form = document.getElementById('editTicketForm');
+            const errorEl = document.getElementById('ticketEditError');
+            const successEl = document.getElementById('ticketEditSuccess');
+
+            if (!modal || !form) {
+                return;
+            }
+
+            if (errorEl) {
+                errorEl.style.display = 'none';
+            }
+            if (successEl) {
+                successEl.style.display = 'none';
+            }
+
+            let ticket = ticketsCache.find(t => t.id === ticketId);
+
+            if (!ticket) {
+                try {
+                    const response = await fetch(`/api/customers/tickets/${ticketId}`, {
+                        headers: {
+                            'Authorization': `Bearer ${userToken}`
+                        }
+                    });
+
+                    const rawPayload = await response.text();
+                    let payload = null;
+
+                    if (rawPayload) {
+                        try {
+                            payload = JSON.parse(rawPayload);
+                        } catch (parseError) {
+                            payload = null;
+                        }
+                    }
+
+                    if (!response.ok || !payload) {
+                        throw new Error(deriveTicketErrorMessage(payload, rawPayload || 'Unable to load ticket information for editing.'));
+                    }
+
+                    ticket = payload;
+                    upsertTicketInCache(ticket);
+                } catch (error) {
+                    console.error('Failed to load ticket for editing', error);
+                    if (errorEl) {
+                        errorEl.textContent = error instanceof Error ? error.message : 'Unable to load ticket information for editing.';
+                        errorEl.style.display = 'block';
+                    }
+                    return;
+                }
+            }
+
+            if (!ticket.canEdit) {
+                if (errorEl) {
+                    errorEl.textContent = 'This ticket cannot be edited anymore.';
+                    errorEl.style.display = 'block';
+                }
+                return;
+            }
+
+            if (!availableCategories.length) {
+                await loadCategories();
+            }
+
+            populateCategorySelect(document.getElementById('editTicketCategory'), ticket.categoryId);
+
+            document.getElementById('editTicketTitle').value = ticket.title || '';
+            document.getElementById('editTicketDescription').value = ticket.description || '';
+            document.getElementById('editTicketPriority').value = (ticket.priority || 'MEDIUM').toUpperCase();
+
+            currentEditingTicketId = ticketId;
+            modal.style.display = 'block';
+        }
+
+        async function deleteTicket(ticketId) {
+            const ticket = ticketsCache.find(t => t.id === ticketId);
+            if (ticket && !ticket.canEdit) {
+                alert('Only OPEN tickets can be deleted.');
+                return;
+            }
+
+            if (!confirm('Are you sure you want to delete this ticket? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/customers/tickets/${ticketId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+
+                const rawPayload = await response.text();
+                let result = null;
+
+                if (rawPayload) {
+                    try {
+                        result = JSON.parse(rawPayload);
+                    } catch (error) {
+                        result = null;
+                    }
+                }
+
+                if (!response.ok) {
+                    const message = deriveTicketErrorMessage(result, rawPayload || 'Failed to delete ticket');
+                    alert(message);
+                    return;
+                }
+
+                alert('Ticket deleted successfully.');
+                ticketsCache = Array.isArray(ticketsCache) ? ticketsCache.filter(ticket => ticket && ticket.id !== ticketId) : [];
+                await loadDashboardData();
+            } catch (error) {
+                console.error('Failed to delete ticket', error);
+                alert('Unable to delete ticket right now. Please try again later.');
+            }
+        }
+
+        async function ensureTicketInCache(ticketId) {
+            if (Array.isArray(ticketsCache)) {
+                const cached = ticketsCache.find(ticket => ticket && ticket.id === ticketId);
+                if (cached) {
+                    return cached;
+                }
+            }
+
+            try {
+                const response = await fetch(`/api/customers/tickets/${ticketId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+
+                const rawPayload = await response.text();
+                let payload = null;
+                if (rawPayload) {
+                    try {
+                        payload = JSON.parse(rawPayload);
+                    } catch (error) {
+                        payload = null;
+                    }
+                }
+
+                if (!response.ok || !payload) {
+                    throw new Error(deriveTicketErrorMessage(payload, rawPayload || 'Unable to load ticket information.'));
+                }
+
+                upsertTicketInCache(payload);
+                return payload;
+            } catch (error) {
+                throw error instanceof Error ? error : new Error('Unable to load ticket information.');
+            }
+        }
+
+        async function showReviewModal(ticketId, mode = 'create') {
+            try {
+                const ticket = await ensureTicketInCache(ticketId);
+                const status = String(ticket.status || '').toUpperCase();
+
+                if (status !== 'RESOLVED') {
+                    alert('You can only review tickets that have been resolved.');
+                    return;
+                }
+
+                const review = ticket.review || null;
+
+                if (mode === 'edit') {
+                    if (!review) {
+                        alert('No review found to edit.');
+                        return;
+                    }
+                    if (!isReviewEditable(review)) {
+                        alert(`Reviews can only be edited within ${REVIEW_EDIT_WINDOW_HOURS} hours of submission.`);
+                        return;
+                    }
+                }
+
+                reviewModalState = {
+                    mode: review ? (mode || 'edit') : 'create',
+                    ticketId: ticket.id,
+                    reviewId: review ? review.id : null,
+                    rating: review && review.rating ? review.rating : 0
+                };
+
+                const modal = document.getElementById('reviewModal');
+                const subtitle = document.getElementById('reviewModalSubtitle');
+                const feedbackInput = document.getElementById('reviewFeedback');
+                const titleEl = document.getElementById('reviewModalTitle');
+                const errorEl = document.getElementById('reviewModalError');
+                const successEl = document.getElementById('reviewModalSuccess');
+                const submitBtn = document.getElementById('reviewSubmitButton');
+
+                if (titleEl) {
+                    titleEl.textContent = reviewModalState.mode === 'edit' ? 'Edit Your Review' : 'Leave a Review';
+                }
+                if (subtitle) {
+                    const agentLabel = ticket.agentName ? ` · Agent: ${ticket.agentName}` : '';
+                    subtitle.textContent = `Ticket #${ticket.ticketNumber || ticket.id}${agentLabel}`;
+                }
+                if (feedbackInput) {
+                    feedbackInput.value = review?.feedback || '';
+                }
+                if (errorEl) {
+                    errorEl.style.display = 'none';
+                    errorEl.textContent = '';
+                }
+                if (successEl) {
+                    successEl.style.display = 'none';
+                    successEl.textContent = '';
+                }
+                if (submitBtn) {
+                    submitBtn.textContent = reviewModalState.mode === 'edit' ? 'Update Review' : 'Submit Review';
+                    submitBtn.disabled = false;
+                }
+
+                initializeStarRating(reviewModalState.rating || 0);
+
+                if (modal) {
+                    modal.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Failed to open review modal', error);
+                alert(error instanceof Error ? error.message : 'Unable to open the review dialog right now.');
+            }
+        }
+
+        function setReviewRating(value) {
+            const rating = Number(value) || 0;
+            const stars = document.querySelectorAll('#reviewRatingStars button');
+            stars.forEach(button => {
+                const starValue = Number(button.dataset.value);
+                const isActive = starValue <= rating;
+                button.classList.toggle('active', isActive);
+                button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+            });
+            reviewModalState.rating = rating;
+        }
+
+        function initializeStarRating(initialValue = 0) {
+            setReviewRating(initialValue);
+        }
+
+        function resetReviewModal() {
+            reviewModalState = { mode: 'create', ticketId: null, reviewId: null, rating: 0 };
+            const feedbackInput = document.getElementById('reviewFeedback');
+            if (feedbackInput) {
+                feedbackInput.value = '';
+            }
+            const errorEl = document.getElementById('reviewModalError');
+            if (errorEl) {
+                errorEl.style.display = 'none';
+                errorEl.textContent = '';
+            }
+            const successEl = document.getElementById('reviewModalSuccess');
+            if (successEl) {
+                successEl.style.display = 'none';
+                successEl.textContent = '';
+            }
+            initializeStarRating(0);
+        }
+
+        function closeReviewModal() {
+            const modal = document.getElementById('reviewModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+            resetReviewModal();
+        }
+
+        function setReviewSubmitting(isSubmitting) {
+            const submitBtn = document.getElementById('reviewSubmitButton');
+            if (submitBtn) {
+                submitBtn.disabled = isSubmitting;
+                submitBtn.textContent = isSubmitting
+                    ? (reviewModalState.mode === 'edit' ? 'Updating…' : 'Submitting…')
+                    : (reviewModalState.mode === 'edit' ? 'Update Review' : 'Submit Review');
+            }
+        }
+
+        function isReviewEditable(review) {
+            if (!review || !review.createdAt) {
+                return false;
+            }
+
+            const createdAt = new Date(review.createdAt);
+            if (Number.isNaN(createdAt.getTime())) {
+                return false;
+            }
+
+            const diffHours = (Date.now() - createdAt.getTime()) / (1000 * 60 * 60);
+            return diffHours <= REVIEW_EDIT_WINDOW_HOURS;
+        }
+
+        function updateTicketReviewInCache(ticketId, review) {
+            if (!Array.isArray(ticketsCache)) {
+                ticketsCache = [];
+            }
+
+            let updatedTicket = null;
+            ticketsCache = ticketsCache.map(ticket => {
+                if (ticket && ticket.id === ticketId) {
+                    updatedTicket = {
+                        ...ticket,
+                        hasReview: !!review,
+                        review: review || null
+                    };
+                    return updatedTicket;
+                }
+                return ticket;
+            });
+
+            return updatedTicket;
+        }
+
+        async function handleReviewSubmit(event) {
+            event.preventDefault();
+
+            const errorEl = document.getElementById('reviewModalError');
+            const successEl = document.getElementById('reviewModalSuccess');
+            if (errorEl) {
+                errorEl.style.display = 'none';
+                errorEl.textContent = '';
+            }
+            if (successEl) {
+                successEl.style.display = 'none';
+                successEl.textContent = '';
+            }
+
+            if (!reviewModalState.ticketId) {
+                if (errorEl) {
+                    errorEl.textContent = 'Ticket context is missing for this review.';
+                    errorEl.style.display = 'block';
+                }
+                return;
+            }
+
+            if (!reviewModalState.rating || reviewModalState.rating < 1) {
+                if (errorEl) {
+                    errorEl.textContent = 'Please select a star rating before submitting your review.';
+                    errorEl.style.display = 'block';
+                }
+                return;
+            }
+
+            setReviewSubmitting(true);
+
+            try {
+                const customer = await ensureCustomerProfile();
+                if (!customer || !customer.id) {
+                    throw new Error('Your customer profile could not be loaded. Please refresh and try again.');
+                }
+
+                const ticket = await ensureTicketInCache(reviewModalState.ticketId);
+                const feedbackInput = document.getElementById('reviewFeedback');
+                const feedback = feedbackInput ? feedbackInput.value.trim() : '';
+
+                const payload = {
+                    ticketId: ticket.id,
+                    customerId: customer.id,
+                    rating: reviewModalState.rating,
+                    feedback,
+                    agentId: ticket.agentId,
+                    companyId: ticket.companyId
+                };
+
+                const isEdit = reviewModalState.mode === 'edit' && reviewModalState.reviewId;
+                const endpoint = isEdit ? `/api/reviews/${reviewModalState.reviewId}` : '/api/reviews';
+                const method = isEdit ? 'PUT' : 'POST';
+
+                const response = await fetch(endpoint, {
+                    method,
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const rawPayload = await response.text();
+                let result = null;
+                if (rawPayload) {
+                    try {
+                        result = JSON.parse(rawPayload);
+                    } catch (parseError) {
+                        result = null;
+                    }
+                }
+
+                if (!response.ok || !result) {
+                    throw new Error(deriveTicketErrorMessage(result, rawPayload || 'Failed to submit review'));
+                }
+
+                updateTicketReviewInCache(reviewModalState.ticketId, result);
+                displayTickets(ticketsCache);
+
+                if (currentViewingTicketId === reviewModalState.ticketId) {
+                    const updatedTicket = ticketsCache.find(ticket => ticket && ticket.id === reviewModalState.ticketId);
+                    if (updatedTicket) {
+                        renderTicketDetails(updatedTicket);
+                    }
+                }
+
+                if (successEl) {
+                    successEl.textContent = isEdit ? 'Review updated successfully.' : 'Review submitted successfully. Thank you!';
+                    successEl.style.display = 'block';
+                }
+
+                setTimeout(() => {
+                    closeReviewModal();
+                }, 1200);
+            } catch (error) {
+                console.error('Failed to submit review', error);
+                if (errorEl) {
+                    errorEl.textContent = error instanceof Error ? error.message : 'Unable to submit your review right now.';
+                    errorEl.style.display = 'block';
+                }
+            } finally {
+                setReviewSubmitting(false);
+            }
+        }
+
+        async function confirmDeleteReview(ticketId) {
+            try {
+                const ticket = await ensureTicketInCache(ticketId);
+                if (!ticket.review) {
+                    alert('There is no review to delete for this ticket.');
+                    return;
+                }
+
+                if (!confirm('Are you sure you want to delete your review? This action cannot be undone.')) {
+                    return;
+                }
+
+                await deleteReviewForTicket(ticket);
+            } catch (error) {
+                console.error('Failed to delete review', error);
+                alert(error instanceof Error ? error.message : 'Unable to delete the review right now.');
+            }
+        }
+
+        async function deleteReviewForTicket(ticket) {
+            const customer = await ensureCustomerProfile();
+            if (!customer || !customer.id) {
+                throw new Error('Your customer profile could not be loaded.');
+            }
+
+            const review = ticket.review;
+            if (!review || !review.id) {
+                throw new Error('Review context is missing.');
+            }
+
+            const response = await fetch(`/api/reviews/${review.id}?customerId=${customer.id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${userToken}`
+                }
+            });
+
+            const rawPayload = await response.text();
+            let payload = null;
+            if (rawPayload) {
+                try {
+                    payload = JSON.parse(rawPayload);
+                } catch (error) {
+                    payload = null;
+                }
+            }
+
+            if (!response.ok) {
+                throw new Error(deriveTicketErrorMessage(payload, rawPayload || 'Failed to delete review.'));
+            }
+
+            updateTicketReviewInCache(ticket.id, null);
+            displayTickets(ticketsCache);
+
+            if (currentViewingTicketId === ticket.id) {
+                const updatedTicket = ticketsCache.find(item => item && item.id === ticket.id);
+                if (updatedTicket) {
+                    renderTicketDetails(updatedTicket);
+                }
+            }
+
+            alert('Your review has been deleted.');
+        }
+
+        function renderStaticStars(rating) {
+            const stars = [];
+            const value = Math.max(0, Math.min(5, Number(rating) || 0));
+            for (let i = 1; i <= 5; i++) {
+                const activeClass = i <= value ? 'active' : '';
+                stars.push(`<button type="button" class="${activeClass}" tabindex="-1">★</button>`);
+            }
+            return stars.join('');
+        }
+
+        function renderReviewSection(ticket) {
+            if (!ticket) {
+                return '';
+            }
+
+            const status = String(ticket.status || '').toUpperCase();
+            if (status !== 'RESOLVED') {
+                return `
+                    <div class="ticket-detail-section review-section">
+                        <h3>Ticket Feedback</h3>
+                        <p>This ticket is not resolved yet. Once it is resolved, you can share your feedback here.</p>
+                    </div>
+                `;
+            }
+
+            const review = ticket.review || null;
+            if (!review) {
+                return `
+                    <div class="ticket-detail-section review-section">
+                        <h3>Ticket Feedback</h3>
+                        <p>You haven't reviewed this ticket yet. Tell us how the support experience was.</p>
+                        <div class="ticket-actions">
+                            <button class="btn btn-secondary" onclick="showReviewModal(${ticket.id}, 'create')">Leave Review</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const editable = isReviewEditable(review);
+            const editControls = editable
+                ? `<button class="btn btn-warning" onclick="showReviewModal(${ticket.id}, 'edit')">Edit Review</button>`
+                : `<span class="review-edit-window">Reviews can only be edited within ${REVIEW_EDIT_WINDOW_HOURS} hours.</span>`;
+
+            return `
+                <div class="ticket-detail-section review-section">
+                    <h3>Ticket Feedback</h3>
+                    <div class="review-summary">
+                        <div class="star-rating read-only" aria-label="Submitted rating">${renderStaticStars(review.rating)}</div>
+                        <p>${escapeHtml(review.feedback || 'No written feedback provided.')}</p>
+                        <small>Submitted ${escapeHtml(formatDateTime(review.createdAt))}</small>
+                    </div>
+                    <div class="ticket-actions">
+                        ${editControls}
+                        <button class="btn btn-danger" onclick="confirmDeleteReview(${ticket.id})">Delete Review</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function viewKnowledgeBase() {
+            const modal = document.getElementById('knowledgeBaseModal');
+            if (!modal) return;
+
+            modal.style.display = 'block';
+
+            const searchInput = document.getElementById('faqSearchInput');
+            if (searchInput) {
+                searchInput.focus();
+            }
+
+            if (!knowledgeBaseFaqs.length && !knowledgeBaseLoading) {
+                loadKnowledgeBase();
+            } else {
+                renderKnowledgeBase(searchInput ? searchInput.value : '');
+            }
+        }
+
+        async function loadKnowledgeBase() {
+            const container = document.getElementById('faqListContainer');
+            if (!container) return;
+
+            if (!currentUser || !currentUser.companyId) {
+                container.innerHTML = '<div class="empty-state">Your company information is missing. Please contact support.</div>';
+                return;
+            }
+
+            knowledgeBaseLoading = true;
+            container.innerHTML = '<div class="empty-state">Loading knowledge base...</div>';
+
+            try {
+                const response = await fetch(`/api/faqs/company/${currentUser.companyId}/published`, {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load FAQs');
+                }
+
+                const data = await response.json();
+                knowledgeBaseFaqs = Array.isArray(data) ? data : [];
+                const searchInput = document.getElementById('faqSearchInput');
+                renderKnowledgeBase(searchInput ? searchInput.value : '');
+            } catch (error) {
+                console.error('Error loading knowledge base:', error);
+                container.innerHTML = '<div class="error">Unable to load FAQs right now. Please try again later.</div>';
+            } finally {
+                knowledgeBaseLoading = false;
+            }
+        }
+
+        function renderKnowledgeBase(searchTerm = '') {
+            const container = document.getElementById('faqListContainer');
+            if (!container) return;
+
+            if (!knowledgeBaseFaqs.length) {
+                container.innerHTML = '<div class="empty-state">No FAQs have been published yet. Check back soon!</div>';
+                return;
+            }
+
+            const normalizedSearch = searchTerm.trim().toLowerCase();
+
+            const filteredFaqs = knowledgeBaseFaqs.filter(faq => {
+                if (!normalizedSearch) return true;
+                const haystack = [faq.question, faq.answer, faq.keywords, faq.categoryName]
+                    .filter(Boolean)
+                    .map(item => item.toLowerCase());
+                return haystack.some(text => text.includes(normalizedSearch));
+            });
+
+            if (!filteredFaqs.length) {
+                container.innerHTML = `<div class="empty-state">No FAQs match "${escapeHtml(searchTerm)}". Try a different keyword.</div>`;
+                return;
+            }
+
+            container.innerHTML = filteredFaqs.map(faq => `
+                <details class="faq-item" data-faq-id="${faq.id || ''}">
+                    <summary>
+                        <div class="faq-question">
+                            <span class="faq-question-title">${escapeHtml(faq.question || 'Untitled question')}</span>
+                            <div class="faq-meta">
+                                <span>${escapeHtml(faq.categoryName || 'General')}</span>
+                                <span>&bull;</span>
+                                <span>Updated ${formatRelativeDate(faq.updatedAt || faq.createdAt)}</span>
+                                ${typeof faq.helpfulCount === 'number' ? `<span>&bull;</span><span>${faq.helpfulCount} found this helpful</span>` : ''}
+                            </div>
+                        </div>
+                    </summary>
+                    <div class="faq-answer">${formatAnswerContent(faq.answer)}</div>
+                    ${renderFaqKeywords(faq.keywords)}
+                </details>
+            `).join('');
+
+            attachFaqToggleHandlers();
+        }
+
+        function renderFaqKeywords(keywords) {
+            if (!keywords) return '';
+
+            const parts = keywords.split(/[,;]+/)
+                .map(part => part.trim())
+                .filter(Boolean);
+
+            if (!parts.length) return '';
+
+            return `<div class="faq-keywords">${parts.map(part => `<span class="faq-chip">${escapeHtml(part)}</span>`).join('')}</div>`;
+        }
+
+        function attachFaqToggleHandlers() {
+            const container = document.getElementById('faqListContainer');
+            if (!container) return;
+
+            container.querySelectorAll('details.faq-item').forEach(detail => {
+                detail.addEventListener('toggle', function() {
+                    if (detail.open) {
+                        const faqId = parseInt(detail.dataset.faqId, 10);
+                        if (faqId && !viewedFaqs.has(faqId)) {
+                            viewedFaqs.add(faqId);
+                            incrementFaqView(faqId);
+                        }
+                    }
+                }, { once: false });
+            });
+        }
+
+        async function incrementFaqView(faqId) {
+            try {
+                await fetch(`/api/faqs/${faqId}/view`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+            } catch (error) {
+                console.warn('Failed to increment FAQ view count', error);
+            }
+        }
+
+        function formatAnswerContent(text) {
+            if (!text) {
+                return '<em>No answer provided yet.</em>';
+            }
+            return escapeHtml(text).replace(/\n/g, '<br>');
+        }
+
+        function renderTicketDetails(ticket) {
+            const body = document.getElementById('viewTicketBody');
+            if (!body) {
+                return;
+            }
+
+            const categoryLabel = ticket.categoryName || 'Uncategorized';
+            const assignedAgent = ticket.agentName || 'Unassigned';
+            const statusLabel = formatStatusLabel(ticket.status);
+            const canReply = !['CLOSED', 'CANCELLED'].includes(String(ticket.status || '').toUpperCase());
+
+            body.innerHTML = `
+                <div class="ticket-detail-grid">
+                    <div><strong>Ticket #:</strong> <span>${escapeHtml(ticket.ticketNumber || '-')}</span></div>
+                    <div><strong>Status:</strong> <span>${escapeHtml(statusLabel)}</span></div>
+                    <div><strong>Priority:</strong> <span>${escapeHtml((ticket.priority || 'MEDIUM').toUpperCase())}</span></div>
+                    <div><strong>Category:</strong> <span>${escapeHtml(categoryLabel)}</span></div>
+                    <div><strong>Assigned Agent:</strong> <span>${escapeHtml(assignedAgent)}</span></div>
+                    <div><strong>Created:</strong> <span>${escapeHtml(formatDateTime(ticket.createdAt))}</span></div>
+                    <div><strong>Last Activity:</strong> <span id="ticketDetailLastActivity">${escapeHtml(formatDateTime(ticket.lastActivity))}</span></div>
+                </div>
+                <div class="ticket-detail-section">
+                    <h3>Title</h3>
+                    <p>${escapeHtml(ticket.title || 'Untitled Ticket')}</p>
+                </div>
+                <div class="ticket-detail-section">
+                    <h3>Description</h3>
+                    <p>${escapeHtml(ticket.description || 'No description provided.')}</p>
+                </div>
+                ${ticket.resolution ? `<div class="ticket-detail-section"><h3>Resolution</h3><p>${escapeHtml(ticket.resolution)}</p></div>` : ''}
+                ${renderReviewSection(ticket)}
+                <div class="conversation-section" id="ticketConversationSection">
+                    <div class="conversation-header">
+                        <h3>Conversation</h3>
+                        <span class="conversation-note">Chat with the support team assigned to this ticket.</span>
+                    </div>
+                    <div id="ticketConversationMessages" class="conversation-messages">
+                        <div class="loading">Loading conversation...</div>
+                    </div>
+                    <div id="ticketConversationError" class="error" style="display:none;"></div>
+                    <div id="ticketConversationSuccess" class="success" style="display:none;"></div>
+                    <div id="ticketConversationInfo" class="notice" style="display:none;"></div>
+                    <form id="ticketReplyForm" class="conversation-form" data-allow-reply="${canReply}">
+                        <label for="ticketReplyMessage" style="font-weight:600; color:#4b5563;">Send a reply</label>
+                        <textarea id="ticketReplyMessage" placeholder="Type your message to the support team…" ${canReply ? '' : 'disabled'} required></textarea>
+                        <div class="conversation-actions">
+                            <button type="submit" class="btn" id="ticketReplySubmit" ${canReply ? '' : 'disabled'}>Send</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+
+            currentConversationTicketId = ticket.id;
+            configureConversationSection(ticket, canReply);
+            loadTicketConversation(ticket.id);
+        }
+
+        function configureConversationSection(ticket, canReply) {
+            const form = document.getElementById('ticketReplyForm');
+            const infoEl = document.getElementById('ticketConversationInfo');
+            const messageInput = document.getElementById('ticketReplyMessage');
+
+            if (!form) {
+                return;
+            }
+
+            if (!canReply) {
+                if (infoEl) {
+                    infoEl.textContent = 'This ticket is closed. You can no longer send new messages.';
+                    infoEl.style.display = 'block';
+                }
+                return;
+            }
+
+            if (infoEl) {
+                infoEl.style.display = 'none';
+                infoEl.textContent = '';
+            }
+
+            if (messageInput) {
+                messageInput.disabled = false;
+                setTimeout(() => messageInput.focus(), 150);
+            }
+
+            if (form.dataset.listenerAttached === 'true') {
+                return;
+            }
+
+            form.addEventListener('submit', (event) => sendCustomerReply(event, ticket.id));
+            form.dataset.listenerAttached = 'true';
+        }
+
+        async function loadTicketConversation(ticketId) {
+            const messagesContainer = document.getElementById('ticketConversationMessages');
+            const errorEl = document.getElementById('ticketConversationError');
+            const successEl = document.getElementById('ticketConversationSuccess');
+
+            if (!messagesContainer || !userToken) {
+                return;
+            }
+
+            if (successEl) {
+                successEl.style.display = 'none';
+            }
+
+            if (errorEl) {
+                errorEl.style.display = 'none';
+                errorEl.textContent = '';
+            }
+
+            messagesContainer.innerHTML = '<div class="loading">Loading conversation...</div>';
+
+            try {
+                const response = await fetch(`/api/customers/tickets/${ticketId}/responses`, {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+
+                const rawPayload = await response.text();
+                let payload = null;
+
+                if (rawPayload) {
+                    try {
+                        payload = JSON.parse(rawPayload);
+                    } catch (parseError) {
+                        payload = null;
+                    }
+                }
+
+                if (!response.ok) {
+                    const message = deriveTicketErrorMessage(payload, rawPayload || 'Failed to load ticket conversation');
+                    throw new Error(message);
+                }
+
+                const responses = Array.isArray(payload) ? payload : [];
+                ticketConversationCache.set(ticketId, responses);
+                renderTicketConversation(ticketId);
+            } catch (error) {
+                console.error('Failed to load ticket conversation', error);
+                messagesContainer.innerHTML = '';
+                if (errorEl) {
+                    errorEl.textContent = error instanceof Error ? error.message : 'Unable to load the conversation right now. Please try again later.';
+                    errorEl.style.display = 'block';
+                }
+            }
+        }
+
+        function renderTicketConversation(ticketId) {
+            const messagesContainer = document.getElementById('ticketConversationMessages');
+            if (!messagesContainer) {
+                return;
+            }
+
+            const responses = Array.isArray(ticketConversationCache.get(ticketId))
+                ? [...ticketConversationCache.get(ticketId)]
+                : [];
+
+            if (!responses.length) {
+                messagesContainer.innerHTML = '<div class="conversation-empty">No messages yet. Start the conversation by sending a reply.</div>';
+                return;
+            }
+
+            responses.sort((a, b) => {
+                const dateA = a && a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                const dateB = b && b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                return dateA - dateB;
+            });
+
+            messagesContainer.innerHTML = responses.map(response => {
+                const responseType = response && response.responseType ? String(response.responseType) : '';
+                const direction = responseType === 'CUSTOMER_REPLY' ? 'customer' : 'agent';
+                const authorName = response && response.userId === (currentUser ? currentUser.userId : null)
+                    ? 'You'
+                    : (response && response.userName) ? response.userName : (direction === 'agent' ? 'Support Agent' : 'Customer');
+                const timestamp = response && response.createdAt ? formatDateTime(response.createdAt) : formatDateTime(new Date().toISOString());
+                const typeLabel = responseType ? responseType.replace(/_/g, ' ') : '';
+
+                return `
+                    <div class="conversation-message ${direction}">
+                        <div class="conversation-meta">
+                            <span>${escapeHtml(authorName)}${typeLabel ? ' · ' + escapeHtml(typeLabel) : ''}</span>
+                            <span>${escapeHtml(timestamp)}</span>
+                        </div>
+                        <div class="conversation-text">${escapeHtml(response && response.message ? response.message : '')}</div>
+                    </div>
+                `;
+            }).join('');
+
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function setReplySubmitting(isSubmitting) {
+            const submitBtn = document.getElementById('ticketReplySubmit');
+            if (submitBtn) {
+                submitBtn.disabled = isSubmitting;
+                submitBtn.textContent = isSubmitting ? 'Sending…' : 'Send';
+            }
+        }
+
+        async function sendCustomerReply(event, ticketId) {
+            event.preventDefault();
+
+            if (conversationSubmitting) {
+                return;
+            }
+
+            const messageInput = document.getElementById('ticketReplyMessage');
+            const errorEl = document.getElementById('ticketConversationError');
+            const successEl = document.getElementById('ticketConversationSuccess');
+
+            if (!messageInput) {
+                return;
+            }
+
+            const message = messageInput.value.trim();
+            if (!message) {
+                if (errorEl) {
+                    errorEl.textContent = 'Message cannot be empty.';
+                    errorEl.style.display = 'block';
+                }
+                return;
+            }
+
+            conversationSubmitting = true;
+            setReplySubmitting(true);
+
+            if (errorEl) {
+                errorEl.style.display = 'none';
+                errorEl.textContent = '';
+            }
+            if (successEl) {
+                successEl.style.display = 'none';
+            }
+
+            try {
+                const payload = {
+                    ticketId,
+                    userId: currentUser ? currentUser.userId : null,
+                    message,
+                    responseType: 'CUSTOMER_REPLY',
+                    isPublic: true
+                };
+
+                const response = await fetch(`/api/customers/tickets/${ticketId}/responses`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const rawPayload = await response.text();
+                let result = null;
+                if (rawPayload) {
+                    try {
+                        result = JSON.parse(rawPayload);
+                    } catch (parseError) {
+                        result = null;
+                    }
+                }
+
+                if (!response.ok) {
+                    const messageText = deriveTicketErrorMessage(result, rawPayload || 'Failed to send reply');
+                    throw new Error(messageText);
+                }
+
+                if (successEl) {
+                    successEl.textContent = 'Message sent successfully.';
+                    successEl.style.display = 'block';
+                    setTimeout(() => {
+                        if (successEl) {
+                            successEl.style.display = 'none';
+                        }
+                    }, 4000);
+                }
+
+                messageInput.value = '';
+                messageInput.focus();
+
+                const responses = Array.isArray(ticketConversationCache.get(ticketId))
+                    ? [...ticketConversationCache.get(ticketId)]
+                    : [];
+
+                if (result && typeof result === 'object') {
+                    responses.push(result);
+                }
+
+                responses.sort((a, b) => {
+                    const dateA = a && a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                    const dateB = b && b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                    return dateA - dateB;
+                });
+
+                ticketConversationCache.set(ticketId, responses);
+                renderTicketConversation(ticketId);
+
+                const newTimestamp = result && result.createdAt ? result.createdAt : new Date().toISOString();
+                updateTicketLastActivity(ticketId, newTimestamp);
+                const lastActivityEl = document.getElementById('ticketDetailLastActivity');
+                if (lastActivityEl) {
+                    lastActivityEl.textContent = formatDateTime(newTimestamp);
+                }
+            } catch (error) {
+                console.error('Failed to send ticket reply', error);
+                if (errorEl) {
+                    errorEl.textContent = error instanceof Error ? error.message : 'Unable to send your message right now.';
+                    errorEl.style.display = 'block';
+                }
+            } finally {
+                conversationSubmitting = false;
+                setReplySubmitting(false);
+            }
+        }
+
+        function updateTicketLastActivity(ticketId, timestamp) {
+            if (!Array.isArray(ticketsCache)) {
+                return;
+            }
+
+            const isoTimestamp = timestamp || new Date().toISOString();
+
+            ticketsCache = ticketsCache.map(ticket => {
+                if (ticket && ticket.id === ticketId) {
+                    return {
+                        ...ticket,
+                        lastActivity: isoTimestamp,
+                        updatedAt: isoTimestamp
+                    };
+                }
+                return ticket;
+            });
+        }
+
+        function upsertTicketInCache(ticket) {
+            if (!ticket || typeof ticket.id === 'undefined') {
+                return;
+            }
+
+            if (!Array.isArray(ticketsCache)) {
+                ticketsCache = [];
+            }
+
+            const index = ticketsCache.findIndex(item => item && item.id === ticket.id);
+            if (index >= 0) {
+                ticketsCache[index] = ticket;
+            } else {
+                ticketsCache.push(ticket);
+            }
+        }
+
+        function populateCategorySelect(selectElement, selectedId = null) {
+            if (!selectElement) {
+                return;
+            }
+
+            selectElement.innerHTML = '<option value="">Select category...</option>';
+
+            if (!Array.isArray(availableCategories) || !availableCategories.length) {
+                return;
+            }
+
+            availableCategories.forEach(category => {
+                if (!category || !category.id) {
+                    return;
+                }
+
+                const option = document.createElement('option');
+                option.value = category.id;
+                option.textContent = category.name || `Category #${category.id}`;
+
+                if (selectedId && Number(selectedId) === Number(category.id)) {
+                    option.selected = true;
+                }
+
+                selectElement.appendChild(option);
+            });
+        }
+
+        function formatDateTime(value) {
+            if (!value) {
+                return '-';
+            }
+
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) {
+                return '-';
+            }
+
+            return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+        }
+
+        function formatStatusLabel(status) {
+            if (!status) {
+                return '-';
+            }
+
+            return String(status).replace(/_/g, ' ').toUpperCase();
+        }
+
+        function formatRelativeDate(dateValue) {
+            if (!dateValue) return 'recently';
+            const date = new Date(dateValue);
+            if (Number.isNaN(date.getTime())) {
+                return 'recently';
+            }
+
+            const formatter = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' });
+            const diffMs = date.getTime() - Date.now();
+            const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+            if (Math.abs(diffDays) < 1) {
+                return 'today';
+            }
+
+            if (Math.abs(diffDays) < 7) {
+                return formatter.format(diffDays, 'day');
+            }
+
+            return date.toLocaleDateString();
+        }
+
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function deriveTicketErrorMessage(result, fallback = '') {
+            const defaultMessage = fallback && typeof fallback === 'string' ? fallback : 'Failed to create ticket';
+
+            if (!result) {
+                return defaultMessage || 'Failed to create ticket';
+            }
+
+            if (typeof result === 'string') {
+                return result;
+            }
+
+            if (result.error) {
+                return result.error;
+            }
+
+            if (result.message) {
+                return result.message;
+            }
+
+            if (Array.isArray(result)) {
+                const messages = result
+                    .map(item => {
+                        if (!item) return null;
+                        if (typeof item === 'string') return item;
+                        if (item.defaultMessage) return item.defaultMessage;
+                        if (item.message) return item.message;
+                        return null;
+                    })
+                    .filter(Boolean);
+                if (messages.length) {
+                    return messages.join(', ');
+                }
+            }
+
+            if (Array.isArray(result.errors)) {
+                const formatted = result.errors
+                    .map(item => {
+                        if (!item) return null;
+                        if (typeof item === 'string') return item;
+                        if (item.defaultMessage) return item.defaultMessage;
+                        if (item.message) return item.message;
+                        return null;
+                    })
+                    .filter(Boolean);
+                if (formatted.length) {
+                    return formatted.join(', ');
+                }
+            }
+
+            return defaultMessage || 'Failed to create ticket';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modals = ['createTicketModal', 'knowledgeBaseModal', 'reviewModal'];
+            modals.forEach(id => {
+                const modal = document.getElementById(id);
+                if (modal && event.target === modal) {
+                    if (id === 'reviewModal') {
+                        closeReviewModal();
+                    } else {
+                        closeModal(id);
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

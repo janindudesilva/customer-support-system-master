@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Queue</title>
+    <link rel="stylesheet" href="/assets/css/styles.css">
+</head>
+<body>
+    <div th:replace="common/header :: header"></div>
+    
+    <div class="dashboard-container">
+        <div th:replace="common/sidebar :: sidebar"></div>
+        
+        <div class="main-content">
+            <h1>Ticket Queue</h1>
+            
+            <div class="search-container">
+                <form action="/agent/tickets/search" method="GET">
+                    <input type="text" name="keyword" placeholder="Search tickets..." th:value="${keyword}">
+                    <button type="submit" class="btn search-btn">Search</button>
+                </form>
+                <div class="filter-options">
+                    <select id="statusFilter" onchange="filterByStatus()">
+                        <option value="">All Statuses</option>
+                        <option value="OPEN">Open</option>
+                        <option value="IN_PROGRESS">In Progress</option>
+                        <option value="PENDING_CUSTOMER">Pending Customer</option>
+                        <option value="RESOLVED">Resolved</option>
+                    </select>
+                    <select id="priorityFilter" onchange="filterByPriority()">
+                        <option value="">All Priorities</option>
+                        <option value="LOW">Low</option>
+                        <option value="MEDIUM">Medium</option>
+                        <option value="HIGH">High</option>
+                        <option value="URGENT">Urgent</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab('assigned')">My Assigned Tickets</button>
+                <button class="tab-btn" onclick="showTab('unassigned')">Unassigned Tickets</button>
+                <button class="tab-btn" onclick="showTab('all')">All Tickets</button>
+            </div>
+            
+            <div id="assigned" class="tab-content active">
+                <div class="tickets-list">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Ticket #</th>
+                                <th>Customer</th>
+                                <th>Title</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Created</th>
+                                <th>Last Activity</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="ticket : ${assignedTickets}">
+                                <td th:text="${ticket.ticketNumber}">TKT-20230101-000001</td>
+                                <td th:text="${ticket.customerName}">John Doe</td>
+                                <td th:text="${ticket.title}">Issue with login</td>
+                                <td th:text="${ticket.status}">OPEN</td>
+                                <td th:text="${ticket.priority}">MEDIUM</td>
+                                <td th:text="${#temporals.format(ticket.createdAt, 'yyyy-MM-dd')}">2023-01-01</td>
+                                <td th:text="${#temporals.format(ticket.lastActivity, 'yyyy-MM-dd HH:mm')}">2023-01-01 12:00</td>
+                                <td class="actions">
+                                    <a th:href="@{/agent/tickets/{id}(id=${ticket.id})}" class="btn view-btn">View</a>
+                                    <a th:href="@{/agent/tickets/{id}/respond(id=${ticket.id})}" class="btn respond-btn">Respond</a>
+                                    <div class="dropdown">
+                                        <button class="dropdown-btn">Actions</button>
+                                        <div class="dropdown-content">
+                                            <a href="#" th:onclick="'updateStatus(' + ${ticket.id} + ', \'IN_PROGRESS\')'" th:if="${ticket.status.name() == 'OPEN'}">Mark In Progress</a>
+                                            <a href="#" th:onclick="'updateStatus(' + ${ticket.id} + ', \'PENDING_CUSTOMER\')'" th:if="${ticket.status.name() == 'IN_PROGRESS'}">Pending Customer</a>
+                                            <a href="#" th:onclick="'updateStatus(' + ${ticket.id} + ', \'RESOLVED\')'" th:if="${ticket.status.name() != 'RESOLVED' && ticket.status.name() != 'CLOSED'}">Mark Resolved</a>
+                                            <a href="#" th:onclick="'updatePriority(' + ${ticket.id} + ', \'LOW\')'" th:if="${ticket.priority.name() != 'LOW'}">Set Low Priority</a>
+                                            <a href="#" th:onclick="'updatePriority(' + ${ticket.id} + ', \'MEDIUM\')'" th:if="${ticket.priority.name() != 'MEDIUM'}">Set Medium Priority</a>
+                                            <a href="#" th:onclick="'updatePriority(' + ${ticket.id} + ', \'HIGH\')'" th:if="${ticket.priority.name() != 'HIGH'}">Set High Priority</a>
+                                            <a href="#" th:onclick="'updatePriority(' + ${ticket.id} + ', \'URGENT\')'" th:if="${ticket.priority.name() != 'URGENT'}">Set Urgent Priority</a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="no-data-message" th:if="${assignedTickets.empty}">
+                        <p>No tickets assigned to you at the moment.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="unassigned" class="tab-content">
+                <div class="tickets-list">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Ticket #</th>
+                                <th>Customer</th>
+                                <th>Title</th>
+                                <th>Priority</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="ticket : ${unassignedTickets}">
+                                <td th:text="${ticket.ticketNumber}">TKT-20230101-000002</td>
+                                <td th:text="${ticket.customerName}">Jane Smith</td>
+                                <td th:text="${ticket.title}">Can't access account</td>
+                                <td th:text="${ticket.priority}">HIGH</td>
+                                <td th:text="${#temporals.format(ticket.createdAt, 'yyyy-MM-dd')}">2023-01-01</td>
+                                <td class="actions">
+                                    <a th:href="@{/agent/tickets/{id}(id=${ticket.id})}" class="btn view-btn">View</a>
+                                    <button th:onclick="'assignTicket(' + ${ticket.id} + ')'" class="btn assign-btn">Assign to Me</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="no-data-message" th:if="${unassignedTickets.empty}">
+                        <p>No unassigned tickets available.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="all" class="tab-content">
+                <div class="tickets-list">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Ticket #</th>
+                                <th>Customer</th>
+                                <th>Title</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Agent</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="ticket : ${allTickets}">
+                                <td th:text="${ticket.ticketNumber}">TKT-20230101-000003</td>
+                                <td th:text="${ticket.customerName}">Alex Johnson</td>
+                                <td th:text="${ticket.title}">Password reset request</td>
+                                <td th:text="${ticket.status}">IN_PROGRESS</td>
+                                <td th:text="${ticket.priority}">MEDIUM</td>
+                                <td th:text="${ticket.agentName != null ? ticket.agentName : 'Unassigned'}">Sarah Smith</td>
+                                <td th:text="${#temporals.format(ticket.createdAt, 'yyyy-MM-dd')}">2023-01-01</td>
+                                <td class="actions">
+                                    <a th:href="@{/agent/tickets/{id}(id=${ticket.id})}" class="btn view-btn">View</a>
+                                    <button th:if="${ticket.agentId == null}" th:onclick="'assignTicket(' + ${ticket.id} + ')'" class="btn assign-btn">Assign to Me</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="no-data-message" th:if="${allTickets.empty}">
+                        <p>No tickets found.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pagination" th:if="${totalPages > 1}">
+                <a th:href="@{/agent/tickets(page=1)}" class="page-link">First</a>
+                <a th:if="${currentPage > 1}" th:href="@{/agent/tickets(page=${currentPage - 1})}" class="page-link">Previous</a>
+                <span th:each="i : ${#numbers.sequence(1, totalPages)}">
+                    <a th:if="${i != currentPage}" th:href="@{/agent/tickets(page=${i})}" class="page-link" th:text="${i}">1</a>
+                    <span th:if="${i == currentPage}" class="current-page" th:text="${i}">1</span>
+                </span>
+                <a th:if="${currentPage < totalPages}" th:href="@{/agent/tickets(page=${currentPage + 1})}" class="page-link">Next</a>
+                <a th:href="@{/agent/tickets(page=${totalPages})}" class="page-link">Last</a>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="common/footer :: footer"></div>
+    <script src="/assets/js/ticket-queue.js"></script>
+</body>
+</html>

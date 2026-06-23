@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>New Customer Review Alert</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+        }
+        .header {
+            background-color: #3498db;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+            border-radius: 0 0 5px 5px;
+            margin-top: 20px;
+        }
+        .content {
+            padding: 20px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .review-details {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #3498db;
+        }
+        .rating-container {
+            margin: 10px 0;
+        }
+        .rating-stars {
+            font-size: 20px;
+            color: #f39c12;
+        }
+        .rating-number {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .comments {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            white-space: pre-line;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>New Customer Review</h1>
+        </div>
+        
+        <div class="content">
+            <p>Hello <span th:text="${adminName}">Admin</span>,</p>
+            
+            <p>A new customer review has been submitted for <span th:text="${companyName}">Your Company</span>:</p>
+            
+            <div class="review-details">
+                <h3>Review Information:</h3>
+                <p><strong>Reviewed Ticket:</strong> <span th:text="${ticketNumber}">TKT-12345</span></p>
+                <p><strong>Submitted By:</strong> <span th:text="${customerName}">John Doe</span></p>
+                <p><strong>Submitted On:</strong> <span th:text="${createdAt}">2025-10-12 10:30:45</span></p>
+                
+                <div class="rating-container">
+                    <p><strong>Overall Rating:</strong></p>
+                    <div class="rating-stars">
+                        <span th:each="i : ${#numbers.sequence(1, rating)}" class="star">★</span>
+                        <span th:each="i : ${#numbers.sequence(rating + 1, 5)}" class="star" style="color: #dddddd;">★</span>
+                        <span class="rating-number" th:text="${rating} + '/5'">/5</span>
+                    </div>
+                </div>
+                
+                <h4>Detailed Ratings:</h4>
+                <p><strong>Service Quality:</strong> <span th:text="${serviceQualityRating} + '/5'">4/5</span></p>
+                <p><strong>Response Time:</strong> <span th:text="${responseTimeRating} + '/5'">4/5</span></p>
+                <p><strong>Professionalism:</strong> <span th:text="${professionalismRating} + '/5'">5/5</span></p>
+                <p><strong>Would Recommend:</strong> <span th:text="${wouldRecommend ? 'Yes' : 'No'}">Yes</span></p>
+            </div>
+            
+            <h3>Customer Feedback:</h3>
+            <div class="comments">
+                <p th:text="${feedback}">Overall feedback from customer...</p>
+            </div>
+            
+            <h3>Additional Comments:</h3>
+            <div class="comments">
+                <p th:if="${additionalComments != null and !additionalComments.isEmpty()}" th:text="${additionalComments}">Additional feedback...</p>
+                <p th:if="${additionalComments == null or additionalComments.isEmpty()}">No additional comments provided.</p>
+            </div>
+            
+            <a th:href="${reviewUrl}" class="button">View Review Details</a>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated message from the Customer Support System.</p>
+            <p>Please do not reply directly to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

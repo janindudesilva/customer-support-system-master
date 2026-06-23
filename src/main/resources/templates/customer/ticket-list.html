@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Tickets</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div th:replace="common/header :: header"></div>
+    
+    <div class="dashboard-container">
+        <div th:replace="common/sidebar :: sidebar"></div>
+        
+        <div class="main-content">
+            <h1>My Support Tickets</h1>
+            
+            <div class="search-container">
+                <form action="/customer/tickets/search" method="GET">
+                    <input type="text" name="keyword" placeholder="Search tickets..." th:value="${keyword}">
+                    <button type="submit" class="btn search-btn">Search</button>
+                </form>
+                <div class="filter-options">
+                    <select id="statusFilter" onchange="filterByStatus()">
+                        <option value="">All Statuses</option>
+                        <option value="OPEN">Open</option>
+                        <option value="IN_PROGRESS">In Progress</option>
+                        <option value="PENDING_CUSTOMER">Pending Your Response</option>
+                        <option value="RESOLVED">Resolved</option>
+                        <option value="CLOSED">Closed</option>
+                        <option value="CANCELLED">Cancelled</option>
+                    </select>
+                    <select id="priorityFilter" onchange="filterByPriority()">
+                        <option value="">All Priorities</option>
+                        <option value="LOW">Low</option>
+                        <option value="MEDIUM">Medium</option>
+                        <option value="HIGH">High</option>
+                        <option value="URGENT">Urgent</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="/customer/tickets/create" class="btn primary-btn">Create New Ticket</a>
+            </div>
+            
+            <div class="tickets-list">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Ticket #</th>
+                            <th>Title</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th>Created</th>
+                            <th>Last Activity</th>
+                            <th>Agent</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="ticket : ${tickets}">
+                            <td th:text="${ticket.ticketNumber}">TKT-20230101-000001</td>
+                            <td th:text="${ticket.title}">Issue with login</td>
+                            <td th:text="${ticket.status}">OPEN</td>
+                            <td th:text="${ticket.priority}">MEDIUM</td>
+                            <td th:text="${#temporals.format(ticket.createdAt, 'yyyy-MM-dd')}">2023-01-01</td>
+                            <td th:text="${#temporals.format(ticket.lastActivity, 'yyyy-MM-dd HH:mm')}">2023-01-01 12:00</td>
+                            <td th:text="${ticket.agentName != null ? ticket.agentName : 'Unassigned'}">John Doe</td>
+                            <td class="actions">
+                                <a th:href="@{/customer/tickets/{id}(id=${ticket.id})}" class="btn view-btn">View</a>
+                                <a th:if="${ticket.canEdit}" th:href="@{/customer/tickets/{id}/edit(id=${ticket.id})}" class="btn edit-btn">Edit</a>
+                                <button th:if="${ticket.canCancel}" th:onclick="'cancelTicket(' + ${ticket.id} + ')'" class="btn warning-btn">Cancel</button>
+                                <a th:if="${ticket.status.name() == 'RESOLVED' && !ticket.hasReview}" th:href="@{/customer/reviews/create/{ticketId}(ticketId=${ticket.id})}" class="btn review-btn">Review</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="no-data-message" th:if="${tickets.empty}">
+                    <p>No tickets found. <a href="/customer/tickets/create">Create a new ticket</a> to get support.</p>
+                </div>
+            </div>
+            
+            <div class="pagination" th:if="${totalPages > 1}">
+                <a th:href="@{/customer/tickets(page=1)}" class="page-link">First</a>
+                <a th:if="${currentPage > 1}" th:href="@{/customer/tickets(page=${currentPage - 1})}" class="page-link">Previous</a>
+                <span th:each="i : ${#numbers.sequence(1, totalPages)}">
+                    <a th:if="${i != currentPage}" th:href="@{/customer/tickets(page=${i})}" class="page-link" th:text="${i}">1</a>
+                    <span th:if="${i == currentPage}" class="current-page" th:text="${i}">1</span>
+                </span>
+                <a th:if="${currentPage < totalPages}" th:href="@{/customer/tickets(page=${currentPage + 1})}" class="page-link">Next</a>
+                <a th:href="@{/customer/tickets(page=${totalPages})}" class="page-link">Last</a>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="common/footer :: footer"></div>
+    <script src="/js/ticket-list.js"></script>
+</body>
+</html>

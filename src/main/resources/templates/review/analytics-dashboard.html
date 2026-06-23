@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div th:replace="common/header :: header"></div>
+    
+    <div class="dashboard-container">
+        <div th:replace="common/sidebar :: sidebar"></div>
+        
+        <div class="main-content">
+            <h1>Analytics Dashboard</h1>
+            
+            <div class="date-filter">
+                <label for="dateRange">Time Period:</label>
+                <select id="dateRange" onchange="updateDashboard()">
+                    <option value="7">Last 7 Days</option>
+                    <option value="30" selected>Last 30 Days</option>
+                    <option value="90">Last 90 Days</option>
+                    <option value="365">Last Year</option>
+                    <option value="custom">Custom Range</option>
+                </select>
+                
+                <div id="customDateRange" style="display:none;">
+                    <label for="startDate">From:</label>
+                    <input type="date" id="startDate">
+                    <label for="endDate">To:</label>
+                    <input type="date" id="endDate">
+                    <button onclick="applyCustomDateRange()" class="btn small-btn">Apply</button>
+                </div>
+            </div>
+            
+            <div class="analytics-summary">
+                <div class="summary-card">
+                    <h3>Total Tickets</h3>
+                    <p class="count" th:text="${totalTickets}">250</p>
+                    <p class="trend up" th:text="${ticketsTrend + '%'}">+12%</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Avg. Resolution Time</h3>
+                    <p class="count" th:text="${avgResolutionTime + ' hours'}">8.5 hours</p>
+                    <p class="trend down" th:text="${resolutionTimeTrend + '%'}">-5%</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Customer Satisfaction</h3>
+                    <p class="count" th:text="${customerSatisfaction + '%'}">88%</p>
+                    <p class="trend up" th:text="${satisfactionTrend + '%'}">+3%</p>
+                </div>
+                <div class="summary-card">
+                    <h3>First Response Time</h3>
+                    <p class="count" th:text="${firstResponseTime + ' hours'}">1.2 hours</p>
+                    <p class="trend down" th:text="${responseTimeTrend + '%'}">-10%</p>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-card">
+                    <h3>Ticket Volume</h3>
+                    <canvas id="ticketVolumeChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Resolution Time</h3>
+                    <canvas id="resolutionTimeChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-card">
+                    <h3>Tickets by Category</h3>
+                    <canvas id="categoryChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Customer Satisfaction</h3>
+                    <canvas id="satisfactionChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-card wide">
+                    <h3>Agent Performance</h3>
+                    <canvas id="agentPerformanceChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="data-export">
+                <h3>Export Data</h3>
+                <div class="export-options">
+                    <button onclick="exportData('csv')" class="btn secondary-btn">Export CSV</button>
+                    <button onclick="exportData('excel')" class="btn secondary-btn">Export Excel</button>
+                    <button onclick="exportData('pdf')" class="btn secondary-btn">Export PDF</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="common/footer :: footer"></div>
+    <script th:inline="javascript">
+        // Get data from Thymeleaf
+        const ticketData = /*[[${ticketData}]]*/ [];
+        const resolutionData = /*[[${resolutionData}]]*/ [];
+        const categoryData = /*[[${categoryData}]]*/ [];
+        const satisfactionData = /*[[${satisfactionData}]]*/ [];
+        const agentData = /*[[${agentData}]]*/ [];
+        
+        // Initialize charts when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+        });
+    </script>
+    <script src="/js/analytics-dashboard.js"></script>
+</body>
+</html>

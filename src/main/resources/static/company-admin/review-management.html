@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Admin - Review Insights</title>
+    <style>
+        :root {
+            --bg-gradient: radial-gradient(circle at 20% 15%, rgba(91, 33, 182, 0.2), transparent 55%),
+                radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.18), transparent 55%),
+                radial-gradient(circle at 45% 95%, rgba(236, 72, 153, 0.18), transparent 65%),
+                #020617;
+            --panel: rgba(15, 23, 42, 0.78);
+            --panel-alt: rgba(17, 24, 39, 0.7);
+            --border: rgba(148, 163, 184, 0.2);
+            --fg: #e2e8f0;
+            --fg-muted: #94a3b8;
+            --accent: linear-gradient(135deg, #a855f7 0%, #38bdf8 50%, #22d3ee 100%);
+            --positive: #22c55e;
+            --warning: #f97316;
+            --gold: #f59e0b;
+            --shadow: 0 30px 90px -32px rgba(15, 23, 42, 0.85);
+            --glass-blur: blur(18px);
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg-gradient);
+            color: var(--fg);
+        }
+
+        .background-aurora {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.2), transparent 45%),
+                radial-gradient(circle at 85% 10%, rgba(244, 114, 182, 0.16), transparent 55%),
+                radial-gradient(circle at 50% 90%, rgba(45, 212, 191, 0.16), transparent 60%);
+            filter: blur(120px);
+            opacity: 0.45;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            background: rgba(10, 12, 23, 0.85);
+            border-bottom: 1px solid var(--border);
+            padding: 1.6rem 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(18px);
+            box-shadow: 0 28px 60px rgba(2, 6, 23, 0.55);
+        }
+
+        .header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .header-brand {
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: #94a3ff;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: clamp(1.6rem, 2vw, 2.1rem);
+            letter-spacing: -0.02em;
+        }
+
+        .header-subtitle {
+            margin: 0;
+            color: var(--fg-muted);
+            font-size: 0.95rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.85rem;
+            align-items: center;
+        }
+
+        .btn {
+            border: 1px solid transparent;
+            border-radius: 999px;
+            padding: 0.7rem 1.4rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.25s ease, filter 0.2s ease;
+            background: var(--accent);
+            color: #f8fafc;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.25), transparent 60%);
+            mix-blend-mode: screen;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 35px rgba(56, 189, 248, 0.32);
+        }
+
+        .btn:hover::after { opacity: 1; }
+
+        .btn-primary { background: var(--accent); color: #f8fafc; }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--fg);
+            border-color: rgba(148, 163, 184, 0.28);
+        }
+
+        .btn-ghost:hover {
+            border-color: rgba(148, 163, 184, 0.6);
+            background: rgba(148, 163, 184, 0.12);
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.5);
+        }
+
+        .layout {
+            position: relative;
+            z-index: 1;
+            max-width: 1280px;
+            margin: 2.5rem auto 4rem;
+            padding: 0 2rem 4rem;
+        }
+
+        .layout h2 {
+            margin: 0 0 1.2rem;
+            font-size: 1.35rem;
+            letter-spacing: -0.01em;
+            color: #f8fafc;
+        }
+
+        .filters {
+            background: var(--panel);
+            border-radius: 18px;
+            padding: 1.6rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.1rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            backdrop-filter: var(--glass-blur);
+        }
+
+        label {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--fg-muted);
+            font-weight: 700;
+        }
+
+        select, input {
+            margin-top: 0.45rem;
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            padding: 0.65rem 0.85rem;
+            background: rgba(10, 12, 23, 0.6);
+            color: var(--fg);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        select option {
+            background: #020617;
+            color: var(--fg);
+        }
+
+        select:focus, input:focus {
+            border-color: rgba(56, 189, 248, 0.8);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+            outline: none;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 1.9rem;
+        }
+
+        .analytics-card {
+            background: var(--panel);
+            padding: 1.35rem;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            backdrop-filter: var(--glass-blur);
+        }
+
+        .analytics-title {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--fg-muted);
+            margin-bottom: 0.45rem;
+        }
+
+        .analytics-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+
+        .distribution {
+            background: var(--panel);
+            border-radius: 18px;
+            padding: 1.6rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            backdrop-filter: var(--glass-blur);
+            margin-bottom: 2.2rem;
+        }
+
+        .distribution-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.65rem;
+            color: var(--fg-muted);
+        }
+
+        .bar {
+            flex: 1;
+            height: 12px;
+            background: rgba(148, 163, 184, 0.15);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .bar span {
+            display: block;
+            height: 100%;
+            background: linear-gradient(135deg, #38bdf8 0%, #22c55e 100%);
+        }
+
+        .reviews-wrapper {
+            background: var(--panel-alt);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            padding: 1.4rem 1.8rem;
+            backdrop-filter: var(--glass-blur);
+        }
+
+        .review-card {
+            border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+            padding: 1.05rem 0;
+        }
+
+        .review-card:last-child { border-bottom: none; }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .review-meta {
+            color: var(--fg-muted);
+            font-size: 0.9rem;
+        }
+
+        .stars { color: var(--gold); font-size: 1.2rem; }
+
+        .review-body { margin-top: 0.65rem; line-height: 1.6; }
+
+        .review-footer {
+            margin-top: 0.65rem;
+            font-size: 0.85rem;
+            color: var(--fg-muted);
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .chip {
+            background: rgba(59, 130, 246, 0.16);
+            color: #93c5fd;
+            padding: 0.35rem 0.65rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid rgba(59, 130, 246, 0.35);
+        }
+
+        .empty-state { text-align: center; padding: 2.2rem 0; color: var(--fg-muted); }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(15, 23, 42, 0.92);
+            color: var(--fg);
+            padding: 0.95rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            box-shadow: 0 30px 60px rgba(2, 6, 23, 0.65);
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 25;
+        }
+
+        .toast.show { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 900px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.1rem;
+                padding: 1.4rem 1.8rem;
+            }
+
+            .layout {
+                padding: 0 1.4rem 3.5rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .header-actions {
+                width: 100%;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+
+            .filters { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="background-aurora"></div>
+<header class="header">
+    <div class="header-left">
+        <span class="header-brand">Oryzo</span>
+        <h1>Review Intelligence Center</h1>
+        <p class="header-subtitle">Monitor satisfaction trends, loyalty signals, and actionable insights.</p>
+    </div>
+    <div class="header-actions">
+        <button class="btn btn-ghost" onclick="window.location.href='/company-admin/dashboard.html'">⬅ Dashboard</button>
+        <button class="btn btn-primary" onclick="logout()">Logout</button>
+    </div>
+</header>
+
+<main class="layout">
+    <section class="filters">
+        <div>
+            <label for="agentFilter">Agent</label>
+            <select id="agentFilter" onchange="refreshData()">
+                <option value="">All agents</option>
+            </select>
+        </div>
+        <div>
+            <label for="startDate">Start Date</label>
+            <input type="date" id="startDate" onchange="refreshData()">
+        </div>
+        <div>
+            <label for="endDate">End Date</label>
+            <input type="date" id="endDate" onchange="refreshData()">
+        </div>
+        <div style="align-self:flex-end;">
+            <button class="btn btn-primary" style="width:100%;" onclick="resetFilters()">Reset Filters</button>
+        </div>
+    </section>
+
+    <section class="analytics-grid" id="analyticsCards">
+        <!-- Analytics cards -->
+    </section>
+
+    <section class="distribution">
+        <h2>Rating Distribution</h2>
+        <div id="distributionGrid"></div>
+    </section>
+
+    <section class="reviews-wrapper">
+        <h2>Recent Reviews</h2>
+        <div id="reviewsContainer">
+            <p class="empty-state">Loading reviews…</p>
+        </div>
+    </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    let currentUser = null;
+    let userToken = null;
+    let agentsCache = [];
+    let reviewsCache = [];
+    let analyticsCache = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        userToken = localStorage.getItem('token');
+        currentUser = JSON.parse(localStorage.getItem('user'));
+        if (!userToken || !currentUser || currentUser.role !== 'COMPANY_ADMIN') {
+            window.location.href = '/';
+            return;
+        }
+        loadAgents();
+        refreshData();
+    });
+
+    function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/';
+    }
+
+    async function loadAgents() {
+        try {
+            const response = await fetch(`/api/company-admin/agents?companyId=${currentUser.companyId}`, {
+                headers: { 'Authorization': `Bearer ${userToken}` }
+            });
+            if (!response.ok) throw new Error('Unable to load agents');
+            agentsCache = await response.json();
+            const select = document.getElementById('agentFilter');
+            agentsCache.forEach(agent => {
+                const option = document.createElement('option');
+                option.value = agent.id;
+                const fallback = `${agent.firstName || agent.firstname || ''} ${agent.lastName || agent.lastname || ''}`.trim();
+                option.textContent = agent.fullName || fallback || agent.email || `Agent #${agent.id}`;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            showToast(error.message, true);
+        }
+    }
+
+    function getFilters() {
+        const agentId = document.getElementById('agentFilter').value;
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        return { agentId, startDate, endDate };
+    }
+
+    function buildQueryParams(base = {}) {
+        const params = new URLSearchParams({ companyId: currentUser.companyId, ...base });
+        const { agentId, startDate, endDate } = getFilters();
+        if (agentId) params.append('agentId', agentId);
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+        return params;
+    }
+
+    async function refreshData() {
+        await Promise.all([loadAnalytics(), loadReviews()]);
+    }
+
+    async function loadAnalytics() {
+        try {
+            const params = buildQueryParams();
+            const response = await fetch(`/api/company-admin/reviews/analytics?${params.toString()}`, {
+                headers: { 'Authorization': `Bearer ${userToken}` }
+            });
+            if (!response.ok) throw new Error('Unable to load analytics');
+            analyticsCache = await response.json();
+            renderAnalytics();
+            renderDistribution();
+        } catch (error) {
+            showToast(error.message, true);
+            document.getElementById('analyticsCards').innerHTML = '<p class="empty-state" style="grid-column: 1 / -1;">Failed to load analytics.</p>';
+            document.getElementById('distributionGrid').innerHTML = '';
+        }
+    }
+
+    function renderAnalytics() {
+        if (!analyticsCache) return;
+        const cards = [
+            { label: 'Average Rating', value: (analyticsCache.averageRating || 0).toFixed(2) },
+            { label: 'Service Quality', value: (analyticsCache.serviceQualityAverage || 0).toFixed(2) },
+            { label: 'Response Time', value: (analyticsCache.responseTimeAverage || 0).toFixed(2) },
+            { label: 'Professionalism', value: (analyticsCache.professionalismAverage || 0).toFixed(2) },
+            { label: 'Recommendation Rate', value: `${Math.round(analyticsCache.recommendationRate || 0)}%` },
+            { label: 'Total Reviews', value: analyticsCache.totalReviews || reviewsCache.length || 0 }
+        ];
+        const container = document.getElementById('analyticsCards');
+        container.innerHTML = cards.map(card => `
+            <div class="analytics-card">
+                <div class="analytics-title">${card.label}</div>
+                <div class="analytics-value">${card.value}</div>
+            </div>
+        `).join('');
+    }
+
+    function renderDistribution() {
+        const container = document.getElementById('distributionGrid');
+        container.innerHTML = '';
+        if (!analyticsCache || !analyticsCache.ratingDistribution) {
+            container.innerHTML = '<p class="empty-state">No distribution data available.</p>';
+            return;
+        }
+        const total = Object.values(analyticsCache.ratingDistribution).reduce((acc, val) => acc + val, 0) || 1;
+        Object.keys(analyticsCache.ratingDistribution).sort((a,b) => b - a).forEach(rating => {
+            const count = analyticsCache.ratingDistribution[rating] || 0;
+            const percent = Math.round((count / total) * 100);
+            const row = document.createElement('div');
+            row.className = 'distribution-row';
+            row.innerHTML = `
+                <div style="width:55px;font-weight:600;">${rating}★</div>
+                <div class="bar"><span style="width:${percent}%"></span></div>
+                <div style="width:50px;text-align:right;">${percent}%</div>
+            `;
+            container.appendChild(row);
+        });
+    }
+
+    async function loadReviews() {
+        const container = document.getElementById('reviewsContainer');
+        container.innerHTML = '<p class="empty-state">Loading reviews…</p>';
+        try {
+            const params = buildQueryParams();
+            const response = await fetch(`/api/company-admin/reviews?${params.toString()}`, {
+                headers: { 'Authorization': `Bearer ${userToken}` }
+            });
+            if (!response.ok) throw new Error('Unable to load reviews');
+            reviewsCache = await response.json();
+            renderReviews();
+        } catch (error) {
+            container.innerHTML = `<p class="empty-state">${error.message}</p>`;
+            showToast(error.message, true);
+        }
+    }
+
+    function renderReviews() {
+        const container = document.getElementById('reviewsContainer');
+        if (!reviewsCache.length) {
+            container.innerHTML = '<p class="empty-state">No reviews match the selected filters.</p>';
+            return;
+        }
+        container.innerHTML = reviewsCache.map(review => {
+            const comment = review.feedback || review.additionalComments || 'No review text provided.';
+            const recommended = review.wouldRecommend === null || review.wouldRecommend === undefined
+                ? 'Recommendation N/A'
+                : (review.wouldRecommend ? '👍 Recommended' : '👎 Not Recommended');
+            return `
+            <article class="review-card">
+                <div class="review-header">
+                    <div>
+                        <div class="stars">${renderStars(review.rating)}</div>
+                        <div class="review-meta">${formatDate(review.createdAt)} • Ticket ${review.ticketNumber || review.ticketId || '#'} • ${review.customerName || 'Customer'}</div>
+                    </div>
+                    ${review.agentName ? `<span class="chip">${review.agentName}</span>` : ''}
+                </div>
+                <div class="review-body">${escapeHtml(comment)}</div>
+                <div class="review-footer">
+                    <span>${recommended}</span>
+                    ${review.serviceQualityRating ? `<span>Service Quality ${review.serviceQualityRating}/5</span>` : ''}
+                    ${review.responseTimeRating ? `<span>Response Time ${review.responseTimeRating}/5</span>` : ''}
+                    ${review.professionalismRating ? `<span>Professionalism ${review.professionalismRating}/5</span>` : ''}
+                </div>
+            </article>
+        `; }).join('');
+    }
+
+    function renderStars(rating = 0) {
+        const fullStars = Math.round(rating);
+        return Array.from({ length: 5 }, (_, i) => i < fullStars ? '★' : '☆').join('');
+    }
+
+    function formatDate(value) {
+        if (!value) return '-';
+        try { return new Date(value).toLocaleString(); } catch { return value; }
+    }
+
+    function escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        if (typeof str !== 'string') str = String(str);
+        return str.replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    }
+
+    function resetFilters() {
+        document.getElementById('agentFilter').value = '';
+        document.getElementById('startDate').value = '';
+        document.getElementById('endDate').value = '';
+        refreshData();
+    }
+
+    let toastTimeout;
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.style.background = isError
+            ? 'linear-gradient(135deg, #ef4444, #f97316)'
+            : 'linear-gradient(135deg, #22d3ee, #60a5fa)';
+        toast.classList.add('show');
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => toast.classList.remove('show'), 3200);
+    }
+</script>
+</body>
+</html>

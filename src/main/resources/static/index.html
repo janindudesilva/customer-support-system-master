@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oryzo - The Future of Digital Synergy</title>
+    <style>
+        :root {
+            --color-bg: #000000; /* Changed to solid black */
+            --color-bg-secondary: #12151c;
+            --color-fg: #e6edf3;
+            --color-fg-muted: #8b949e;
+            --color-border: #2a2f37;
+            --color-accent: #58a6ff;
+            --color-success: #3fb950;
+            --color-danger: #f85149;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+            --glow-purple: #a777ff;
+            --glow-blue: #79c0ff;
+            --glow-pink: #f778ba;
+}
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--color-bg);
+            color: var(--color-fg);
+            position: relative;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        a { color: inherit; }
+
+        #tsparticles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            /* background: linear-gradient(320deg, var(--glow-pink), var(--glow-purple), var(--glow-blue)); */
+            background-size: 400% 400%;
+            animation: gradient-animation 20s ease infinite;
+            filter: blur(150px);
+            opacity: 0.3;
+        }
+
+        @keyframes gradient-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem 6rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .main-header {
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: rgba(13, 17, 23, 0.7);
+            backdrop-filter: blur(12px);
+            z-index: 100;
+            border-bottom: 1px solid var(--color-border);
+            user-select: none;
+        }
+
+        .header-logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--color-fg);
+            text-decoration: none;
+            user-select: none;
+        }
+
+        .main-nav a {
+            color: var(--color-fg-muted);
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-weight: 500;
+            transition: color 0.3s;
+            user-select: none;
+        }
+
+        .main-nav a:hover {
+            color: var(--color-fg);
+        }
+
+        .hero {
+            text-align: center;
+            padding: 8rem 0 6rem;
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 800;
+            letter-spacing: -2px;
+            line-height: 1.1;
+            color: var(--color-fg);
+            max-width: 900px;
+            user-select: none;
+        }
+
+        .hero-title .char {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: char-reveal 0.5s forwards;
+            user-select: none;
+        }
+
+        @keyframes char-reveal {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--color-fg-muted);
+            max-width: 650px;
+            line-height: 1.6;
+            user-select: none;
+        }
+
+        .cta-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            user-select: none;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 28px;
+            background: linear-gradient(45deg, var(--glow-purple), var(--glow-blue));
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            cursor: pointer;
+            font-size: 1rem;
+            min-width: 180px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+            user-select: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35), 0 0 18px var(--card-glow);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--color-border);
+            color: var(--color-fg);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(22, 27, 34, 0.8);
+            border-color: var(--color-fg-muted);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .section {
+            padding: 6rem 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: -1px;
+            user-select: none;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.1rem;
+            color: var(--color-fg-muted);
+            margin-bottom: 4rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            user-select: none;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s, transform 0.8s;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .interactive-card {
+            background: rgba(22, 27, 34, 0.8);
+            border: 1px solid var(--color-border);
+            border-radius: 16px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .interactive-card::before {
+            content: "";
+            position: absolute;
+            left: var(--mouse-x, -1000px);
+            top: var(--mouse-y, -1000px);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(121, 192, 255, 0.25) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            transition: left 0.2s, top 0.2s;
+            opacity: 0;
+        }
+
+        .interactive-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.35);
+        }
+
+        .interactive-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .interactive-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .interactive-card p {
+            color: var(--color-fg-muted);
+            line-height: 1.6;
+        }
+
+        #visualization {
+            overflow: hidden;
+        }
+
+        .constellation-container {
+            width: 100%;
+            height: 500px;
+            position: relative;
+        }
+
+        #constellation-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .testimonial-text {
+            color: var(--color-fg-muted);
+            line-height: 1.6;
+            font-style: italic;
+            border-left: 3px solid var(--color-accent);
+            padding-left: 1rem;
+            flex-grow: 1;
+            margin-bottom: 1.5rem;
+            user-select: none;
+        }
+
+        .testimonial-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            color: var(--color-fg-muted);
+            font-size: 0.9rem;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .testimonial-author img {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 2px solid var(--color-border);
+        }
+
+        .rating-stars {
+            color: #f1c40f;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            background: rgba(63, 185, 80, 0.15);
+            color: var(--color-success);
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .faq-item summary {
+            padding: 1.5rem 0;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: color 0.3s;
+        }
+
+        .faq-item summary:hover {
+            color: var(--color-accent);
+        }
+
+        .faq-item summary::-webkit-details-marker { display: none; }
+
+        .faq-item summary::after {
+            content: '+';
+            font-size: 1.5rem;
+            font-weight: 300;
+            transition: transform 0.3s;
+        }
+
+        .faq-item[open] summary::after {
+            transform: rotate(45deg);
+        }
+
+        .faq-content {
+            padding: 0 0 1.5rem 0;
+            color: var(--color-fg-muted);
+            line-height: 1.7;
+            overflow: hidden;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--color-fg-muted);
+            font-size: 0.95rem;
+            margin-top: 1rem;
+        }
+
+        .main-footer {
+            padding: 4rem 2rem;
+            text-align: center;
+            color: var(--color-fg-muted);
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--color-fg);
+            margin-bottom: 1rem;
+        }
+
+        .footer-links {
+            margin: 1.5rem 0;
+        }
+
+        .footer-links a {
+            color: var(--color-fg-muted);
+            text-decoration: none;
+            margin: 0 1rem;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--color-fg);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s;
+            /* Allow scrolling when modal content is taller than the viewport */
+            overflow-y: auto;
+            padding: 1.5rem 0;
+        }
+
+        .modal-content {
+            background-color: var(--color-bg-secondary);
+            margin: clamp(2rem, 8vh, 5%) auto;
+            padding: 2.5rem;
+            border-radius: 15px;
+            border: 1px solid var(--color-border);
+            width: 90%;
+            max-width: 450px;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.4s;
+            /* Keep the form within the screen height */
+            max-height: calc(100vh - 6rem);
+            overflow-y: auto;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: var(--color-fg-muted);
+            transition: color 0.3s;
+        }
+
+        .close:hover { color: var(--color-fg); }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--color-fg);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid var(--color-border);
+            background: rgba(13, 17, 23, 0.8);
+            color: var(--color-fg);
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15);
+        }
+
+        .error {
+            color: var(--color-danger);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .success {
+            color: var(--color-success);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid var(--color-accent);
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 0.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 900px) {
+            .main-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .hero {
+                padding-top: 6rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .main-container {
+                padding: 0 1.5rem 4rem;
+            }
+            .main-header {
+                padding: 1rem;
+            }
+            .main-nav {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.85rem;
+            }
+            .main-nav a {
+                margin: 0 0.5rem;
+            }
+            .btn {
+                width: 100%;
+            }
+            .constellation-container {
+                height: 320px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation"></div>
+
+    <header class="main-header">
+        <a href="#home" class="header-logo">Oryzo</a>
+        <nav class="main-nav">
+            <a href="#features">Features</a>
+            <a href="#visualization">Vision</a>
+            <a href="#testimonials">Reviews</a>
+            <a href="#faq">FAQ</a>
+            <a href="#contact">Contact</a>
+        </nav>
+    </header>
+
+    <div id="tsparticles"></div>
+
+    <main class="main-container">
+        <section class="hero" id="home">
+            <h1 class="hero-title reveal">The Future of Digital Synergy is Here</h1>
+            <p class="hero-subtitle reveal">Oryzo is a unified customer service platform designed for multi-company environments.</p>
+            <div class="cta-buttons reveal">
+                <button class="btn" onclick="showRegisterModal()">Get Started for Free</button>
+                <button class="btn btn-secondary" onclick="showLoginModal()">Login</button>
+            </div>
+        </section>
+
+        <section class="section" id="features">
+            <h2 class="section-title reveal">Why Oryzo?</h2>
+            <p class="section-subtitle reveal">Everything you need to achieve digital excellence, all in one seamless platform.</p>
+            <div class="features-grid">
+                <div class="interactive-card reveal">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Unified Workspace</h3>
+                    <p>Bring all your data, tools, and teams together in a single, organized, and intelligent environment.</p>
+                </div>
+                <div class="interactive-card reveal" style="transition-delay: 0.1s;">
+                    <div class="feature-icon">🤖</div>
+                    <h3>AI-Powered Automation</h3>
+                    <p>Automate repetitive tasks, uncover hidden insights, and empower your team with our smart AI core.</p>
+                </div>
+                <div class="interactive-card reveal" style="transition-delay: 0.2s;">
+                    <div class="feature-icon">📈</div>
+                    <h3>Powerful Analytics</h3>
+                    <p>Gain deep insights into performance, trends, and opportunities with beautiful, real-time, and actionable reports.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- <section class="section" id="visualization">
+            <h2 class="section-title reveal">Visualizing a Connected World</h2>
+            <p class="section-subtitle reveal">Our platform is built for global scale, connecting data and teams across the world in real-time.</p>
+            <div class="constellation-container reveal">
+                <canvas id="constellation-canvas"></canvas>
+            </div>
+        </section> -->
+
+        <section class="section" id="testimonials">
+            <h2 class="section-title reveal">Loved by Teams Worldwide</h2>
+            <p class="section-subtitle reveal">See what company admins are celebrating about their SupportHub experience.</p>
+            <div id="testimonials-container" class="testimonials-grid"></div>
+            <p id="testimonials-empty" class="empty-state">Partner insights will appear here once super admins approve company feedback.</p>
+        </section>
+
+        <section class="section" id="faq">
+            <h2 class="section-title reveal">Frequently Asked Questions</h2>
+            <p class="section-subtitle reveal">Have questions? We've got answers curated by your support team.</p>
+            <div id="faq-container" class="faq-container"></div>
+            <p id="faq-empty" class="empty-state">We're preparing helpful resources. Check back soon!</p>
+        </section>
+
+        <section class="section" id="contact">
+            <h2 class="section-title reveal">Ready to Innovate?</h2>
+            <p class="section-subtitle reveal">Elevate your team's potential. Contact our sales team or sign up today.</p>
+            <div style="text-align: center;" class="reveal"><button class="btn" onclick="showRegisterModal()">Contact Sales</button></div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-logo">🚀 Oryzo</div>
+        <div class="footer-links">
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+            <a href="#">Status</a>
+        </div>
+        <p>© 2025 Oryzo. All rights reserved.</p>
+    </footer>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal" aria-hidden="true" role="dialog">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('loginModal')" role="button" aria-label="Close">&times;</span>
+            <h2 style="margin-bottom: 1.5rem;">Login</h2>
+            <form id="loginForm" novalidate>
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" name="email" autocomplete="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" name="password" autocomplete="current-password" required>
+                </div>
+                <div class="loading" id="loginLoading">
+                    <div class="spinner"></div>
+                    <p>Logging in...</p>
+                </div>
+                <div id="loginError" class="error" role="alert"></div>
+                <button type="submit" class="btn" style="width: 100%; margin-top: 0.5rem;">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal" aria-hidden="true" role="dialog">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('registerModal')" role="button" aria-label="Close">&times;</span>
+            <h2 style="margin-bottom: 1.5rem;">Register as Customer</h2>
+            <form id="registerForm" novalidate>
+                <div class="form-group">
+                    <label for="regFirstName">First Name</label>
+                    <input type="text" id="regFirstName" name="firstName" autocomplete="given-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="regLastName">Last Name</label>
+                    <input type="text" id="regLastName" name="lastName" autocomplete="family-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="regEmail">Email</label>
+                    <input type="email" id="regEmail" name="email" autocomplete="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPassword">Password</label>
+                    <input type="password" id="regPassword" name="password" autocomplete="new-password" minlength="8" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPhone">Phone</label>
+                    <input type="tel" id="regPhone" name="phone" autocomplete="tel">
+                </div>
+                <div class="form-group">
+                    <label for="regCompany">Select Company</label>
+                    <select id="regCompany" name="companyId" required>
+                        <option value="">Loading companies...</option>
+                    </select>
+                </div>
+                <div class="loading" id="registerLoading">
+                    <div class="spinner"></div>
+                    <p>Creating account...</p>
+                </div>
+                <div id="registerError" class="error" role="alert"></div>
+                <div id="registerSuccess" class="success"></div>
+                <button type="submit" class="btn" style="width: 100%; margin-top: 0.5rem;">Register</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
+    <script>
+        (function() {
+            let revealObserver;
+            let particles = [];
+            const mouse = { x: null, y: null, radius: 150 };
+
+            document.addEventListener('DOMContentLoaded', async () => {
+                setupHeroTitleAnimation();
+                setupTsParticles();
+                setupInteractiveCardEffects();
+                setupRevealObserver();
+                initConstellation();
+
+                const companies = await loadCompanies();
+                const companyId = resolveLandingCompanyId(companies);
+
+                if (companyId) {
+                    await Promise.all([
+                        loadLandingSystemFeedback(companyId),
+                        loadLandingFaqs(companyId)
+                    ]);
+                } else {
+                    showTestimonialsEmpty('We\'re onboarding partners now. Check back soon!');
+                    showFaqsEmpty('FAQs will appear once a company publishes them.');
+                }
+
+                setupAuthForms();
+                attachGlobalModalCloser();
+            });
+
+            function setupTsParticles() {
+                tsParticles.load("tsparticles", {
+                    background: { color: "transparent" },
+                    fpsLimit: 60,
+                    particles: {
+                        number: { value: 60, density: { enable: true, area: 800 } },
+                        color: { value: ["#58a6ff", "#a777ff", "#f778ba"] },
+                        shape: { type: "circle" },
+                        opacity: { value: { min: 0.1, max: 0.6 }, random: true },
+                        size: { value: { min: 1, max: 3 } },
+                        links: {
+                            enable: true,
+                            distance: 150,
+                            color: "#8b949e",
+                            opacity: 0.2,
+                            width: 1
+                        },
+                        move: {
+                            enable: true,
+                            speed: 1,
+                            direction: "none",
+                            outModes: { default: "out" }
+                        }
+                    },
+                    interactivity: {
+                        events: {
+                            onHover: { enable: true, mode: "grab" },
+                            onClick: { enable: true, mode: "push" }
+                        },
+                        modes: {
+                            grab: { distance: 140, links: { opacity: 0.5 } },
+                            push: { quantity: 2 }
+                        }
+                    },
+                    detectRetina: true
+                });
+            }
+
+
+            function resolveLandingCompanyId(companies) {
+                if (window.APP_COMPANY_ID) {
+                    return window.APP_COMPANY_ID;
+                }
+
+                if (Array.isArray(companies) && companies.length > 0) {
+                    return companies[0].id;
+                }
+
+                const storedUser = localStorage.getItem('user');
+                if (storedUser) {
+                    try {
+                        const parsed = JSON.parse(storedUser);
+                        if (parsed && parsed.companyId) {
+                            return parsed.companyId;
+                        }
+                    } catch (_) {
+                        // Ignore parsing errors
+                    }
+                }
+                return null;
+            }
+
+            function setupHeroTitleAnimation() {
+                const heroTitle = document.querySelector('.hero-title');
+                if (!heroTitle) return;
+
+                const text = heroTitle.textContent;
+                heroTitle.innerHTML = '';
+
+                text.split('').forEach((char, index) => {
+                    const span = document.createElement('span');
+                    span.className = 'char';
+                    span.textContent = char === ' ' ? '\u00A0' : char;
+                    span.style.animationDelay = `${index * 0.03}s`;
+                    heroTitle.appendChild(span);
+                });
+            }
+
+            function setupInteractiveCardEffects() {
+                document.querySelectorAll('.interactive-card').forEach(attachInteractiveCardListeners);
+            }
+
+            function attachInteractiveCardListeners(card) {
+                if (!card || card.dataset.enhanced === 'true') {
+                    return;
+                }
+
+                card.dataset.enhanced = 'true';
+                card.addEventListener('mousemove', event => {
+                    const rect = card.getBoundingClientRect();
+                    const x = event.clientX - rect.left;
+                    const y = event.clientY - rect.top;
+                    card.style.setProperty('--mouse-x', `${x}px`);
+                    card.style.setProperty('--mouse-y', `${y}px`);
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    card.style.setProperty('--mouse-x', '-1000px');
+                    card.style.setProperty('--mouse-y', '-1000px');
+                });
+            }
+
+            function setupRevealObserver() {
+                revealObserver = new IntersectionObserver(entries => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                            revealObserver.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                document.querySelectorAll('.reveal').forEach(observeRevealElement);
+            }
+
+            function observeRevealElement(element) {
+                if (revealObserver && element) {
+                    revealObserver.observe(element);
+                }
+            }
+
+            function initConstellation() {
+                const canvas = document.getElementById('constellation-canvas');
+                if (!canvas) return;
+
+                const ctx = canvas.getContext('2d');
+                setupCanvasSize(canvas);
+                initParticles(canvas);
+                animateConstellation(canvas, ctx);
+
+                window.addEventListener('resize', () => {
+                    setupCanvasSize(canvas);
+                    initParticles(canvas);
+                });
+
+                canvas.addEventListener('mousemove', event => {
+                    const rect = canvas.getBoundingClientRect();
+                    mouse.x = event.clientX - rect.left;
+                    mouse.y = event.clientY - rect.top;
+                });
+
+                canvas.addEventListener('mouseout', () => {
+                    mouse.x = null;
+                    mouse.y = null;
+                });
+            }
+
+            function setupCanvasSize(canvas) {
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+            }
+
+            function initParticles(canvas) {
+                const numberOfParticles = Math.max(35, Math.floor((canvas.width * canvas.height) / 9000));
+                particles = Array.from({ length: numberOfParticles }).map(() => createParticle(canvas));
+            }
+
+            function createParticle(canvas) {
+                const size = Math.random() * 2 + 1;
+                const x = Math.random() * (canvas.width - size * 4) + size * 2;
+                const y = Math.random() * (canvas.height - size * 4) + size * 2;
+                const directionX = (Math.random() * 0.4) - 0.2;
+                const directionY = (Math.random() * 0.4) - 0.2;
+                return { x, y, size, directionX, directionY, color: 'rgba(132, 141, 151, 0.8)' };
+            }
+
+            function animateConstellation(canvas, ctx) {
+                function draw() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    particles.forEach(particle => updateParticle(particle, canvas, ctx));
+                    connectParticles(ctx, canvas);
+                    requestAnimationFrame(draw);
+                }
+                draw();
+            }
+
+            function updateParticle(particle, canvas, ctx) {
+                if (particle.x > canvas.width || particle.x < 0) {
+                    particle.directionX = -particle.directionX;
+                }
+                if (particle.y > canvas.height || particle.y < 0) {
+                    particle.directionY = -particle.directionY;
+                }
+
+                if (mouse.x !== null && mouse.y !== null) {
+                    const dx = mouse.x - particle.x;
+                    const dy = mouse.y - particle.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < mouse.radius) {
+                        particle.x -= dx / 20;
+                        particle.y -= dy / 20;
+                    }
+                }
+
+                particle.x += particle.directionX;
+                particle.y += particle.directionY;
+
+                ctx.beginPath();
+                ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2, false);
+                ctx.fillStyle = particle.color;
+                ctx.fill();
+            }
+
+            function connectParticles(ctx, canvas) {
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const dx = particles[i].x - particles[j].x;
+                        const dy = particles[i].y - particles[j].y;
+                        const distanceSquared = dx * dx + dy * dy;
+                        const threshold = (canvas.width / 7) * (canvas.height / 7);
+
+                        if (distanceSquared < threshold) {
+                            const opacity = 1 - (distanceSquared / 20000);
+                            ctx.strokeStyle = `rgba(88, 166, 255, ${opacity})`;
+                            ctx.lineWidth = 1;
+                            ctx.beginPath();
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            async function loadLandingSystemFeedback(companyId) {
+                const container = document.getElementById('testimonials-container');
+                const emptyState = document.getElementById('testimonials-empty');
+
+                if (!container) return;
+
+                container.innerHTML = '';
+
+                const params = new URLSearchParams();
+                params.append('limit', '6');
+                if (companyId) {
+                    params.append('companyId', companyId);
+                }
+
+                try {
+                    const response = await fetch(`/api/system-feedback/public?${params.toString()}`);
+                    if (!response.ok) {
+                        throw new Error('Unable to load system feedback');
+                    }
+
+                    const feedbackEntries = await response.json();
+                    if (!Array.isArray(feedbackEntries) || feedbackEntries.length === 0) {
+                        showTestimonialsEmpty('Partner feedback will appear once super admins approve submissions.');
+                        return;
+                    }
+
+                    feedbackEntries.forEach((entry, index) => {
+                        const card = createFeedbackCard(entry);
+                        card.style.transitionDelay = `${index * 0.1}s`;
+                        container.appendChild(card);
+                        observeRevealElement(card);
+                        attachInteractiveCardListeners(card);
+                    });
+
+                    if (emptyState) {
+                        emptyState.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Failed to load system feedback:', error);
+                    showTestimonialsEmpty('We couldn\'t load partner feedback right now. Please try again later.');
+                }
+            }
+
+            function createFeedbackCard(entry) {
+                const card = document.createElement('div');
+                card.className = 'interactive-card reveal';
+
+                const title = document.createElement('h3');
+                title.textContent = entry.title || 'Platform Feedback';
+                title.style.marginBottom = '0.75rem';
+                card.appendChild(title);
+
+                const testimonialText = document.createElement('p');
+                testimonialText.className = 'testimonial-text';
+                testimonialText.textContent = entry.feedback || 'This company admin left a glowing rating for SupportHub.';
+                card.appendChild(testimonialText);
+
+                const rating = Math.max(0, Math.min(5, entry.rating || 0));
+                const stars = document.createElement('div');
+                stars.className = 'rating-stars';
+                stars.textContent = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+                card.appendChild(stars);
+
+                const meta = document.createElement('div');
+                meta.className = 'testimonial-meta';
+
+                const author = document.createElement('div');
+                author.className = 'testimonial-author';
+
+                const avatar = document.createElement('img');
+                const avatarSeed = entry.adminName || entry.companyName || 'Company Admin';
+                avatar.src = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(avatarSeed)}&backgroundType=gradientLinear&fontWeight=700`;
+                avatar.alt = avatarSeed;
+
+                const authorInfo = document.createElement('div');
+                const name = document.createElement('strong');
+                name.textContent = entry.adminName || 'Company Admin';
+                const subtitle = document.createElement('span');
+                const createdAt = entry.createdAt ? new Date(entry.createdAt) : null;
+                const companyLabel = entry.companyName || 'Partner Company';
+                const dateLabel = createdAt ? createdAt.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently';
+                subtitle.textContent = `${companyLabel} • ${dateLabel}`;
+                subtitle.style.color = 'var(--color-fg-muted)';
+                subtitle.style.fontSize = '0.85rem';
+
+                authorInfo.appendChild(name);
+                authorInfo.appendChild(subtitle);
+
+                author.appendChild(avatar);
+                author.appendChild(authorInfo);
+
+                const badges = document.createElement('div');
+                const approvalBadge = document.createElement('span');
+                approvalBadge.className = 'badge';
+                approvalBadge.innerHTML = '✅ Super Admin Approved';
+                badges.appendChild(approvalBadge);
+
+                meta.appendChild(author);
+                meta.appendChild(badges);
+
+                card.appendChild(meta);
+
+                return card;
+            }
+
+            function showTestimonialsEmpty(message) {
+                const emptyState = document.getElementById('testimonials-empty');
+                if (emptyState) {
+                    emptyState.textContent = message;
+                    emptyState.style.display = 'block';
+                }
+            }
+
+            async function loadLandingFaqs(companyId) {
+                const faqContainer = document.getElementById('faq-container');
+                const faqEmptyState = document.getElementById('faq-empty');
+
+                if (!faqContainer) return;
+
+                faqContainer.innerHTML = '';
+
+                try {
+                    const response = await fetch(`/api/faqs/company/${companyId}/published`);
+                    if (!response.ok) {
+                        throw new Error('Unable to load FAQs');
+                    }
+
+                    const faqs = await response.json();
+                    if (!Array.isArray(faqs) || faqs.length === 0) {
+                        showFaqsEmpty('Company administrators haven\'t published FAQs yet.');
+                        return;
+                    }
+
+                    faqs.slice(0, 8).forEach((faq, index) => {
+                        const item = createFaqItem(faq);
+                        item.style.transitionDelay = `${index * 0.05}s`;
+                        faqContainer.appendChild(item);
+                        observeRevealElement(item);
+                    });
+
+                    if (faqEmptyState) {
+                        faqEmptyState.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Failed to load FAQs:', error);
+                    showFaqsEmpty('We couldn\'t load FAQs right now. Please try again later.');
+                }
+            }
+
+            function createFaqItem(faq) {
+                const details = document.createElement('details');
+                details.className = 'faq-item reveal';
+
+                const summary = document.createElement('summary');
+                summary.textContent = faq.question || 'Untitled question';
+
+                const content = document.createElement('div');
+                content.className = 'faq-content';
+                content.innerHTML = faq.answer ? faq.answer.replace(/\n/g, '<br>') : 'Answer coming soon.';
+
+                details.appendChild(summary);
+                details.appendChild(content);
+
+                return details;
+            }
+
+            function showFaqsEmpty(message) {
+                const faqEmptyState = document.getElementById('faq-empty');
+                if (faqEmptyState) {
+                    faqEmptyState.textContent = message;
+                    faqEmptyState.style.display = 'block';
+                }
+            }
+
+            async function loadCompanies() {
+                const companySelect = document.getElementById('regCompany');
+                try {
+                    const response = await fetch('/api/auth/companies');
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch companies');
+                    }
+
+                    const companies = await response.json();
+
+                    if (companySelect) {
+                        companySelect.innerHTML = '<option value="">Select a company...</option>';
+                        companies.forEach(company => {
+                            const option = document.createElement('option');
+                            option.value = company.id;
+                            option.textContent = company.name;
+                            companySelect.appendChild(option);
+                        });
+                    }
+
+                    return companies;
+                } catch (error) {
+                    console.error('Error loading companies:', error);
+                    if (companySelect) {
+                        companySelect.innerHTML = '<option value="">Error loading companies</option>';
+                    }
+                    return [];
+                }
+            }
+
+            function setupAuthForms() {
+                const loginForm = document.getElementById('loginForm');
+                const registerForm = document.getElementById('registerForm');
+
+                if (loginForm) {
+                    loginForm.addEventListener('submit', handleLoginSubmit);
+                }
+
+                if (registerForm) {
+                    registerForm.addEventListener('submit', handleRegisterSubmit);
+                }
+            }
+
+            async function handleLoginSubmit(event) {
+                event.preventDefault();
+
+                const loginLoading = document.getElementById('loginLoading');
+                const loginError = document.getElementById('loginError');
+
+                if (loginLoading) loginLoading.style.display = 'block';
+                if (loginError) loginError.textContent = '';
+
+                const formData = new FormData(event.target);
+                const payload = {
+                    email: formData.get('email'),
+                    password: formData.get('password')
+                };
+
+                try {
+                    const response = await fetch('/api/auth', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        localStorage.setItem('token', result.token);
+                        localStorage.setItem('user', JSON.stringify(result));
+
+                        switch (result.role) {
+                            case 'SUPER_ADMIN':
+                                window.location.href = '/super-admin/dashboard.html';
+                                break;
+                            case 'COMPANY_ADMIN':
+                                window.location.href = '/company-admin/dashboard.html';
+                                break;
+                            case 'SUPPORT_AGENT':
+                                window.location.href = '/agent/dashboard.html';
+                                break;
+                            case 'CUSTOMER':
+                                window.location.href = '/customer/dashboard.html';
+                                break;
+                            default:
+                                window.location.reload();
+                        }
+                    } else if (loginError) {
+                        loginError.textContent = result.error || 'Login failed. Please double-check your credentials.';
+                    }
+                } catch (error) {
+                    console.error('Login failed:', error);
+                    if (loginError) {
+                        loginError.textContent = 'Network error. Please try again.';
+                    }
+                } finally {
+                    if (loginLoading) loginLoading.style.display = 'none';
+                }
+            }
+
+            async function handleRegisterSubmit(event) {
+                event.preventDefault();
+
+                const registerLoading = document.getElementById('registerLoading');
+                const registerError = document.getElementById('registerError');
+                const registerSuccess = document.getElementById('registerSuccess');
+
+                if (registerLoading) registerLoading.style.display = 'block';
+                if (registerError) registerError.textContent = '';
+                if (registerSuccess) registerSuccess.textContent = '';
+
+                const formData = new FormData(event.target);
+                const payload = {
+                    firstName: formData.get('firstName'),
+                    lastName: formData.get('lastName'),
+                    email: formData.get('email'),
+                    password: formData.get('password'),
+                    phone: formData.get('phone'),
+                    id: parseInt(formData.get('companyId'), 10)
+                };
+
+                if (!payload.id) {
+                    if (registerError) {
+                        registerError.textContent = 'Please select a company before registering.';
+                    }
+                    if (registerLoading) registerLoading.style.display = 'none';
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/customers/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        if (registerSuccess) {
+                            registerSuccess.textContent = 'Registration successful! You can now login.';
+                        }
+                        setTimeout(() => {
+                            closeModal('registerModal');
+                            showLoginModal();
+                        }, 2000);
+                    } else if (registerError) {
+                        registerError.textContent = result.error || 'Registration failed. Please review your details.';
+                    }
+                } catch (error) {
+                    console.error('Registration failed:', error);
+                    if (registerError) {
+                        registerError.textContent = 'Network error. Please try again.';
+                    }
+                } finally {
+                    if (registerLoading) registerLoading.style.display = 'none';
+                }
+            }
+
+            function attachGlobalModalCloser() {
+                window.addEventListener('click', event => {
+                    const loginModal = document.getElementById('loginModal');
+                    const registerModal = document.getElementById('registerModal');
+
+                    if (event.target === loginModal) {
+                        closeModal('loginModal');
+                    }
+                    if (event.target === registerModal) {
+                        closeModal('registerModal');
+                    }
+                });
+            }
+
+            window.showLoginModal = function() {
+                const modal = document.getElementById('loginModal');
+                if (modal) {
+                    modal.style.display = 'block';
+                    modal.setAttribute('aria-hidden', 'false');
+                }
+            };
+
+            window.showRegisterModal = function() {
+                const modal = document.getElementById('registerModal');
+                if (modal) {
+                    modal.style.display = 'block';
+                    modal.setAttribute('aria-hidden', 'false');
+                }
+            };
+
+            window.closeModal = function(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.style.display = 'none';
+                    modal.setAttribute('aria-hidden', 'true');
+                }
+                clearAuthMessages();
+            };
+
+            function clearAuthMessages() {
+                const loginError = document.getElementById('loginError');
+                const registerError = document.getElementById('registerError');
+                const registerSuccess = document.getElementById('registerSuccess');
+
+                if (loginError) loginError.textContent = '';
+                if (registerError) registerError.textContent = '';
+                if (registerSuccess) registerSuccess.textContent = '';
+            }
+        })();
+    </script>
+</body>
+</html>

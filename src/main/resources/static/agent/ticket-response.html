@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oryzo Agent • Ticket Response</title>
+    <style>
+        :root {
+            --bg-gradient: radial-gradient(circle at 20% 18%, rgba(91, 33, 182, 0.2), transparent 55%),
+                radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.2), transparent 55%),
+                radial-gradient(circle at 45% 95%, rgba(236, 72, 153, 0.2), transparent 65%),
+                #020617;
+            --panel: rgba(15, 23, 42, 0.78);
+            --panel-alt: rgba(17, 24, 39, 0.72);
+            --border: rgba(148, 163, 184, 0.2);
+            --border-strong: rgba(148, 163, 184, 0.35);
+            --fg: #e2e8f0;
+            --fg-muted: #94a3b8;
+            --accent: linear-gradient(135deg, #a855f7 0%, #38bdf8 50%, #22d3ee 100%);
+            --accent-soft: rgba(56, 189, 248, 0.18);
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #f87171;
+            --info: #60a5fa;
+            --shadow: 0 30px 90px -32px rgba(15, 23, 42, 0.85);
+            --glass-blur: blur(18px);
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--fg);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .background-aurora {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 12% 12%, rgba(56, 189, 248, 0.22), transparent 55%),
+                radial-gradient(circle at 88% 12%, rgba(244, 114, 182, 0.18), transparent 60%),
+                radial-gradient(circle at 48% 92%, rgba(45, 212, 191, 0.18), transparent 60%);
+            filter: blur(120px);
+            opacity: 0.48;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            background: rgba(10, 12, 23, 0.85);
+            border-bottom: 1px solid var(--border);
+            padding: 1.6rem 2.4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(18px);
+            box-shadow: 0 28px 60px rgba(2, 6, 23, 0.55);
+        }
+
+        .header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .header-brand {
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: #94a3ff;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: clamp(1.6rem, 2vw, 2.1rem);
+            letter-spacing: -0.02em;
+        }
+
+        .header-subtitle {
+            margin: 0;
+            color: var(--fg-muted);
+            font-size: 0.95rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.85rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .agent-chip {
+            padding: 0.45rem 0.9rem;
+            border-radius: 999px;
+            border: 1px solid var(--border-strong);
+            background: rgba(148, 163, 184, 0.12);
+            color: var(--fg-muted);
+            font-size: 0.9rem;
+        }
+
+        main {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 2.5rem auto 4rem;
+            padding: 0 1.6rem 3.5rem;
+        }
+
+        .breadcrumbs {
+            font-size: 0.9rem;
+            color: var(--fg-muted);
+            margin-bottom: 1.4rem;
+        }
+
+        .breadcrumbs a {
+            color: #bae6fd;
+            text-decoration: none;
+        }
+
+        .card {
+            background: var(--panel);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            padding: 1.8rem;
+            margin-bottom: 1.6rem;
+            backdrop-filter: var(--glass-blur);
+        }
+
+        .ticket-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .ticket-header h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #f8fafc;
+        }
+
+        .badge-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .ticket-subtitle {
+            color: var(--fg-muted);
+            margin-top: 0.25rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.8rem;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border: 1px solid var(--border-strong);
+            color: var(--fg-muted);
+        }
+
+        .badge-status {
+            background: rgba(59, 130, 246, 0.18);
+            color: #bae6fd;
+            border-color: rgba(59, 130, 246, 0.35);
+        }
+
+        .badge-priority {
+            background: rgba(248, 113, 113, 0.18);
+            color: #fecaca;
+            border-color: rgba(248, 113, 113, 0.35);
+        }
+
+        .badge-priority.HIGH {
+            background: rgba(234, 179, 8, 0.18);
+            color: #fde68a;
+            border-color: rgba(234, 179, 8, 0.38);
+        }
+
+        .badge-priority.URGENT {
+            background: rgba(248, 113, 113, 0.22);
+            color: #fca5a5;
+            border-color: rgba(248, 113, 113, 0.45);
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.1rem;
+            margin-bottom: 1.6rem;
+        }
+
+        .meta-item label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--fg-muted);
+            letter-spacing: 0.06rem;
+        }
+
+        .meta-item span {
+            display: block;
+            margin-top: 0.4rem;
+            font-size: 1rem;
+            color: #f8fafc;
+        }
+
+        .description {
+            line-height: 1.6;
+            color: var(--fg);
+            background: var(--panel-alt);
+            border-radius: 14px;
+            padding: 1.4rem;
+            border: 1px solid var(--border);
+            white-space: pre-wrap;
+        }
+
+        .section-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--fg);
+            margin-bottom: 0.4rem;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: #f8fafc;
+        }
+
+        .section-title span {
+            display: inline-flex;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(56, 189, 248, 0.18);
+            align-items: center;
+            justify-content: center;
+            color: #bae6fd;
+        }
+
+        .responses-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .response-card {
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.25rem;
+            background: var(--panel-alt);
+            box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.08);
+        }
+
+        .response-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .response-user {
+            font-weight: 600;
+            color: #f8fafc;
+        }
+
+        .response-time {
+            font-size: 0.85rem;
+            color: var(--fg-muted);
+        }
+
+        .response-message {
+            color: var(--fg-muted);
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        
+        .internal-note {
+            background: rgba(45, 55, 72, 0.75);
+            border-left: 3px solid #9f7aea;
+        }
+        
+        .note-actions-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .delete-note-btn, .edit-note-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 50%;
+            opacity: 0.7;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .delete-note-btn {
+            color: #f87171;
+        }
+        
+        .edit-note-btn {
+            color: #60a5fa;
+        }
+        
+        .delete-note-btn:hover, .edit-note-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        
+        .delete-note-btn:hover {
+            background: rgba(248, 113, 113, 0.1);
+        }
+        
+        .edit-note-btn:hover {
+            background: rgba(96, 165, 250, 0.1);
+        }
+        
+        .editing-container {
+            margin-top: 10px;
+        }
+        
+        .editing-container textarea {
+            width: 100%;
+            min-height: 80px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            color: var(--fg);
+            border-radius: 8px;
+            padding: 8px;
+            font-family: inherit;
+            margin-bottom: 10px;
+        }
+        
+        .editing-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        
+        .btn-save, .btn-cancel {
+            font-size: 0.85rem;
+            padding: 6px 12px;
+            border-radius: 6px;
+        }
+        
+        .btn-save {
+            background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+            color: white;
+            border: none;
+        }
+        
+        .btn-cancel {
+            background: transparent;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            color: var(--fg-muted);
+        }
+
+        .empty-state {
+            border: 1px dashed var(--border-strong);
+            border-radius: 14px;
+            padding: 1.6rem;
+            text-align: center;
+            color: var(--fg-muted);
+            background: rgba(15, 23, 42, 0.75);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.1rem;
+            margin-top: 1rem;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+
+        label {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--fg);
+        }
+
+        select,
+        textarea,
+        input[type="text"],
+        input[type="checkbox"] {
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 12px;
+            padding: 0.75rem;
+            font-size: 0.95rem;
+            font-family: inherit;
+            background: rgba(10, 12, 23, 0.65);
+            color: var(--fg);
+            transition: border 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        textarea {
+            min-height: 160px;
+            resize: vertical;
+        }
+
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: rgba(56, 189, 248, 0.8);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+        }
+
+        select option {
+            background: #020617;
+            color: var(--fg);
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--fg-muted);
+        }
+
+        .checkbox-row label {
+            margin: 0;
+            font-weight: 500;
+            color: var(--fg);
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            align-items: center;
+        }
+
+        .btn {
+            border: 1px solid transparent;
+            border-radius: 999px;
+            padding: 0.75rem 1.6rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.25s ease;
+            background: var(--accent);
+            color: #f8fafc;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.2), transparent 60%);
+            mix-blend-mode: screen;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 35px rgba(56, 189, 248, 0.28);
+        }
+
+        .btn:hover::after { opacity: 1; }
+
+        .btn-primary {
+            background: var(--accent);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--fg);
+            border-color: rgba(148, 163, 184, 0.28);
+        }
+
+        .btn-secondary:hover {
+            border-color: rgba(148, 163, 184, 0.6);
+            background: rgba(148, 163, 184, 0.12);
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.5);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4ade80, #34d399);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #fbbf24, #fb923c);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f87171, #fb7185);
+        }
+
+        .btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .alert {
+            padding: 0.85rem 1.2rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            border: 1px solid transparent;
+            margin-bottom: 0.6rem;
+        }
+
+        .alert-error {
+            background: rgba(248, 113, 113, 0.18);
+            color: #fecaca;
+            border-color: rgba(248, 113, 113, 0.35);
+        }
+
+        .alert-success {
+            background: rgba(52, 211, 153, 0.18);
+            color: #bbf7d0;
+            border-color: rgba(52, 211, 153, 0.35);
+        }
+
+        .loader {
+            text-align: center;
+            color: #bae6fd;
+            padding: 2rem 0;
+        }
+
+        .status-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+                padding: 1.4rem 1.8rem;
+            }
+
+            main {
+                padding: 0 1.3rem 3.2rem;
+            }
+
+            .actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="background-aurora"></div>
+<header class="header">
+    <div class="header-left">
+        <span class="header-brand">Oryzo</span>
+        <h1>Agent Response Console</h1>
+        <p class="header-subtitle">Keep conversations flowing and close tickets with clarity.</p>
+    </div>
+    <div class="header-actions">
+        <span class="agent-chip" id="agentName">Loading...</span>
+        <button class="btn" onclick="logout()">Logout</button>
+    </div>
+</header>
+<main>
+    <div class="breadcrumbs"><a href="/agent/dashboard.html">Dashboard</a> / <span>Ticket Response</span></div>
+    <div id="pageError" class="alert alert-error" style="display:none;"></div>
+    <div id="loadingState" class="loader">Loading ticket details…</div>
+    <div id="ticketContainer" style="display:none;">
+        <section class="card" id="ticketDetails">
+            <div class="ticket-header">
+                <div>
+                    <h2 id="ticketTitle">Ticket</h2>
+                    <p id="ticketNumber" class="ticket-subtitle"></p>
+                </div>
+                <div class="badge-group">
+                    <span class="badge badge-status" id="ticketStatus">STATUS</span>
+                    <span class="badge badge-priority" id="ticketPriority">PRIORITY</span>
+                </div>
+            </div>
+            <div class="meta-grid">
+                <div class="meta-item">
+                    <label>Customer</label>
+                    <span id="ticketCustomer">-</span>
+                </div>
+                <div class="meta-item">
+                    <label>Created</label>
+                    <span id="ticketCreated">-</span>
+                </div>
+                <div class="meta-item">
+                    <label>Last Activity</label>
+                    <span id="ticketLastActivity">-</span>
+                </div>
+                <div class="meta-item">
+                    <label>Category</label>
+                    <span id="ticketCategory">-</span>
+                </div>
+            </div>
+            <div>
+                <span class="section-label">Description</span>
+                <p class="description" id="ticketDescription"></p>
+            </div>
+        </section>
+        <section class="card">
+            <div class="section-title"><span>💬</span>Conversation History</div>
+            <div id="responsesContainer" class="responses-list"></div>
+        </section>
+        <section class="card">
+            <div class="section-title"><span>✍️</span>Add a Response</div>
+            <div id="responseSuccess" class="alert alert-success" style="display:none;">Response sent successfully.</div>
+            <div id="responseError" class="alert alert-error" style="display:none;"></div>
+            <form id="responseForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="responseType">Response Type</label>
+                        <select id="responseType" name="responseType">
+                            <option value="AGENT_REPLY">Customer Reply</option>
+                            <option value="INTERNAL_NOTE">Internal Note</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="isPublic">Visibility</label>
+                        <div class="checkbox-row">
+                            <input type="checkbox" id="isPublic" name="isPublic" checked>
+                            <label for="isPublic">Visible to customer</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="responseMessage">Message</label>
+                    <textarea id="responseMessage" name="message" placeholder="Write your response…" required></textarea>
+                </div>
+                <div class="actions">
+                    <button type="submit" class="btn btn-primary" id="sendResponseBtn">Send Response</button>
+                    <div class="status-buttons">
+                        <button type="button" class="btn btn-secondary" id="markInProgressBtn">Mark In Progress</button>
+                        <button type="button" class="btn btn-warning" id="markPendingBtn">Pending Customer</button>
+                        <button type="button" class="btn btn-success" id="markResolvedBtn">Mark Resolved</button>
+                    </div>
+                </div>
+            </form>
+        </section>
+    </div>
+</main>
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const ticketId = params.get('ticketId');
+    const token = localStorage.getItem('token');
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+    if (!token || !currentUser || currentUser.role !== 'SUPPORT_AGENT') {
+        window.location.href = '/';
+    }
+
+    const state = {
+        ticket: null,
+        responses: [],
+        agent: null,
+        agentId: null,
+        loading: false,
+        saving: false
+    };
+
+    const elements = {
+        loading: document.getElementById('loadingState'),
+        error: document.getElementById('pageError'),
+        container: document.getElementById('ticketContainer'),
+        title: document.getElementById('ticketTitle'),
+        number: document.getElementById('ticketNumber'),
+        status: document.getElementById('ticketStatus'),
+        priority: document.getElementById('ticketPriority'),
+        customer: document.getElementById('ticketCustomer'),
+        created: document.getElementById('ticketCreated'),
+        lastActivity: document.getElementById('ticketLastActivity'),
+        category: document.getElementById('ticketCategory'),
+        description: document.getElementById('ticketDescription'),
+        responses: document.getElementById('responsesContainer'),
+        responseForm: document.getElementById('responseForm'),
+        responseMessage: document.getElementById('responseMessage'),
+        responseType: document.getElementById('responseType'),
+        isPublic: document.getElementById('isPublic'),
+        responseError: document.getElementById('responseError'),
+        responseSuccess: document.getElementById('responseSuccess'),
+        markInProgress: document.getElementById('markInProgressBtn'),
+        markPending: document.getElementById('markPendingBtn'),
+        markResolved: document.getElementById('markResolvedBtn'),
+        sendBtn: document.getElementById('sendResponseBtn'),
+        agentName: document.getElementById('agentName')
+    };
+
+    elements.agentName.textContent = `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() || currentUser.email;
+
+    if (!ticketId) {
+        showError('Ticket id is missing.');
+        elements.loading.style.display = 'none';
+    } else {
+        loadTicket();
+    }
+
+    function showError(message) {
+        elements.error.style.display = 'block';
+        elements.error.textContent = message;
+    }
+
+    function clearPageError() {
+        elements.error.style.display = 'none';
+        elements.error.textContent = '';
+    }
+
+    async function loadTicket() {
+        state.loading = true;
+        clearPageError();
+        elements.loading.style.display = 'block';
+        elements.container.style.display = 'none';
+
+        try {
+            const [boardRes, ticketRes, responsesRes] = await Promise.all([
+                fetch('/api/agents/tickets', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }),
+                fetch(`/api/tickets/${ticketId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }),
+                fetch(`/api/agents/tickets/${ticketId}/responses`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+            ]);
+
+            if (boardRes.ok) {
+                const board = await boardRes.json();
+                state.agent = board.agent || null;
+                state.agentId = board.agent ? board.agent.agentId : null;
+            }
+
+            if (!ticketRes.ok) {
+                throw new Error(await ticketRes.text() || 'Unable to load ticket');
+            }
+            state.ticket = await ticketRes.json();
+            if (!state.agentId && state.ticket && state.ticket.agentId) {
+                state.agentId = state.ticket.agentId;
+            }
+
+            if (responsesRes.ok) {
+                state.responses = await responsesRes.json();
+            } else if (responsesRes.status === 403) {
+                state.responses = [];
+            } else {
+                throw new Error(await responsesRes.text() || 'Unable to load responses');
+            }
+
+            renderTicket();
+            renderResponses();
+            updateStatusButtons();
+            elements.container.style.display = 'block';
+        } catch (error) {
+            console.error('Error loading ticket', error);
+            showError(error.message || 'Failed to load ticket information.');
+        } finally {
+            state.loading = false;
+            elements.loading.style.display = 'none';
+        }
+    }
+
+    function renderTicket() {
+        const ticket = state.ticket;
+        if (!ticket) return;
+        elements.title.textContent = ticket.title;
+        elements.number.textContent = `Ticket #${ticket.ticketNumber || ticket.id}`;
+        elements.status.textContent = ticket.status;
+        elements.status.className = `badge badge-status status-${ticket.status.toLowerCase().replace('_','-')}`;
+        elements.priority.textContent = ticket.priority;
+        elements.priority.className = `badge badge-priority ${ticket.priority}`;
+        elements.customer.textContent = ticket.customerName || 'Unknown customer';
+        elements.created.textContent = formatDate(ticket.createdAt);
+        elements.lastActivity.textContent = formatDate(ticket.lastActivity);
+        elements.category.textContent = ticket.categoryName || 'Uncategorised';
+        elements.description.textContent = ticket.description || '';
+    }
+
+    function renderResponses() {
+        const container = elements.responses;
+        container.innerHTML = '';
+        if (!state.responses || state.responses.length === 0) {
+            container.innerHTML = '<div class="empty-state">No responses yet. Start the conversation.</div>';
+            return;
+        }
+        state.responses.forEach(response => {
+            const card = document.createElement('div');
+            card.className = 'response-card';
+            card.setAttribute('data-response-id', response.id);
+            
+            // Check if this is an internal note (not public and type is INTERNAL_NOTE)
+            const isInternalNote = response.responseType === 'INTERNAL_NOTE' || 
+                                  (response.isPublic === false && response.responseType === 'AGENT_REPLY');
+            
+            let actionButtons = '';
+            if (isInternalNote && response.userId === currentUser.userId) {
+                actionButtons = `
+                    <div class="note-actions-container">
+                        <button class="edit-note-btn" data-response-id="${response.id}" title="Edit this internal note">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
+                            </svg>
+                        </button>
+                        <button class="delete-note-btn" data-response-id="${response.id}" title="Delete this internal note">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                                <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+            }
+            
+            // Add a class if this is an internal note
+            if (isInternalNote) {
+                card.classList.add('internal-note');
+            }
+            
+            card.innerHTML = `
+                <div class="response-head">
+                    <div class="response-user">${escapeHTML(response.userName || 'Support Agent')}</div>
+                    <div class="response-time">${formatDate(response.createdAt)}</div>
+                </div>
+                <div class="response-message">${escapeHTML(response.message || '')}</div>
+                ${actionButtons}
+                <div class="editing-container" style="display:none;"></div>
+            `;
+            container.appendChild(card);
+        });
+        
+        // Add click event listeners to action buttons
+        document.querySelectorAll('.delete-note-btn').forEach(button => {
+            button.addEventListener('click', handleDeleteInternalNote);
+        });
+        
+        document.querySelectorAll('.edit-note-btn').forEach(button => {
+            button.addEventListener('click', handleEditInternalNote);
+        });
+    }
+
+    elements.responseForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (state.saving) return;
+        const message = elements.responseMessage.value.trim();
+        if (!message) {
+            displayResponseError('Message is required.');
+            return;
+        }
+        state.saving = true;
+        setResponseSubmitting(true);
+        clearResponseAlerts();
+        try {
+            const payload = {
+                ticketId: Number(ticketId),
+                userId: currentUser.userId,
+                responseType: elements.responseType.value,
+                message,
+                isPublic: elements.isPublic.checked
+            };
+            const response = await fetch(`/api/agents/tickets/${ticketId}/responses`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(text || 'Unable to send response');
+            }
+            elements.responseSuccess.style.display = 'block';
+            elements.responseForm.reset();
+            elements.isPublic.checked = true;
+            await loadTicket();
+        } catch (error) {
+            console.error('Error sending response', error);
+            displayResponseError(error.message || 'Failed to send response.');
+        } finally {
+            state.saving = false;
+            setResponseSubmitting(false);
+        }
+    });
+
+    elements.markInProgress.addEventListener('click', () => updateTicketStatus('IN_PROGRESS'));
+    elements.markPending.addEventListener('click', () => updateTicketStatus('PENDING_CUSTOMER'));
+    elements.markResolved.addEventListener('click', () => resolveTicket());
+
+    async function updateTicketStatus(status) {
+        if (!state.ticket || !state.agentId) {
+            displayResponseError('You need to be assigned to this ticket to update its status.');
+            return;
+        }
+        setStatusButtonsDisabled(true);
+        clearResponseAlerts();
+        try {
+            const response = await fetch(`/api/agents/tickets/${ticketId}/status?status=${status}&agentId=${state.agentId}`, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(text || 'Unable to update status');
+            }
+            elements.responseSuccess.textContent = `Ticket marked as ${status.replace('_',' ')}.`;
+            elements.responseSuccess.style.display = 'block';
+            await loadTicket();
+        } catch (error) {
+            displayResponseError(error.message || 'Failed to update status.');
+        } finally {
+            setStatusButtonsDisabled(false);
+        }
+    }
+
+    async function resolveTicket() {
+        if (!state.ticket || !state.agentId) {
+            displayResponseError('You need to be assigned to this ticket to resolve it.');
+            return;
+        }
+        setStatusButtonsDisabled(true);
+        clearResponseAlerts();
+        try {
+            const response = await fetch(`/api/agents/tickets/${ticketId}/resolve?agentId=${state.agentId}`, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(text || 'Unable to resolve ticket');
+            }
+            elements.responseSuccess.textContent = 'Ticket marked as resolved.';
+            elements.responseSuccess.style.display = 'block';
+            await loadTicket();
+        } catch (error) {
+            displayResponseError(error.message || 'Failed to resolve ticket.');
+        } finally {
+            setStatusButtonsDisabled(false);
+        }
+    }
+
+    function updateStatusButtons() {
+        if (!state.ticket) return;
+        const status = state.ticket.status;
+        const agentMismatch = !state.agentId || state.ticket.agentId !== state.agentId;
+        elements.markInProgress.disabled = agentMismatch || status === 'IN_PROGRESS' || status === 'RESOLVED' || status === 'CLOSED';
+        elements.markPending.disabled = agentMismatch || status !== 'IN_PROGRESS';
+        elements.markResolved.disabled = agentMismatch || status === 'RESOLVED' || status === 'CLOSED';
+    }
+
+    function displayResponseError(message) {
+        elements.responseError.style.display = 'block';
+        elements.responseError.textContent = message;
+    }
+
+    function clearResponseAlerts() {
+        elements.responseError.style.display = 'none';
+        elements.responseError.textContent = '';
+        elements.responseSuccess.style.display = 'none';
+        elements.responseSuccess.textContent = 'Response sent successfully.';
+    }
+
+    function setResponseSubmitting(isSubmitting) {
+        elements.sendBtn.disabled = isSubmitting;
+        elements.sendBtn.textContent = isSubmitting ? 'Sending…' : 'Send Response';
+    }
+
+    function setStatusButtonsDisabled(disabled) {
+        elements.markInProgress.disabled = disabled;
+        elements.markPending.disabled = disabled;
+        elements.markResolved.disabled = disabled;
+    }
+
+    function formatDate(value) {
+        if (!value) return '-';
+        const date = new Date(value);
+        if (isNaN(date.getTime())) return value;
+        return date.toLocaleString();
+    }
+
+    function escapeHTML(str) {
+        if (!str) return '';
+        return str.replace(/[&<>"']/g, (tag) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        }[tag]));
+    }
+
+    async function handleEditInternalNote(event) {
+        const responseId = event.currentTarget.getAttribute('data-response-id');
+        if (!responseId || !ticketId) return;
+        
+        // Find the response in the state
+        const response = state.responses.find(r => r.id == responseId);
+        if (!response) return;
+        
+        // Find the card and get its message container and editing container
+        const card = document.querySelector(`.response-card[data-response-id="${responseId}"]`);
+        const messageContainer = card.querySelector('.response-message');
+        const editingContainer = card.querySelector('.editing-container');
+        const actionsContainer = card.querySelector('.note-actions-container');
+        
+        // Hide message and actions, show editing container
+        messageContainer.style.display = 'none';
+        if (actionsContainer) actionsContainer.style.display = 'none';
+        editingContainer.style.display = 'block';
+        
+        // Create editing form
+        editingContainer.innerHTML = `
+            <textarea id="edit-message-${responseId}">${escapeHTML(response.message || '')}</textarea>
+            <div class="editing-actions">
+                <button class="btn-cancel" data-response-id="${responseId}">Cancel</button>
+                <button class="btn-save" data-response-id="${responseId}">Save Changes</button>
+            </div>
+        `;
+        
+        // Add event listeners for cancel and save buttons
+        editingContainer.querySelector('.btn-cancel').addEventListener('click', () => {
+            // Restore the original view
+            messageContainer.style.display = 'block';
+            if (actionsContainer) actionsContainer.style.display = 'flex';
+            editingContainer.style.display = 'none';
+        });
+        
+        editingContainer.querySelector('.btn-save').addEventListener('click', async () => {
+            const updatedMessage = document.getElementById(`edit-message-${responseId}`).value.trim();
+            if (!updatedMessage) {
+                alert('Message cannot be empty');
+                return;
+            }
+            
+            try {
+                // Show loading state
+                const saveBtn = editingContainer.querySelector('.btn-save');
+                const cancelBtn = editingContainer.querySelector('.btn-cancel');
+                saveBtn.disabled = true;
+                cancelBtn.disabled = true;
+                saveBtn.textContent = 'Saving...';
+                
+                // Create payload with updated message and keep original responseType and isPublic
+                const payload = {
+                    message: updatedMessage,
+                    ticketId: response.ticketId,
+                    userId: response.userId,
+                    responseType: response.responseType,
+                    isPublic: response.isPublic
+                };
+                
+                // Send update request
+                const apiResponse = await fetch(`/api/agents/tickets/${ticketId}/responses/${responseId}`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!apiResponse.ok) {
+                    const errorData = await apiResponse.json();
+                    throw new Error(errorData.error || 'Failed to update the internal note');
+                }
+                
+                elements.responseSuccess.textContent = 'Internal note updated successfully';
+                elements.responseSuccess.style.display = 'block';
+                
+                // Reload responses to show the updated content
+                await loadTicket();
+                
+                // Hide success message after 3 seconds
+                setTimeout(() => {
+                    elements.responseSuccess.style.display = 'none';
+                }, 3000);
+                
+            } catch (error) {
+                console.error('Error updating internal note:', error);
+                displayResponseError(error.message || 'Failed to update internal note');
+            }
+        });
+        
+        // Focus the textarea
+        document.getElementById(`edit-message-${responseId}`).focus();
+    }
+
+    async function handleDeleteInternalNote(event) {
+        const responseId = event.currentTarget.getAttribute('data-response-id');
+        if (!responseId || !ticketId) return;
+        
+        if (!confirm('Are you sure you want to delete this internal note? This action cannot be undone.')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/agents/tickets/${ticketId}/responses/${responseId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to delete the internal note');
+            }
+            
+            elements.responseSuccess.textContent = 'Internal note deleted successfully';
+            elements.responseSuccess.style.display = 'block';
+            
+            // Reload responses
+            await loadTicket();
+            
+            // Hide success message after 3 seconds
+            setTimeout(() => {
+                elements.responseSuccess.style.display = 'none';
+            }, 3000);
+            
+        } catch (error) {
+            console.error('Error deleting internal note:', error);
+            displayResponseError(error.message || 'Failed to delete internal note');
+        }
+    }
+    
+    function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/';
+    }
+</script>
+</body>
+</html>

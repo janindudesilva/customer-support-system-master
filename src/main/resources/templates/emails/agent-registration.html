@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Welcome to Support Team</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+        }
+        .header {
+            background-color: #3498db;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+            border-radius: 0 0 5px 5px;
+            margin-top: 20px;
+        }
+        .content {
+            padding: 20px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .credentials {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #3498db;
+        }
+        .agent-details {
+            margin-top: 20px;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .company-details {
+            margin-top: 20px;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to the Support Team</h1>
+        </div>
+        
+        <div class="content">
+            <p>Dear <span th:text="${agentName}">Agent</span>,</p>
+            
+            <p>You have been registered as a Support Agent for <strong th:text="${companyName}">Company</strong> on our Customer Support System.</p>
+            
+            <div class="credentials">
+                <h3>Your Login Credentials:</h3>
+                <p><strong>Email:</strong> <span th:text="${email}">agent@company.com</span></p>
+                <p><strong>Password:</strong> <span th:text="${password}">password</span></p>
+                <p><em>Please change your password after your first login for security reasons.</em></p>
+            </div>
+            
+            <div class="agent-details">
+                <h3>Your Role Details:</h3>
+                <p><strong>Department:</strong> <span th:text="${department}">Customer Support</span></p>
+                <p><strong>Specialization:</strong> <span th:text="${specialization}">Technical Support</span></p>
+            </div>
+            
+            <p>You can access the system using the following link:</p>
+            <a class="button" th:href="http://localhost:8082/" target="_blank">Login to System</a>
+            
+            <div class="company-details">
+                <h3>Company Details:</h3>
+                <div th:utext="${companyDetails}">
+                    <!-- Company details will be inserted here -->
+                </div>
+            </div>
+            
+            <p>If you have any questions or need assistance, please contact your company administrator.</p>
+            
+            <p>Best regards,<br/>
+            Customer Support System Team</p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 Customer Support System. All rights reserved.</p>
+            <p>This is an automated email. Please do not reply.</p>
+        </div>
+    </div>
+</body>
+</html>

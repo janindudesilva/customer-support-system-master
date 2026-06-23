@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frequently Asked Questions</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div th:replace="common/header :: header"></div>
+    
+    <div class="dashboard-container">
+        <div th:replace="common/sidebar :: sidebar"></div>
+        
+        <div class="main-content">
+            <h1>Frequently Asked Questions</h1>
+            
+            <div class="search-container">
+                <form action="/faqs/search" method="GET">
+                    <input type="text" name="keyword" placeholder="Search FAQs..." th:value="${keyword}">
+                    <button type="submit" class="btn search-btn">Search</button>
+                </form>
+            </div>
+            
+            <div class="faq-categories">
+                <h2>Categories</h2>
+                <div class="category-list">
+                    <a href="/faqs" class="category-item" th:classappend="${selectedCategory == null ? 'active' : ''}">
+                        All Categories
+                    </a>
+                    <a th:each="category : ${categories}" 
+                       th:href="@{/faqs/category/{id}(id=${category.id})}" 
+                       class="category-item" 
+                       th:classappend="${selectedCategory != null && selectedCategory.id == category.id ? 'active' : ''}"
+                       th:style="${'border-left: 4px solid ' + category.colorCode}">
+                        <span th:text="${category.name}">Category Name</span>
+                        <span class="count" th:text="${category.faqCount}">10</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="faq-container">
+                <div th:if="${selectedCategory != null}" class="selected-category">
+                    <h2 th:text="${selectedCategory.name + ' FAQs'}">Category Name FAQs</h2>
+                    <p th:if="${selectedCategory.description}" th:text="${selectedCategory.description}">Category description goes here.</p>
+                </div>
+                
+                <div class="faq-accordion">
+                    <div th:each="faq : ${faqs}" class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <h3 th:text="${faq.question}">How do I reset my password?</h3>
+                            <span class="toggle-icon">+</span>
+                        </div>
+                        <div class="faq-answer">
+                            <div th:utext="${faq.answer}">
+                                <p>To reset your password, follow these steps:</p>
+                                <ol>
+                                    <li>Click on the "Forgot Password" link on the login page</li>
+                                    <li>Enter your email address</li>
+                                    <li>Check your email for a password reset link</li>
+                                    <li>Click the link and follow the instructions to create a new password</li>
+                                </ol>
+                            </div>
+                            <div class="faq-feedback">
+                                <p>Was this helpful?</p>
+                                <button onclick="rateFaqHelpful(event, this)" th:data-faq-id="${faq.id}" class="btn helpful-btn">Yes</button>
+                                <button onclick="rateFaqNotHelpful(event, this)" th:data-faq-id="${faq.id}" class="btn not-helpful-btn">No</button>
+                                <span class="feedback-message"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="no-data-message" th:if="${faqs.empty}">
+                    <p>No FAQs found in this category. Please try another category or search for your question.</p>
+                </div>
+            </div>
+            
+            <div class="contact-support">
+                <h2>Can't find what you're looking for?</h2>
+                <p>If you couldn't find the answer to your question, please contact our support team.</p>
+                <a href="/customer/tickets/create" class="btn primary-btn">Create Support Ticket</a>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="common/footer :: footer"></div>
+    <script src="/js/faq-list.js"></script>
+</body>
+</html>
